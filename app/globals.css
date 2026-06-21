@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-canvas text-ink;
+  font-family: ui-rounded, "Nunito", "Segoe UI", system-ui, -apple-system,
+    sans-serif;
+}
+
+@layer components {
+  /* Chunky Duolingo-style button with a pressed-down shadow. */
+  .btn-brand {
+    @apply rounded-2xl bg-brand px-6 py-3 font-bold uppercase tracking-wide text-white shadow-[0_4px_0_#46a302] transition active:translate-y-[2px] active:shadow-[0_2px_0_#46a302] disabled:opacity-50 disabled:active:translate-y-0;
+  }
+  .btn-sky {
+    @apply rounded-2xl bg-sky px-6 py-3 font-bold uppercase tracking-wide text-white shadow-[0_4px_0_#1a8fc7] transition active:translate-y-[2px] active:shadow-[0_2px_0_#1a8fc7];
+  }
+  .btn-ghost {
+    @apply rounded-2xl border-2 border-gray-200 bg-white px-6 py-3 font-bold uppercase tracking-wide text-muted transition hover:bg-gray-50 active:translate-y-[1px];
+  }
+  .card {
+    @apply rounded-xl2 border-2 border-gray-100 bg-surface shadow-card;
+  }
+  .choice {
+    @apply cursor-pointer rounded-2xl border-2 border-gray-200 bg-white px-4 py-4 text-center text-lg font-semibold shadow-[0_2px_0_#e5e5e5] transition hover:bg-gray-50 active:translate-y-[1px];
+  }
+  .choice-selected {
+    @apply border-sky bg-sky/10 text-sky;
+  }
+  .choice-correct {
+    @apply border-brand bg-brand/10 text-brand-dark;
+  }
+  .choice-wrong {
+    @apply border-heart bg-heart/10 text-heart;
+  }
+}
