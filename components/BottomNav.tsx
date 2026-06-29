@@ -17,8 +17,17 @@ function isActive(tabHref: string, pathname: string): boolean {
   return pathname === tabHref || pathname.startsWith(`${tabHref}/`);
 }
 
+// Full-screen exercise flows hide the nav so the feedback banner isn't covered.
+function isImmersive(pathname: string): boolean {
+  if (pathname.startsWith("/lesson/")) return true;
+  if (pathname.startsWith("/dojo/")) return true; // a specific drill / review
+  return false;
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
+
+  if (isImmersive(pathname)) return null;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-gray-100 bg-white/95 backdrop-blur">

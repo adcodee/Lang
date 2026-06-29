@@ -8,12 +8,14 @@ export default function FeedbackBanner({
   note,
   answer,
   onContinue,
+  onRetry,
   continueLabel = "Continue",
 }: {
   correct: boolean;
   note?: string;
-  answer?: string; // shown when the user got it wrong
+  answer?: string; // shown when the user got it wrong (final attempt only)
   onContinue: () => void;
+  onRetry?: () => void; // when set, show "Try again" instead of continuing
   continueLabel?: string;
 }) {
   return (
@@ -39,22 +41,28 @@ export default function FeedbackBanner({
                 correct ? "text-brand-dark" : "text-heart"
               }`}
             >
-              {correct ? "Nice work!" : "Not quite"}
+              {correct ? "Nice work!" : onRetry ? "Not quite — try again" : "Not quite"}
             </div>
-            {!correct && answer && (
+            {!correct && !onRetry && answer && (
               <div className="text-sm text-ink">
                 Answer: <span className="font-bold">{answer}</span>
               </div>
             )}
-            {note && <div className="text-sm text-muted">{note}</div>}
+            {note && !onRetry && <div className="text-sm text-muted">{note}</div>}
           </div>
         </div>
-        <button
-          onClick={onContinue}
-          className={correct ? "btn-brand" : "btn-sky"}
-        >
-          {continueLabel}
-        </button>
+        {onRetry ? (
+          <button onClick={onRetry} className="btn-sky">
+            Try again
+          </button>
+        ) : (
+          <button
+            onClick={onContinue}
+            className={correct ? "btn-brand" : "btn-sky"}
+          >
+            {continueLabel}
+          </button>
+        )}
       </div>
     </motion.div>
   );

@@ -1,4 +1,5 @@
-import type { Lesson, SkillCategory } from "@/lib/types";
+import type { Exercise, Lesson, SkillCategory } from "@/lib/types";
+import { getLesson } from "@/lib/content/curriculum";
 
 // Dojo drills — standalone, replayable practice not tied to lesson progression.
 // They reuse the Lesson shape so LessonPlayer can render them in freePlay mode.
@@ -153,4 +154,28 @@ export function getDrill(id: string): Lesson | undefined {
 // The drill that best trains a given skill (for "Train your weakness").
 export function getDrillForSkill(skill: SkillCategory): Lesson | undefined {
   return dojoDrills.find((d) => d.skill === skill);
+}
+
+// Build a synthetic "Review mistakes" drill from flagged revision item ids
+// (`${lessonId}#${exerciseIndex}`). Returns null when nothing is flagged.
+export function buildReviewLesson(itemIds: string[]): Lesson | null {
+  const exercises = itemIds
+    .map((id) => {
+      const [lessonId, idxStr] = id.split("#");
+      const ex = getLesson(lessonId)?.exercises[Number(idxStr)];
+      return ex;
+    })
+    .filter((ex): ex is Exercise => Boolean(ex));
+
+  if (exercises.length === 0) return null;
+
+  return {
+    id: "review",
+    title: "Review mistakes",
+    subtitle: "Questions you missed",
+    icon: "🔁",
+    skill: "writing", // unused — review mode doesn't record skill stats
+    xp: 0,
+    exercises,
+  };
 }

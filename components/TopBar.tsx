@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Flame, Heart, Star } from "lucide-react";
+import { Flame, Star } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 
 export default function TopBar() {
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
-  const hearts = useGameStore((s) => s.hearts);
-  const maxHearts = useGameStore((s) => s.maxHearts);
 
   // Avoid hydration mismatch: store values come from localStorage on the client.
   const [mounted, setMounted] = useState(false);
@@ -26,11 +24,6 @@ export default function TopBar() {
         <div className="flex items-center gap-4 text-sm font-bold">
           <Stat icon={<Star className="h-5 w-5 text-gold" fill="#ffc800" />} value={mounted ? xp : 0} label="XP" />
           <Stat icon={<Flame className="h-5 w-5 text-orange-500" fill="#f97316" />} value={mounted ? streak : 0} label="day streak" />
-          <Stat
-            icon={<Heart className="h-5 w-5 text-heart" fill="#ff4b4b" />}
-            value={mounted ? `${hearts}/${maxHearts}` : `${maxHearts}/${maxHearts}`}
-            label="hearts"
-          />
         </div>
       </div>
     </header>

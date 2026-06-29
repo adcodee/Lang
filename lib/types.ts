@@ -138,4 +138,8 @@ export interface GameState {
   hearts: number;
   completedLessons: string[];
   skillStats: SkillStats;
+  // Items missed on the first try, kept for revision (id = `${lessonId}#${i}`).
+  revisionItems: string[];
+  // How many flagged items belong to each skill (drives weakness training).
+  revisionSkills: Record<SkillCategory, number>;
 }

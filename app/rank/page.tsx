@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { getRank } from "@/lib/rank";
@@ -8,6 +9,7 @@ import SkillStats from "@/components/SkillStats";
 export default function RankPage() {
   const xp = useGameStore((s) => s.xp);
   const skillStats = useGameStore((s) => s.skillStats);
+  const revisionCount = useGameStore((s) => s.revisionItems.length);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -44,6 +46,18 @@ export default function RankPage() {
       </section>
 
       <SkillStats />
+
+      {mounted && revisionCount > 0 && (
+        <Link
+          href="/dojo/review"
+          className="card flex items-center justify-between p-4"
+        >
+          <span className="font-bold text-ink">
+            🔁 {revisionCount} item{revisionCount === 1 ? "" : "s"} to review
+          </span>
+          <span className="text-sm font-bold text-torii">Review →</span>
+        </Link>
+      )}
     </div>
   );
 }

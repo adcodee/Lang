@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Sword, Target } from "lucide-react";
+import { Sword, Target, RotateCcw } from "lucide-react";
 import { dojoDrills, getDrillForSkill } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import { SKILL_BADGE } from "@/components/LessonNode";
@@ -17,11 +17,13 @@ const SKILLS: SkillCategory[] = [
 
 export default function DojoPage() {
   const skillStats = useGameStore((s) => s.skillStats);
+  const revisionSkills = useGameStore((s) => s.revisionSkills);
+  const revisionCount = useGameStore((s) => s.revisionItems.length);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Weakest skill = lowest accuracy (untouched skills count as weakest).
-  const weakest = mounted ? weakestSkill(skillStats) : null;
+  // Weakness = skill with the most flagged items, else lowest accuracy.
+  const weakest = mounted ? weakestSkill(skillStats, revisionSkills) : null;
   const weaknessDrill = weakest ? getDrillForSkill(weakest) : null;
 
   return (
@@ -35,6 +37,25 @@ export default function DojoPage() {
           Free-play drills — grind any skill, no hearts at stake.
         </p>
       </header>
+
+      {mounted && revisionCount > 0 && (
+        <Link
+          href="/dojo/review"
+          className="flex items-center justify-between rounded-2xl border-2 border-torii bg-torii/10 p-4"
+        >
+          <div className="flex items-center gap-3">
+            <RotateCcw className="h-6 w-6 text-torii" />
+            <div>
+              <div className="font-extrabold text-ink">Review mistakes</div>
+              <div className="text-sm text-muted">
+                {revisionCount} question{revisionCount === 1 ? "" : "s"} flagged
+                for revision
+              </div>
+            </div>
+          </div>
+          <span className="text-sm font-bold text-torii">Go →</span>
+        </Link>
+      )}
 
       {weaknessDrill && (
         <Link
@@ -78,13 +99,19 @@ export default function DojoPage() {
 }
 
 function weakestSkill(
-  stats: ReturnType<typeof useGameStore.getState>["skillStats"]
+  stats: ReturnType<typeof useGameStore.getState>["skillStats"],
+  revision: Record<SkillCategory, number>
 ): SkillCategory {
+  // Priority 1: the skill with the most items flagged for revision.
+  const mostFlagged = Math.max(...SKILLS.map((s) => revision[s]));
+  if (mostFlagged > 0) {
+    return SKILLS.reduce((a, b) => (revision[b] > revision[a] ? b : a));
+  }
+  // Priority 2: lowest first-try accuracy (untouched skills count as weakest).
   let worst: SkillCategory = SKILLS[0];
   let worstAcc = Infinity;
   for (const skill of SKILLS) {
     const s = stats[skill];
-    // Untouched skills (total 0) are treated as the weakest (accuracy 0).
     const acc = s.total === 0 ? 0 : s.correct / s.total;
     if (acc < worstAcc) {
       worstAcc = acc;

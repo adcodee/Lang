@@ -28,11 +28,17 @@ interface GameStore extends GameState {
   maxHearts: number;
   addXp: (amount: number) => void;
   recordAnswer: (skill: SkillCategory, correct: boolean, xp: number) => void;
+  flagRevision: (skill: SkillCategory, itemId: string) => void;
+  clearRevision: () => void;
   loseHeart: () => void;
   refillHearts: () => void;
   completeLesson: (lessonId: string, bonusXp: number) => void;
   registerActivity: () => void;
   reset: () => void;
+}
+
+function emptyRevisionSkills(): Record<SkillCategory, number> {
+  return { speaking: 0, writing: 0, listening: 0, punctuation: 0 };
 }
 
 const initialState: GameState = {
@@ -42,6 +48,8 @@ const initialState: GameState = {
   hearts: MAX_HEARTS,
   completedLessons: [],
   skillStats: emptySkillStats(),
+  revisionItems: [],
+  revisionSkills: emptyRevisionSkills(),
 };
 
 export const useGameStore = create<GameStore>()(
@@ -88,6 +96,23 @@ export const useGameStore = create<GameStore>()(
         set({ streak: nextStreak, lastActiveDay: today });
       },
 
+      // Flag an item (and its skill) for revision; ignore duplicates.
+      flagRevision: (skill, itemId) =>
+        set((s) => {
+          if (s.revisionItems.includes(itemId)) return s;
+          return {
+            revisionItems: [...s.revisionItems, itemId],
+            revisionSkills: {
+              ...s.revisionSkills,
+              [skill]: s.revisionSkills[skill] + 1,
+            },
+          };
+        }),
+
+      // Clear all flagged items (after a Review session).
+      clearRevision: () =>
+        set({ revisionItems: [], revisionSkills: emptyRevisionSkills() }),
+
       completeLesson: (lessonId, bonusXp) =>
         set((s) => ({
           xp: s.xp + bonusXp,
@@ -96,7 +121,12 @@ export const useGameStore = create<GameStore>()(
             : [...s.completedLessons, lessonId],
         })),
 
-      reset: () => set({ ...initialState, skillStats: emptySkillStats() }),
+      reset: () =>
+        set({
+          ...initialState,
+          skillStats: emptySkillStats(),
+          revisionSkills: emptyRevisionSkills(),
+        }),
     }),
     {
       name: "lang-game-state",
@@ -108,6 +138,8 @@ export const useGameStore = create<GameStore>()(
         hearts: s.hearts,
         completedLessons: s.completedLessons,
         skillStats: s.skillStats,
+        revisionItems: s.revisionItems,
+        revisionSkills: s.revisionSkills,
       }),
     }
   )
