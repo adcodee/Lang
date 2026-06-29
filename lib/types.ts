@@ -4,7 +4,16 @@ export type ExerciseType =
   | "translate-choice" // pick the correct translation from options
   | "match-pairs" // match Japanese <-> English pairs
   | "type-answer" // type the romaji / English answer
-  | "build-sentence"; // assemble word tiles into a sentence
+  | "build-sentence" // assemble word tiles into a sentence
+  | "listen-choice" // hear audio, pick what it means
+  | "speak-phrase"; // see a phrase, say it aloud (speech recognition)
+
+// The four learning skills every unit aims to cover.
+export type SkillCategory =
+  | "speaking"
+  | "writing"
+  | "listening"
+  | "punctuation";
 
 export interface TranslateChoiceExercise {
   type: "translate-choice";
@@ -40,19 +49,59 @@ export interface BuildSentenceExercise {
   note?: string;
 }
 
+// hear it (TTS) -> pick the meaning/kana. No on-screen Japanese.
+export interface ListenChoiceExercise {
+  type: "listen-choice";
+  prompt: string;
+  audio: string; // Japanese text fed to speak()
+  options: string[];
+  answer: string; // must be one of options
+  note?: string;
+}
+
+// see it -> say it -> matched against speech recognition transcript.
+export interface SpeakPhraseExercise {
+  type: "speak-phrase";
+  prompt: string;
+  display: string; // the Japanese phrase to say
+  romaji?: string; // pronunciation hint shown under the phrase
+  accept?: string[]; // extra accepted transcripts
+  note?: string;
+}
+
 export type Exercise =
   | TranslateChoiceExercise
   | MatchPairsExercise
   | TypeAnswerExercise
-  | BuildSentenceExercise;
+  | BuildSentenceExercise
+  | ListenChoiceExercise
+  | SpeakPhraseExercise;
 
 export interface Lesson {
-  id: string;
+  id: string; // globally unique — used by completedLessons + routing
   title: string;
   subtitle: string;
   icon: string; // emoji used on the node
+  skill: SkillCategory; // which skill this lesson trains
   xp: number; // bonus XP awarded on completion
   exercises: Exercise[];
+}
+
+// A group of related lessons spanning the four skills.
+export interface Unit {
+  id: string;
+  title: string;
+  subtitle: string;
+  lessons: Lesson[];
+}
+
+// A proficiency tier containing several units.
+export interface Level {
+  id: "beginner" | "intermediate" | "advanced" | "fluent";
+  title: string;
+  blurb: string;
+  comingSoon?: boolean; // true while the level has no authored content yet
+  units: Unit[];
 }
 
 export interface ChatMessage {

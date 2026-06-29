@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Volume2, Mic } from "lucide-react";
 import type { Exercise } from "@/lib/types";
+import { speak, listenOnce, speechSupported, matchesSpoken } from "@/lib/speech";
 
 // Renders one exercise and reports the result up via onChecked.
 // The parent owns progression + feedback display.
@@ -30,6 +32,14 @@ export default function ExerciseCard({
     case "build-sentence":
       return (
         <BuildSentence exercise={exercise} checked={checked} onChecked={onChecked} />
+      );
+    case "listen-choice":
+      return (
+        <ListenChoice exercise={exercise} checked={checked} onChecked={onChecked} />
+      );
+    case "speak-phrase":
+      return (
+        <SpeakPhrase exercise={exercise} checked={checked} onChecked={onChecked} />
       );
   }
 }
@@ -263,6 +273,171 @@ function BuildSentence({
             {w}
           </button>
         ))}
+      </div>
+    </Frame>
+  );
+}
+
+// --- listen-choice ---------------------------------------------------------
+function ListenChoice({
+  exercise,
+  checked,
+  onChecked,
+}: {
+  exercise: Extract<Exercise, { type: "listen-choice" }>;
+  checked: boolean;
+  onChecked: (correct: boolean) => void;
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [played, setPlayed] = useState(false);
+
+  const play = () => {
+    speak(exercise.audio);
+    setPlayed(true);
+  };
+
+  // Auto-play once when the exercise appears.
+  useEffect(() => {
+    play();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercise]);
+
+  function classFor(option: string): string {
+    if (!checked) return selected === option ? "choice choice-selected" : "choice";
+    if (option === exercise.answer) return "choice choice-correct";
+    if (option === selected) return "choice choice-wrong";
+    return "choice opacity-60";
+  }
+
+  return (
+    <Frame
+      prompt={exercise.prompt}
+      canCheck={selected !== null}
+      checked={checked}
+      onCheck={() => onChecked(selected === exercise.answer)}
+    >
+      <button
+        type="button"
+        onClick={play}
+        className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-sky text-white shadow-[0_5px_0_#1899d6] transition active:translate-y-0.5 active:shadow-[0_2px_0_#1899d6]"
+        aria-label="Play audio"
+      >
+        <Volume2 className="h-10 w-10" />
+      </button>
+      {!played && (
+        <p className="mb-4 text-center text-sm text-muted">
+          Tap to hear it
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-3">
+        {exercise.options.map((opt) => (
+          <button
+            key={opt}
+            disabled={checked}
+            className={classFor(opt)}
+            onClick={() => setSelected(opt)}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </Frame>
+  );
+}
+
+// --- speak-phrase ----------------------------------------------------------
+function SpeakPhrase({
+  exercise,
+  checked,
+  onChecked,
+}: {
+  exercise: Extract<Exercise, { type: "speak-phrase" }>;
+  checked: boolean;
+  onChecked: (correct: boolean) => void;
+}) {
+  const supported = useMemo(() => speechSupported(), []);
+  const [listening, setListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [typed, setTyped] = useState("");
+
+  async function record() {
+    if (checked || listening) return;
+    setTranscript("");
+    setListening(true);
+    try {
+      const { promise } = listenOnce("ja-JP");
+      const result = await promise;
+      setTranscript(result);
+    } catch {
+      setTranscript("");
+    } finally {
+      setListening(false);
+    }
+  }
+
+  const accept = exercise.accept ?? [];
+  const canCheck = supported ? transcript.trim().length > 0 : typed.trim().length > 0;
+
+  function check() {
+    const said = supported ? transcript : typed;
+    onChecked(matchesSpoken(said, exercise.display, accept));
+  }
+
+  return (
+    <Frame
+      prompt={exercise.prompt}
+      display={exercise.display}
+      canCheck={canCheck}
+      checked={checked}
+      onCheck={check}
+    >
+      {exercise.romaji && (
+        <p className="-mt-4 mb-4 text-center text-lg text-muted">
+          {exercise.romaji}
+        </p>
+      )}
+      <div className="flex flex-col items-center gap-3">
+        <button
+          type="button"
+          onClick={() => speak(exercise.display)}
+          className="text-sm font-bold text-sky"
+        >
+          🔊 Hear it first
+        </button>
+
+        {supported ? (
+          <>
+            <button
+              type="button"
+              disabled={checked || listening}
+              onClick={record}
+              className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-[0_5px_0_#46a302] transition active:translate-y-0.5 ${
+                listening ? "animate-pulse bg-red" : "bg-brand"
+              }`}
+              aria-label="Record your voice"
+            >
+              <Mic className="h-10 w-10" />
+            </button>
+            <p className="min-h-[1.5rem] text-center text-lg font-semibold">
+              {listening ? "Listening…" : transcript || "Tap the mic and speak"}
+            </p>
+          </>
+        ) : (
+          <div className="w-full">
+            <p className="mb-2 text-center text-sm text-muted">
+              Speech input isn&apos;t available in this browser — type the phrase
+              instead.
+            </p>
+            <input
+              autoFocus
+              disabled={checked}
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder="Type the phrase…"
+              className="w-full rounded-2xl border-2 border-gray-200 px-4 py-3 text-lg outline-none focus:border-sky"
+            />
+          </div>
+        )}
       </div>
     </Frame>
   );

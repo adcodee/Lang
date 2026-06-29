@@ -72,6 +72,39 @@ export function listenOnce(lang = "ja-JP"): {
   return { promise, stop: () => recog.stop() };
 }
 
+// Lenient comparison of a speech-recognition transcript against a target
+// phrase. Used to grade speaking exercises locally (no API). Strips spaces and
+// punctuation, lowercases, then accepts on exact match (against the target or
+// any `accept` alternative) or high character overlap — recognition is noisy,
+// so we err toward encouraging the learner.
+export function matchesSpoken(
+  transcript: string,
+  target: string,
+  accept: string[] = []
+): boolean {
+  const clean = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFKC")
+      .replace(/[\s。、．，.,!！?？「」『』・ー〜~…]/g, "");
+
+  const got = clean(transcript);
+  if (!got) return false;
+
+  const candidates = [target, ...accept].map(clean).filter(Boolean);
+  if (candidates.includes(got)) return true;
+
+  // Fall back to overlap: did we hear most of an expected phrase (or vice
+  // versa)? Helps when recognition adds/drops a trailing sound.
+  return candidates.some((c) => {
+    const [short, long] = got.length <= c.length ? [got, c] : [c, got];
+    if (short.length === 0) return false;
+    let hits = 0;
+    for (const ch of short) if (long.includes(ch)) hits++;
+    return hits / short.length >= 0.7;
+  });
+}
+
 // Speak text aloud. Tries to use a Japanese voice when available.
 export function speak(text: string, lang = "ja-JP") {
   if (typeof window === "undefined" || !window.speechSynthesis) return;

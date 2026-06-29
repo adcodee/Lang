@@ -3,9 +3,16 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Check, Lock, Star } from "lucide-react";
-import type { Lesson } from "@/lib/types";
+import type { Lesson, SkillCategory } from "@/lib/types";
 
 export type NodeStatus = "completed" | "current" | "locked";
+
+const SKILL_BADGE: Record<SkillCategory, { icon: string; label: string }> = {
+  speaking: { icon: "🗣️", label: "Speaking" },
+  writing: { icon: "✍️", label: "Writing" },
+  listening: { icon: "👂", label: "Listening" },
+  punctuation: { icon: "。", label: "Punctuation" },
+};
 
 export default function LessonNode({
   lesson,
@@ -62,6 +69,10 @@ export default function LessonNode({
       )}
       <div className="text-center">
         <div className="text-sm font-extrabold text-ink">{lesson.title}</div>
+        <div className="mt-0.5 flex items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide text-muted">
+          <span>{SKILL_BADGE[lesson.skill].icon}</span>
+          {SKILL_BADGE[lesson.skill].label}
+        </div>
         <div className="flex items-center justify-center gap-1 text-xs text-muted">
           <Star className="h-3 w-3 text-gold" fill="#ffc800" /> {lesson.xp} XP
         </div>

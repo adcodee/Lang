@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { getLesson, lessons } from "@/lib/content/lessons";
+import { getLesson, getNextLesson } from "@/lib/content/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Exercise } from "@/lib/types";
 import ExerciseCard from "@/components/ExerciseCard";
@@ -129,6 +129,10 @@ function answerLabel(exercise: Exercise): string {
       return exercise.answer.join(" ");
     case "match-pairs":
       return exercise.pairs.map((p) => `${p.left}=${p.right}`).join(", ");
+    case "listen-choice":
+      return exercise.answer;
+    case "speak-phrase":
+      return exercise.romaji ? `${exercise.display} (${exercise.romaji})` : exercise.display;
   }
 }
 
@@ -144,8 +148,7 @@ function LessonComplete({
   total: number;
 }) {
   const router = useRouter();
-  const idx = lessons.findIndex((l) => l.id === lessonId);
-  const next = lessons[idx + 1];
+  const next = getNextLesson(lessonId);
 
   return (
     <motion.div
