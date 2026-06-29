@@ -21,6 +21,13 @@ const config: Config = {
         heart: "#ff4b4b",
         surface: "#ffffff",
         canvas: "#f7f7f7",
+        // Japanese "dojo" accents.
+        sumi: "#1f2530", // ink black-blue
+        washi: "#f4ede0", // paper
+        torii: "#c1352b", // vermilion gate red
+      },
+      fontFamily: {
+        jp: ["var(--font-noto-jp)", "ui-rounded", "Nunito", "sans-serif"],
       },
       boxShadow: {
         node: "0 4px 0 rgba(0,0,0,0.15)",

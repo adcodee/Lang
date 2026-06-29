@@ -6,7 +6,8 @@ export type ExerciseType =
   | "type-answer" // type the romaji / English answer
   | "build-sentence" // assemble word tiles into a sentence
   | "listen-choice" // hear audio, pick what it means
-  | "speak-phrase"; // see a phrase, say it aloud (speech recognition)
+  | "speak-phrase" // see a phrase, say it aloud (speech recognition)
+  | "category-sort"; // park items into the correct buckets
 
 // The four learning skills every unit aims to cover.
 export type SkillCategory =
@@ -69,13 +70,24 @@ export interface SpeakPhraseExercise {
   note?: string;
 }
 
+// park each item into its correct bucket (the "sorting game" mechanic).
+export interface CategorySortExercise {
+  type: "category-sort";
+  prompt: string;
+  categories: string[]; // bucket labels
+  // Each item carries its correct bucket — avoids empty-bucket / lookup bugs.
+  items: { label: string; romaji?: string; category: string }[];
+  note?: string;
+}
+
 export type Exercise =
   | TranslateChoiceExercise
   | MatchPairsExercise
   | TypeAnswerExercise
   | BuildSentenceExercise
   | ListenChoiceExercise
-  | SpeakPhraseExercise;
+  | SpeakPhraseExercise
+  | CategorySortExercise;
 
 export interface Lesson {
   id: string; // globally unique — used by completedLessons + routing
@@ -110,10 +122,20 @@ export interface ChatMessage {
   correction?: string; // grammar correction surfaced by Claude
 }
 
+// Per-skill performance, accumulated across every answered exercise.
+export interface SkillStat {
+  correct: number;
+  total: number;
+  xp: number;
+}
+
+export type SkillStats = Record<SkillCategory, SkillStat>;
+
 export interface GameState {
   xp: number;
   streak: number;
   lastActiveDay: string | null; // YYYY-MM-DD
   hearts: number;
   completedLessons: string[];
+  skillStats: SkillStats;
 }

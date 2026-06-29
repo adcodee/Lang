@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Flame, Heart, Star, MessageCircle } from "lucide-react";
+import { Flame, Heart, Star } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 
 export default function TopBar() {
@@ -31,14 +31,6 @@ export default function TopBar() {
             value={mounted ? `${hearts}/${maxHearts}` : `${maxHearts}/${maxHearts}`}
             label="hearts"
           />
-          <Link
-            href="/practice"
-            className="flex items-center gap-1 rounded-full bg-sky px-3 py-1.5 text-white shadow-[0_2px_0_#1a8fc7]"
-            title="AI conversation practice"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">Practice</span>
-          </Link>
         </div>
       </div>
     </header>

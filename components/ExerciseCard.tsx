@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Volume2, Mic } from "lucide-react";
 import type { Exercise } from "@/lib/types";
 import { speak, listenOnce, speechSupported, matchesSpoken } from "@/lib/speech";
@@ -40,6 +41,10 @@ export default function ExerciseCard({
     case "speak-phrase":
       return (
         <SpeakPhrase exercise={exercise} checked={checked} onChecked={onChecked} />
+      );
+    case "category-sort":
+      return (
+        <CategorySort exercise={exercise} checked={checked} onChecked={onChecked} />
       );
   }
 }
@@ -438,6 +443,134 @@ function SpeakPhrase({
             />
           </div>
         )}
+      </div>
+    </Frame>
+  );
+}
+
+// --- category-sort ---------------------------------------------------------
+function CategorySort({
+  exercise,
+  checked,
+  onChecked,
+}: {
+  exercise: Extract<Exercise, { type: "category-sort" }>;
+  checked: boolean;
+  onChecked: (correct: boolean) => void;
+}) {
+  // Present items in a stable shuffled order.
+  const items = useMemo(() => shuffle(exercise.items), [exercise]);
+
+  // label -> chosen bucket (undefined = still in the tray).
+  const [placement, setPlacement] = useState<Record<string, string | undefined>>(
+    {}
+  );
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const unplaced = items.filter((it) => !placement[it.label]);
+  const allPlaced = unplaced.length === 0;
+
+  function placeInto(category: string) {
+    if (checked || !selected) return;
+    setPlacement((p) => ({ ...p, [selected]: category }));
+    setSelected(null);
+  }
+
+  function returnToTray(label: string) {
+    if (checked) return;
+    setPlacement((p) => ({ ...p, [label]: undefined }));
+  }
+
+  function tileClass(label: string, inBucket: boolean): string {
+    const base =
+      "rounded-xl border-2 px-3 py-2 text-center font-semibold shadow-[0_2px_0_#e5e5e5]";
+    if (!checked)
+      return `${base} ${
+        selected === label && !inBucket
+          ? "border-sky bg-sky/10"
+          : "border-gray-200 bg-white"
+      }`;
+    if (!inBucket) return `${base} border-gray-200 bg-white`;
+    const it = exercise.items.find((i) => i.label === label)!;
+    return placement[label] === it.category
+      ? `${base} border-brand bg-brand/10 text-brand-dark`
+      : `${base} border-heart bg-heart/10 text-heart`;
+  }
+
+  return (
+    <Frame
+      prompt={exercise.prompt}
+      canCheck={allPlaced}
+      checked={checked}
+      onCheck={() =>
+        onChecked(
+          exercise.items.every((it) => placement[it.label] === it.category)
+        )
+      }
+    >
+      {/* Tray of unsorted items */}
+      <div className="mb-5 flex min-h-[3.5rem] flex-wrap items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-gray-200 p-3">
+        {unplaced.length === 0 ? (
+          <span className="text-sm text-muted">All sorted — tap Check</span>
+        ) : (
+          unplaced.map((it) => (
+            <button
+              key={it.label}
+              disabled={checked}
+              onClick={() => setSelected(it.label)}
+              className={tileClass(it.label, false)}
+            >
+              <div>{it.label}</div>
+              {it.romaji && (
+                <div className="text-xs font-normal text-muted">{it.romaji}</div>
+              )}
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* Buckets */}
+      <div
+        className={`grid gap-3 ${
+          exercise.categories.length > 2 ? "grid-cols-2" : "grid-cols-2"
+        }`}
+      >
+        {exercise.categories.map((cat) => {
+          const parked = items.filter((it) => placement[it.label] === cat);
+          return (
+            <button
+              key={cat}
+              type="button"
+              disabled={checked || !selected}
+              onClick={() => placeInto(cat)}
+              className={`flex min-h-[5rem] flex-col gap-2 rounded-2xl border-2 p-3 text-left transition ${
+                selected && !checked
+                  ? "border-sky bg-sky/5"
+                  : "border-gray-200 bg-gray-50"
+              }`}
+            >
+              <span className="text-xs font-extrabold uppercase tracking-wide text-muted">
+                {cat}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {parked.map((it) => (
+                  <motion.span
+                    key={it.label}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      returnToTray(it.label);
+                    }}
+                    className={tileClass(it.label, true)}
+                  >
+                    {it.label}
+                  </motion.span>
+                ))}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </Frame>
   );

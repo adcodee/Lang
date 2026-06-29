@@ -9,8 +9,8 @@ const STARTER: ChatMessage = {
   content: "こんにちは！日本語で話しましょう。(Hello! Let's talk in Japanese.)",
 };
 
-export default function ChatPanel() {
-  const [messages, setMessages] = useState<ChatMessage[]>([STARTER]);
+export default function ChatPanel({ starter }: { starter?: ChatMessage }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([starter ?? STARTER]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [demo, setDemo] = useState(false);

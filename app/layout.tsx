@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/TopBar";
+import BottomNav from "@/components/BottomNav";
+
+const notoSansJp = Noto_Sans_JP({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+  variable: "--font-noto-jp",
+});
 
 export const metadata: Metadata = {
   title: "Lang — Learn Japanese",
@@ -14,12 +22,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={notoSansJp.variable}>
       <body>
         <TopBar />
         <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-6">
           {children}
         </main>
+        <BottomNav />
       </body>
     </html>
   );

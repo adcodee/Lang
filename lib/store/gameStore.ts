@@ -2,9 +2,18 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { GameState } from "@/lib/types";
+import type { GameState, SkillCategory, SkillStats } from "@/lib/types";
 
 const MAX_HEARTS = 5;
+
+function emptySkillStats(): SkillStats {
+  return {
+    speaking: { correct: 0, total: 0, xp: 0 },
+    writing: { correct: 0, total: 0, xp: 0 },
+    listening: { correct: 0, total: 0, xp: 0 },
+    punctuation: { correct: 0, total: 0, xp: 0 },
+  };
+}
 
 function todayKey(): string {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -18,6 +27,7 @@ function dayDiff(a: string, b: string): number {
 interface GameStore extends GameState {
   maxHearts: number;
   addXp: (amount: number) => void;
+  recordAnswer: (skill: SkillCategory, correct: boolean, xp: number) => void;
   loseHeart: () => void;
   refillHearts: () => void;
   completeLesson: (lessonId: string, bonusXp: number) => void;
@@ -31,6 +41,7 @@ const initialState: GameState = {
   lastActiveDay: null,
   hearts: MAX_HEARTS,
   completedLessons: [],
+  skillStats: emptySkillStats(),
 };
 
 export const useGameStore = create<GameStore>()(
@@ -40,6 +51,23 @@ export const useGameStore = create<GameStore>()(
       maxHearts: MAX_HEARTS,
 
       addXp: (amount) => set((s) => ({ xp: s.xp + amount })),
+
+      // Record a single exercise answer against its skill (and global XP).
+      recordAnswer: (skill, correct, xp) =>
+        set((s) => {
+          const prev = s.skillStats[skill];
+          return {
+            xp: s.xp + xp,
+            skillStats: {
+              ...s.skillStats,
+              [skill]: {
+                correct: prev.correct + (correct ? 1 : 0),
+                total: prev.total + 1,
+                xp: prev.xp + xp,
+              },
+            },
+          };
+        }),
 
       loseHeart: () => set((s) => ({ hearts: Math.max(0, s.hearts - 1) })),
 
@@ -68,7 +96,7 @@ export const useGameStore = create<GameStore>()(
             : [...s.completedLessons, lessonId],
         })),
 
-      reset: () => set({ ...initialState }),
+      reset: () => set({ ...initialState, skillStats: emptySkillStats() }),
     }),
     {
       name: "lang-game-state",
@@ -79,6 +107,7 @@ export const useGameStore = create<GameStore>()(
         lastActiveDay: s.lastActiveDay,
         hearts: s.hearts,
         completedLessons: s.completedLessons,
+        skillStats: s.skillStats,
       }),
     }
   )

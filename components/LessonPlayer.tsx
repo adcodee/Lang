@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { getLesson, getNextLesson } from "@/lib/content/curriculum";
+import { getDrill } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Exercise } from "@/lib/types";
 import ExerciseCard from "@/components/ExerciseCard";
@@ -12,13 +13,23 @@ import FeedbackBanner from "@/components/FeedbackBanner";
 
 const XP_PER_CORRECT = 5;
 
-export default function LessonPlayer({ lessonId }: { lessonId: string }) {
+export default function LessonPlayer({
+  lessonId,
+  freePlay = false,
+}: {
+  lessonId: string;
+  freePlay?: boolean;
+}) {
   const router = useRouter();
-  const lesson = useMemo(() => getLesson(lessonId), [lessonId]);
+  // Lessons come from the curriculum tree; Dojo drills come from the drill set.
+  const lesson = useMemo(
+    () => (freePlay ? getDrill(lessonId) : getLesson(lessonId)),
+    [lessonId, freePlay]
+  );
 
-  const addXp = useGameStore((s) => s.addXp);
   const loseHeart = useGameStore((s) => s.loseHeart);
   const hearts = useGameStore((s) => s.hearts);
+  const recordAnswer = useGameStore((s) => s.recordAnswer);
   const completeLesson = useGameStore((s) => s.completeLesson);
   const registerActivity = useGameStore((s) => s.registerActivity);
 
@@ -31,9 +42,14 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   if (!lesson) {
     return (
       <div className="card p-6 text-center">
-        <p className="font-bold">Lesson not found.</p>
-        <button className="btn-brand mt-4" onClick={() => router.push("/")}>
-          Back to map
+        <p className="font-bold">
+          {freePlay ? "Drill not found." : "Lesson not found."}
+        </p>
+        <button
+          className="btn-brand mt-4"
+          onClick={() => router.push(freePlay ? "/dojo" : "/")}
+        >
+          {freePlay ? "Back to Dojo" : "Back to map"}
         </button>
       </div>
     );
@@ -46,8 +62,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   function handleChecked(correct: boolean) {
     setLastCorrect(correct);
     setChecked(true);
+    // Attribute the answer to this lesson's skill (feeds the Rank tab).
+    recordAnswer(lesson!.skill, correct, correct ? XP_PER_CORRECT : 0);
     if (correct) {
-      addXp(XP_PER_CORRECT);
       setCorrectCount((c) => c + 1);
     } else {
       loseHeart();
@@ -59,15 +76,34 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     if (step + 1 < total) {
       setStep((s) => s + 1);
     } else {
-      // Lesson finished — award bonus XP, unlock next, bump streak.
-      completeLesson(lesson!.id, lesson!.xp);
+      // Finished. Free-play drills don't unlock anything; lessons do.
+      if (!freePlay) {
+        completeLesson(lesson!.id, lesson!.xp);
+      }
       registerActivity();
       setDone(true);
     }
   }
 
+  function restart() {
+    setStep(0);
+    setChecked(false);
+    setLastCorrect(false);
+    setCorrectCount(0);
+    setDone(false);
+  }
+
   if (done) {
-    return <LessonComplete lessonId={lesson.id} xp={lesson.xp} correct={correctCount} total={total} />;
+    return freePlay ? (
+      <DrillComplete correct={correctCount} total={total} onRestart={restart} />
+    ) : (
+      <LessonComplete
+        lessonId={lesson.id}
+        xp={lesson.xp}
+        correct={correctCount}
+        total={total}
+      />
+    );
   }
 
   // Out of hearts — soft wall.
@@ -83,8 +119,8 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
     <div className="relative">
       <div className="mb-6 flex items-center gap-3">
         <button
-          onClick={() => router.push("/")}
-          aria-label="Quit lesson"
+          onClick={() => router.push(freePlay ? "/dojo" : "/")}
+          aria-label={freePlay ? "Quit drill" : "Quit lesson"}
           className="text-muted hover:text-ink"
         >
           <X />
@@ -133,6 +169,16 @@ function answerLabel(exercise: Exercise): string {
       return exercise.answer;
     case "speak-phrase":
       return exercise.romaji ? `${exercise.display} (${exercise.romaji})` : exercise.display;
+    case "category-sort":
+      return exercise.categories
+        .map(
+          (cat) =>
+            `${cat}: ${exercise.items
+              .filter((it) => it.category === cat)
+              .map((it) => it.label)
+              .join(", ")}`
+        )
+        .join(" · ");
   }
 }
 
@@ -179,6 +225,45 @@ function LessonComplete({
         )}
         <button className="btn-ghost" onClick={() => router.push("/")}>
           Back to map
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function DrillComplete({
+  correct,
+  total,
+  onRestart,
+}: {
+  correct: number;
+  total: number;
+  onRestart: () => void;
+}) {
+  const router = useRouter();
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  return (
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="card p-8 text-center"
+    >
+      <div className="text-6xl">🥋</div>
+      <h1 className="mt-4 text-2xl font-extrabold text-brand-dark">
+        Training complete!
+      </h1>
+      <p className="mt-2 text-muted">
+        Accuracy:{" "}
+        <span className="font-bold text-gold">{accuracy}%</span> ({correct}/
+        {total})
+      </p>
+      <div className="mt-6 flex flex-col gap-3">
+        <button className="btn-brand" onClick={onRestart}>
+          Train again
+        </button>
+        <button className="btn-ghost" onClick={() => router.push("/dojo")}>
+          Back to Dojo
         </button>
       </div>
     </motion.div>

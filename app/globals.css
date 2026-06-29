@@ -38,4 +38,23 @@ body {
   .choice-wrong {
     @apply border-heart bg-heart/10 text-heart;
   }
+  /* Dojo/Rank header — sumi ink with a torii-red accent edge. */
+  .dojo-header {
+    @apply font-jp shadow-card;
+    background:
+      radial-gradient(
+        circle at 1px 1px,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 0
+      ),
+      linear-gradient(135deg, #1f2530 0%, #2c3444 100%);
+    background-size: 16px 16px, 100% 100%;
+    border-bottom: 4px solid #c1352b;
+  }
+}
+
+/* Japanese display font for headings. */
+h1,
+h2 {
+  font-family: var(--font-noto-jp), ui-rounded, "Nunito", sans-serif;
 }

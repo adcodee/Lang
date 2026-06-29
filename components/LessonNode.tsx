@@ -7,7 +7,7 @@ import type { Lesson, SkillCategory } from "@/lib/types";
 
 export type NodeStatus = "completed" | "current" | "locked";
 
-const SKILL_BADGE: Record<SkillCategory, { icon: string; label: string }> = {
+export const SKILL_BADGE: Record<SkillCategory, { icon: string; label: string }> = {
   speaking: { icon: "🗣️", label: "Speaking" },
   writing: { icon: "✍️", label: "Writing" },
   listening: { icon: "👂", label: "Listening" },
