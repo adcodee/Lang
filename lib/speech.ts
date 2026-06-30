@@ -140,13 +140,22 @@ function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
   );
 }
 
-// Speak text aloud. Uses a cached Japanese voice when available.
-export function speak(text: string, lang = "ja-JP") {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
+// Speak text aloud. Uses a cached Japanese voice when available. `onEnd` fires
+// when the utterance finishes (or errors, or if TTS is unavailable) so a
+// hands-free conversation loop knows when to re-open the mic.
+export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
+    onEnd?.();
+    return;
+  }
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang;
   const jaVoice = pickJapaneseVoice();
   if (jaVoice) utter.voice = jaVoice;
+  if (onEnd) {
+    utter.onend = () => onEnd();
+    utter.onerror = () => onEnd();
+  }
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utter);
 }
