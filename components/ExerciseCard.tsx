@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Mic } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import type { Exercise } from "@/lib/types";
-import { speak, listenOnce, speechSupported, matchesSpoken } from "@/lib/speech";
+import { speak, matchesSpoken } from "@/lib/speech";
+import SpeakInput from "@/components/SpeakInput";
 
 // Renders one exercise and reports the result up via onChecked.
 // The parent owns progression + feedback display.
@@ -360,41 +361,20 @@ function SpeakPhrase({
   checked: boolean;
   onChecked: (correct: boolean) => void;
 }) {
-  const supported = useMemo(() => speechSupported(), []);
-  const [listening, setListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [typed, setTyped] = useState("");
+  const [captured, setCaptured] = useState("");
 
-  async function record() {
-    if (checked || listening) return;
-    setTranscript("");
-    setListening(true);
-    try {
-      const { promise } = listenOnce("ja-JP");
-      const result = await promise;
-      setTranscript(result);
-    } catch {
-      setTranscript("");
-    } finally {
-      setListening(false);
-    }
-  }
-
-  const accept = exercise.accept ?? [];
-  const canCheck = supported ? transcript.trim().length > 0 : typed.trim().length > 0;
-
-  function check() {
-    const said = supported ? transcript : typed;
-    onChecked(matchesSpoken(said, exercise.display, accept));
-  }
+  const accept = useMemo(
+    () => [exercise.romaji ?? "", ...(exercise.accept ?? [])].filter(Boolean),
+    [exercise]
+  );
 
   return (
     <Frame
       prompt={exercise.prompt}
       display={exercise.display}
-      canCheck={canCheck}
+      canCheck={captured.trim().length > 0}
       checked={checked}
-      onCheck={check}
+      onCheck={() => onChecked(matchesSpoken(captured, exercise.display, accept))}
     >
       {exercise.romaji && (
         <p className="-mt-4 mb-4 text-center text-lg text-muted">
@@ -410,38 +390,19 @@ function SpeakPhrase({
           🔊 Hear it first
         </button>
 
-        {supported ? (
-          <>
-            <button
-              type="button"
-              disabled={checked || listening}
-              onClick={record}
-              className={`flex h-24 w-24 items-center justify-center rounded-full text-white shadow-[0_5px_0_#46a302] transition active:translate-y-0.5 ${
-                listening ? "animate-pulse bg-red" : "bg-brand"
-              }`}
-              aria-label="Record your voice"
-            >
-              <Mic className="h-10 w-10" />
-            </button>
-            <p className="min-h-[1.5rem] text-center text-lg font-semibold">
-              {listening ? "Listening…" : transcript || "Tap the mic and speak"}
-            </p>
-          </>
-        ) : (
-          <div className="w-full">
-            <p className="mb-2 text-center text-sm text-muted">
-              Speech input isn&apos;t available in this browser — type the phrase
-              instead.
-            </p>
-            <input
-              autoFocus
-              disabled={checked}
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              placeholder="Type the phrase…"
-              className="w-full rounded-2xl border-2 border-gray-200 px-4 py-3 text-lg outline-none focus:border-sky"
-            />
-          </div>
+        {!checked && (
+          <SpeakInput
+            onTranscript={setCaptured}
+            idleLabel="Tap and speak"
+            typedPlaceholder={
+              exercise.romaji ? `Type "${exercise.romaji}"` : "Type the romaji…"
+            }
+          />
+        )}
+        {captured && (
+          <p className="min-h-[1.5rem] text-center text-lg font-semibold">
+            {captured}
+          </p>
         )}
       </div>
     </Frame>

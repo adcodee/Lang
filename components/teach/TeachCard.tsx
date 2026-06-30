@@ -1,13 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Volume2, Mic } from "lucide-react";
-import {
-  speak,
-  listenOnce,
-  speechSupported,
-  matchesSpoken,
-} from "@/lib/speech";
+import { Volume2 } from "lucide-react";
+import { speak, matchesSpoken } from "@/lib/speech";
+import SpeakInput from "@/components/SpeakInput";
 import StrokeOrder from "@/components/teach/StrokeOrder";
 import TraceCanvas from "@/components/teach/TraceCanvas";
 import type { KanaTeachCard } from "@/lib/types";
@@ -24,25 +20,12 @@ export default function TeachCard({
   onSpeakAttempt: (correct: boolean) => void;
   onTraced: () => void;
 }) {
-  const supported = speechSupported();
-  const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState<null | boolean>(null);
 
-  async function sayIt() {
-    if (listening) return;
-    setHeard(null);
-    setListening(true);
-    try {
-      const { promise } = listenOnce("ja-JP");
-      const transcript = await promise;
-      const ok = matchesSpoken(transcript, card.char, [card.romaji]);
-      setHeard(ok);
-      onSpeakAttempt(ok);
-    } catch {
-      setHeard(null);
-    } finally {
-      setListening(false);
-    }
+  function gradeSpoken(text: string) {
+    const ok = matchesSpoken(text, card.char, [card.romaji]);
+    setHeard(ok);
+    onSpeakAttempt(ok);
   }
 
   return (
@@ -51,24 +34,17 @@ export default function TeachCard({
       <section className="text-center">
         <div className="font-jp text-7xl text-sumi">{card.char}</div>
         <div className="mt-1 text-lg font-bold text-muted">{card.romaji}</div>
-        <div className="mt-3 flex items-center justify-center gap-3">
+        <div className="mt-3 flex flex-col items-center gap-3">
           <button
             onClick={() => speak(card.char)}
             className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#1a8fc7]"
           >
             <Volume2 className="h-4 w-4" /> Hear it
           </button>
-          {supported && (
-            <button
-              onClick={sayIt}
-              disabled={listening}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-2 font-bold text-white shadow-[0_2px_0_#46a302] ${
-                listening ? "animate-pulse bg-torii" : "bg-brand"
-              }`}
-            >
-              <Mic className="h-4 w-4" /> {listening ? "Listening…" : "Say it"}
-            </button>
-          )}
+          <SpeakInput
+            onTranscript={gradeSpoken}
+            typedPlaceholder={`Type "${card.romaji}"`}
+          />
         </div>
         {heard !== null && (
           <p

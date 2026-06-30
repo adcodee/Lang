@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Mic, Square, Volume2, Type } from "lucide-react";
+import { useState } from "react";
+import { Volume2 } from "lucide-react";
 import { DemoBadge } from "@/components/ChatPanel";
-import { listenOnce, speak, speechSupported } from "@/lib/speech";
+import { speak } from "@/lib/speech";
+import SpeakInput from "@/components/SpeakInput";
 
 interface VoiceLine {
   role: "user" | "assistant";
@@ -13,16 +14,8 @@ interface VoiceLine {
 
 export default function VoiceChat() {
   const [lines, setLines] = useState<VoiceLine[]>([]);
-  const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
   const [demo, setDemo] = useState(false);
-  const [supported, setSupported] = useState(true);
-  const [typed, setTyped] = useState("");
-  const stopRef = useRef<(() => void) | null>(null);
-
-  useEffect(() => {
-    setSupported(speechSupported());
-  }, []);
 
   async function handleTranscript(transcript: string) {
     const text = transcript.trim();
@@ -51,34 +44,6 @@ export default function VoiceChat() {
     } finally {
       setThinking(false);
     }
-  }
-
-  async function startListening() {
-    if (!supported) return;
-    setListening(true);
-    const { promise, stop } = listenOnce("ja-JP");
-    stopRef.current = stop;
-    try {
-      const transcript = await promise;
-      await handleTranscript(transcript);
-    } catch {
-      // ignore recognition errors (e.g. no speech)
-    } finally {
-      setListening(false);
-      stopRef.current = null;
-    }
-  }
-
-  function stopListening() {
-    stopRef.current?.();
-    setListening(false);
-  }
-
-  function sendTyped() {
-    const t = typed.trim();
-    if (!t) return;
-    setTyped("");
-    handleTranscript(t);
   }
 
   return (
@@ -131,38 +96,13 @@ export default function VoiceChat() {
         )}
       </div>
 
-      <div className="border-t-2 border-gray-100 p-3">
-        {supported ? (
-          <div className="flex flex-col items-center gap-2">
-            <button
-              onClick={listening ? stopListening : startListening}
-              disabled={thinking}
-              className={`flex h-16 w-16 items-center justify-center rounded-full text-white shadow-node disabled:opacity-50 ${
-                listening ? "animate-pulse bg-heart" : "bg-brand"
-              }`}
-              aria-label={listening ? "Stop" : "Speak"}
-            >
-              {listening ? <Square className="h-6 w-6" /> : <Mic className="h-7 w-7" />}
-            </button>
-            <span className="text-xs text-muted">
-              {listening ? "Listening…" : "Tap to speak"}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Type className="h-5 w-5 text-muted" />
-            <input
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendTyped()}
-              placeholder="Voice not supported — type instead…"
-              className="flex-1 rounded-2xl border-2 border-gray-200 px-4 py-2 outline-none focus:border-brand"
-            />
-            <button onClick={sendTyped} className="btn-brand px-4 py-2">
-              Send
-            </button>
-          </div>
-        )}
+      <div className="flex justify-center border-t-2 border-gray-100 p-3">
+        <SpeakInput
+          onTranscript={handleTranscript}
+          idleLabel="Tap to speak"
+          typedPrompt="Type what you said (or type in Japanese)"
+          typedPlaceholder="Type here…"
+        />
       </div>
     </div>
   );
