@@ -25,6 +25,20 @@ export function getNextUnit(unitId: string): Unit | undefined {
   return units[idx + 1];
 }
 
+export function getUnitForLesson(lessonId: string): Unit | undefined {
+  return unitsInOrder().find((u) =>
+    u.lessons.some((l) => l.id === lessonId)
+  );
+}
+
+// A unit is unlocked if it's first in order, or the previous unit's exam passed.
+export function isUnitUnlocked(unitId: string, examsPassed: string[]): boolean {
+  const units = unitsInOrder();
+  const idx = units.findIndex((u) => u.id === unitId);
+  if (idx <= 0) return true; // first unit (or unknown) is open
+  return examsPassed.includes(units[idx - 1].id);
+}
+
 // Flat, ordered list of every lesson across all levels/units.
 // Order defines progression: the first non-completed lesson is "current".
 export function allLessons(): Lesson[] {

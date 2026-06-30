@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { getLesson, getNextLesson } from "@/lib/content/curriculum";
+import { getLesson, getUnitForLesson } from "@/lib/content/curriculum";
 import { getDrill } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
@@ -205,7 +205,13 @@ function LessonComplete({
   onRetry: () => void;
 }) {
   const router = useRouter();
-  const next = getNextLesson(lessonId);
+  // Progress within the unit only — crossing into the next unit must go through
+  // the unit exam, not straight to the next unit's first lesson.
+  const unit = getUnitForLesson(lessonId);
+  const idxInUnit = unit ? unit.lessons.findIndex((l) => l.id === lessonId) : -1;
+  const isLastInUnit = unit ? idxInUnit === unit.lessons.length - 1 : false;
+  const nextInUnit =
+    unit && idxInUnit >= 0 ? unit.lessons[idxInUnit + 1] : undefined;
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   if (!passed) {
@@ -262,12 +268,19 @@ function LessonComplete({
         .
       </p>
       <div className="mt-6 flex flex-col gap-3">
-        {next ? (
+        {isLastInUnit && unit ? (
           <button
             className="btn-brand"
-            onClick={() => router.push(`/lesson/${next.id}`)}
+            onClick={() => router.push(`/exam/${unit.id}`)}
           >
-            Next lesson: {next.title}
+            Take the {unit.title} exam 🥋
+          </button>
+        ) : nextInUnit ? (
+          <button
+            className="btn-brand"
+            onClick={() => router.push(`/lesson/${nextInUnit.id}`)}
+          >
+            Next lesson: {nextInUnit.title}
           </button>
         ) : (
           <button className="btn-sky" onClick={() => router.push("/practice")}>
