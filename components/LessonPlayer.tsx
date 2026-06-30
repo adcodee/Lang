@@ -7,7 +7,8 @@ import { X } from "lucide-react";
 import { getLesson, getNextLesson } from "@/lib/content/curriculum";
 import { getDrill } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
-import type { Exercise, Lesson } from "@/lib/types";
+import type { Lesson } from "@/lib/types";
+import { answerLabel } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
@@ -186,32 +187,6 @@ export default function LessonPlayer({
       )}
     </div>
   );
-}
-
-function answerLabel(exercise: Exercise): string {
-  switch (exercise.type) {
-    case "translate-choice":
-    case "type-answer":
-      return exercise.answer;
-    case "build-sentence":
-      return exercise.answer.join(" ");
-    case "match-pairs":
-      return exercise.pairs.map((p) => `${p.left}=${p.right}`).join(", ");
-    case "listen-choice":
-      return exercise.answer;
-    case "speak-phrase":
-      return exercise.romaji ? `${exercise.display} (${exercise.romaji})` : exercise.display;
-    case "category-sort":
-      return exercise.categories
-        .map(
-          (cat) =>
-            `${cat}: ${exercise.items
-              .filter((it) => it.category === cat)
-              .map((it) => it.label)
-              .join(", ")}`
-        )
-        .join(" · ");
-  }
 }
 
 function LessonComplete({

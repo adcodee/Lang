@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { getRank } from "@/lib/rank";
+import { unitsInOrder } from "@/lib/content/curriculum";
 import SkillStats from "@/components/SkillStats";
 
 export default function RankPage() {
   const xp = useGameStore((s) => s.xp);
   const skillStats = useGameStore((s) => s.skillStats);
   const revisionCount = useGameStore((s) => s.revisionItems.length);
+  const belts = useGameStore((s) => s.examsPassed.length);
+  const totalUnits = unitsInOrder().length;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -21,7 +24,7 @@ export default function RankPage() {
         <div className="text-6xl">{rank.emoji}</div>
         <h1 className="mt-3 text-2xl font-extrabold">{rank.title}</h1>
         <p className="mt-1 text-sm text-white/80">
-          {mounted ? xp : 0} XP total
+          {mounted ? xp : 0} XP total · 🥋 {mounted ? belts : 0}/{totalUnits} belts
         </p>
 
         <div className="mx-auto mt-4 max-w-xs">

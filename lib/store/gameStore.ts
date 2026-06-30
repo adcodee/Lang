@@ -33,6 +33,7 @@ interface GameStore extends GameState {
   loseHeart: () => void;
   refillHearts: () => void;
   completeLesson: (lessonId: string, bonusXp: number) => void;
+  passExam: (unitId: string, bonusXp: number) => void;
   registerActivity: () => void;
   reset: () => void;
 }
@@ -50,6 +51,7 @@ const initialState: GameState = {
   skillStats: emptySkillStats(),
   revisionItems: [],
   revisionSkills: emptyRevisionSkills(),
+  examsPassed: [],
 };
 
 export const useGameStore = create<GameStore>()(
@@ -121,6 +123,15 @@ export const useGameStore = create<GameStore>()(
             : [...s.completedLessons, lessonId],
         })),
 
+      // Pass a unit's exam: award bonus XP and record the belt (opens the gate).
+      passExam: (unitId, bonusXp) =>
+        set((s) => ({
+          xp: s.xp + bonusXp,
+          examsPassed: s.examsPassed.includes(unitId)
+            ? s.examsPassed
+            : [...s.examsPassed, unitId],
+        })),
+
       reset: () =>
         set({
           ...initialState,
@@ -140,6 +151,7 @@ export const useGameStore = create<GameStore>()(
         skillStats: s.skillStats,
         revisionItems: s.revisionItems,
         revisionSkills: s.revisionSkills,
+        examsPassed: s.examsPassed,
       }),
     }
   )

@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Lock } from "lucide-react";
-import { levels, allLessons } from "@/lib/content/curriculum";
+import { levels } from "@/lib/content/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import LessonNode, { NodeStatus } from "@/components/LessonNode";
+import ExamNode, { ExamStatus } from "@/components/ExamNode";
+import type { Unit } from "@/lib/types";
 
 // Gentle zig-zag pattern for the path of nodes within a unit.
 const OFFSETS = [0, 1, 0, -1, 0, 1, 0, -1];
 
 export default function SkillTree() {
   const completed = useGameStore((s) => s.completedLessons);
+  const examsPassed = useGameStore((s) => s.examsPassed);
   const [mounted, setMounted] = useState(false);
   // Default to the first level that has authored content.
   const [activeLevelId, setActiveLevelId] = useState(levels[0].id);
@@ -21,18 +24,48 @@ export default function SkillTree() {
     () => new Set(mounted ? completed : []),
     [mounted, completed]
   );
+  const examsPassedSet = useMemo(
+    () => new Set(mounted ? examsPassed : []),
+    [mounted, examsPassed]
+  );
 
-  // The current lesson is the first non-completed one across the whole tree.
-  const flat = useMemo(() => allLessons(), []);
-  const currentId = flat.find((l) => !completedSet.has(l.id))?.id;
+  const activeLevel = levels.find((l) => l.id === activeLevelId) ?? levels[0];
+  const units = activeLevel.units;
 
-  function statusFor(id: string): NodeStatus {
+  // A unit is unlocked if it's first, or the previous unit's exam is passed.
+  function unitUnlocked(index: number): boolean {
+    return index === 0 || examsPassedSet.has(units[index - 1].id);
+  }
+  function unitDone(unit: Unit): boolean {
+    return unit.lessons.every((l) => completedSet.has(l.id));
+  }
+
+  // The single "current" lesson: first incomplete lesson in the first unlocked
+  // unit that still has lesson work. If a unit's lessons are all done but its
+  // exam isn't passed, the exam is the frontier (no lesson is current).
+  const currentId = useMemo(() => {
+    for (let i = 0; i < units.length; i++) {
+      if (!unitUnlocked(i)) break;
+      const next = units[i].lessons.find((l) => !completedSet.has(l.id));
+      if (next) return next.id;
+      if (!examsPassedSet.has(units[i].id)) break; // frontier is the exam
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units, completedSet, examsPassedSet]);
+
+  function statusFor(unitIndex: number, id: string): NodeStatus {
+    if (!unitUnlocked(unitIndex)) return "locked";
     if (completedSet.has(id)) return "completed";
     if (id === currentId) return "current";
     return "locked";
   }
 
-  const activeLevel = levels.find((l) => l.id === activeLevelId) ?? levels[0];
+  function examStatusFor(unit: Unit, unitIndex: number): ExamStatus {
+    if (examsPassedSet.has(unit.id)) return "passed";
+    if (unitUnlocked(unitIndex) && unitDone(unit)) return "available";
+    return "locked";
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -74,7 +107,7 @@ export default function SkillTree() {
         </div>
       ) : (
         <div className="flex flex-col gap-12">
-          {activeLevel.units.map((unit) => (
+          {units.map((unit, unitIndex) => (
             <section key={unit.id} className="flex flex-col gap-6">
               <div className="text-center">
                 <div className="text-xs font-extrabold uppercase tracking-widest text-brand-dark">
@@ -87,10 +120,14 @@ export default function SkillTree() {
                   <LessonNode
                     key={lesson.id}
                     lesson={lesson}
-                    status={statusFor(lesson.id)}
+                    status={statusFor(unitIndex, lesson.id)}
                     offset={OFFSETS[i % OFFSETS.length]}
                   />
                 ))}
+                <ExamNode
+                  unit={unit}
+                  status={examStatusFor(unit, unitIndex)}
+                />
               </div>
             </section>
           ))}

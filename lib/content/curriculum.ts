@@ -1,4 +1,4 @@
-import type { Level, Lesson } from "@/lib/types";
+import type { Level, Lesson, Unit } from "@/lib/types";
 import { beginner } from "@/lib/content/levels/beginner";
 import { intermediate } from "@/lib/content/levels/intermediate";
 import { advanced } from "@/lib/content/levels/advanced";
@@ -6,6 +6,24 @@ import { fluent } from "@/lib/content/levels/fluent";
 
 // The full curriculum, ordered from easiest to hardest.
 export const levels: Level[] = [beginner, intermediate, advanced, fluent];
+
+// All units that have authored content, in progression order. Drives the
+// end-of-unit exam gating.
+export function unitsInOrder(): Unit[] {
+  return levels.filter((l) => !l.comingSoon).flatMap((l) => l.units);
+}
+
+export function getUnit(unitId: string): Unit | undefined {
+  return unitsInOrder().find((u) => u.id === unitId);
+}
+
+// The unit that follows a given one in progression order (gated by its exam).
+export function getNextUnit(unitId: string): Unit | undefined {
+  const units = unitsInOrder();
+  const idx = units.findIndex((u) => u.id === unitId);
+  if (idx === -1) return undefined;
+  return units[idx + 1];
+}
 
 // Flat, ordered list of every lesson across all levels/units.
 // Order defines progression: the first non-completed lesson is "current".

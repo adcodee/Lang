@@ -21,6 +21,7 @@ function isActive(tabHref: string, pathname: string): boolean {
 function isImmersive(pathname: string): boolean {
   if (pathname.startsWith("/lesson/")) return true;
   if (pathname.startsWith("/dojo/")) return true; // a specific drill / review
+  if (pathname.startsWith("/exam/")) return true; // a unit examination
   return false;
 }
 

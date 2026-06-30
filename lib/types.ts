@@ -152,4 +152,6 @@ export interface GameState {
   revisionItems: string[];
   // How many flagged items belong to each skill (drives weakness training).
   revisionSkills: Record<SkillCategory, number>;
+  // Unit ids whose end-of-unit exam has been passed (belt earned + gate open).
+  examsPassed: string[];
 }
