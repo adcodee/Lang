@@ -105,14 +105,47 @@ export function matchesSpoken(
   });
 }
 
-// Speak text aloud. Tries to use a Japanese voice when available.
+// Voices load asynchronously; cache them and refresh on `voiceschanged` so the
+// first spoken character doesn't have to wait for the list to populate (a big
+// cause of the "Hear it" lag).
+let voiceCache: SpeechSynthesisVoice[] = [];
+function refreshVoices() {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+  const v = window.speechSynthesis.getVoices();
+  if (v.length) voiceCache = v;
+}
+if (typeof window !== "undefined" && window.speechSynthesis) {
+  refreshVoices();
+  window.speechSynthesis.addEventListener?.("voiceschanged", refreshVoices);
+}
+
+// Warm the TTS engine + voice list within a user gesture (call on the first tap)
+// so the first real utterance plays promptly instead of cold-starting.
+export function primeSpeech() {
+  if (typeof window === "undefined" || !window.speechSynthesis) return;
+  refreshVoices();
+  try {
+    const warm = new SpeechSynthesisUtterance(" ");
+    warm.volume = 0;
+    window.speechSynthesis.speak(warm);
+  } catch {
+    /* ignore — warming up is best-effort */
+  }
+}
+
+function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
+  if (!voiceCache.length) refreshVoices();
+  return voiceCache.find(
+    (v) => v.lang?.toLowerCase().startsWith("ja") || v.lang?.includes("JP")
+  );
+}
+
+// Speak text aloud. Uses a cached Japanese voice when available.
 export function speak(text: string, lang = "ja-JP") {
   if (typeof window === "undefined" || !window.speechSynthesis) return;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang;
-  const jaVoice = window.speechSynthesis
-    .getVoices()
-    .find((v) => v.lang.startsWith("ja"));
+  const jaVoice = pickJapaneseVoice();
   if (jaVoice) utter.voice = jaVoice;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utter);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Flame, Star } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
+import { primeSpeech } from "@/lib/speech";
 
 export default function TopBar() {
   const xp = useGameStore((s) => s.xp);
@@ -12,6 +13,13 @@ export default function TopBar() {
   // Avoid hydration mismatch: store values come from localStorage on the client.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Warm up TTS on the first user gesture so "Hear it" isn't slow first time.
+  useEffect(() => {
+    const warm = () => primeSpeech();
+    window.addEventListener("pointerdown", warm, { once: true });
+    return () => window.removeEventListener("pointerdown", warm);
+  }, []);
 
   return (
     <header className="sticky top-0 z-20 border-b-2 border-gray-100 bg-white/90 backdrop-blur">
