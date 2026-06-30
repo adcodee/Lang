@@ -33,8 +33,7 @@ export default function SpeakInput({
   const [status, setStatus] = useState<Status>("idle");
   const [showTyped, setShowTyped] = useState(false);
   const [typed, setTyped] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [diag, setDiag] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   const recorderRef = useRef<Recorder | null>(null);
 
   useEffect(() => {
@@ -50,27 +49,22 @@ export default function SpeakInput({
     } else {
       setTier("typed");
       setShowTyped(true);
-      setDiag("recording isn't supported in this browser");
     }
   }, []);
 
   async function runWebSpeech() {
     setStatus("listening");
-    setError(null);
-    setDiag(null);
+    setNote(null);
     try {
       const { promise } = listenOnce("ja-JP");
       const text = await promise;
       if (!text.trim()) {
-        // Browser recognition returned nothing — make it visible + recover.
-        setDiag("browser speech returned nothing — type instead");
+        // Browser recognition returned nothing — recover with typed entry.
         setShowTyped(true);
         return;
       }
       onTranscript(text);
     } catch {
-      // Recognition failed at runtime — offer the typed fallback.
-      setDiag("browser speech failed — type instead");
       setShowTyped(true);
     } finally {
       setStatus("idle");
@@ -78,12 +72,13 @@ export default function SpeakInput({
   }
 
   async function startCloud() {
-    setError(null);
+    setNote(null);
     try {
       recorderRef.current = await startRecording();
       setStatus("recording");
     } catch {
-      setError("Mic permission is needed — or just type what you said below.");
+      // Almost always a denied/blocked mic permission.
+      setNote("Allow microphone access to speak — or type what you said below.");
       setShowTyped(true);
     }
   }
@@ -101,15 +96,12 @@ export default function SpeakInput({
       const res = await fetch("/api/transcribe", { method: "POST", body: form });
       const data = await res.json();
       if (data?.stubbed || !data?.transcript) {
-        // No cloud key (or empty) — fall back to typed-romaji practice.
-        setDiag(describeDiag(data, blob));
+        // No cloud key (or nothing heard) — fall back to typed-romaji practice.
         setShowTyped(true);
       } else {
-        setDiag(null);
         onTranscript(data.transcript as string);
       }
     } catch {
-      setDiag("network error reaching transcription");
       setShowTyped(true);
     } finally {
       setStatus("idle");
@@ -121,26 +113,6 @@ export default function SpeakInput({
     if (!t) return;
     setTyped("");
     onTranscript(t);
-  }
-
-  // Short, human-readable reason the cloud transcription didn't return text.
-  function describeDiag(
-    data: { reason?: string; status?: number; provider?: string },
-    blob: Blob
-  ): string {
-    const size = `${Math.round(blob.size / 1024)}KB ${blob.type || "?"}`;
-    switch (data?.reason) {
-      case "no-key":
-        return "no STT key on the server (set XAI_API_KEY and redeploy)";
-      case "error":
-        return `STT ${data.provider ?? ""} HTTP ${data.status} (${size})`;
-      case "empty":
-        return `STT heard nothing (${size})`;
-      case "exception":
-        return `STT request failed (${size})`;
-      default:
-        return `fell back (${size})`;
-    }
   }
 
   function handleMic() {
@@ -182,13 +154,7 @@ export default function SpeakInput({
         </button>
       )}
 
-      {tier !== "typed" && (
-        <p className="text-[10px] text-muted/70">
-          via {tier === "cloud" ? "cloud STT" : "browser"}
-        </p>
-      )}
-      {error && <p className="text-xs text-heart">{error}</p>}
-      {diag && <p className="text-[11px] text-muted">⚠️ {diag}</p>}
+      {note && <p className="text-center text-xs text-muted">{note}</p>}
 
       {showTyped && (
         <div className="w-full max-w-xs">
