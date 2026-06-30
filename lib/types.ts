@@ -89,6 +89,15 @@ export type Exercise =
   | SpeakPhraseExercise
   | CategorySortExercise;
 
+// One character's intro shown in the Teach phase before the exercises.
+export interface KanaTeachCard {
+  char: string; // あ
+  romaji: string; // a
+  mnemonic: string; // "あ looks like a fish saying 'ah'"
+  mnemonicEmoji?: string; // 🐟
+  example: { word: string; romaji: string; meaning: string }; // あめ / ame / rain
+}
+
 export interface Lesson {
   id: string; // globally unique — used by completedLessons + routing
   title: string;
@@ -96,6 +105,7 @@ export interface Lesson {
   icon: string; // emoji used on the node
   skill: SkillCategory; // which skill this lesson trains
   xp: number; // bonus XP awarded on completion
+  teach?: KanaTeachCard[]; // optional intro phase shown before exercises
   exercises: Exercise[];
 }
 

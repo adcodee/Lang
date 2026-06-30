@@ -20,6 +20,43 @@ export const beginner: Level = {
           icon: "あ",
           skill: "writing",
           xp: 20,
+          teach: [
+            {
+              char: "あ",
+              romaji: "a",
+              mnemonic: "あ hides a capital 'A' — see the cross and the curl. Say 'ah'.",
+              mnemonicEmoji: "🅰️",
+              example: { word: "あめ", romaji: "ame", meaning: "rain" },
+            },
+            {
+              char: "い",
+              romaji: "i",
+              mnemonic: "い is two strokes side by side — like two little 'i's. Say 'ee'.",
+              mnemonicEmoji: "🐟",
+              example: { word: "いぬ", romaji: "inu", meaning: "dog" },
+            },
+            {
+              char: "う",
+              romaji: "u",
+              mnemonic: "う is a person with a curl, leaning back going 'ooo'.",
+              mnemonicEmoji: "🌊",
+              example: { word: "うみ", romaji: "umi", meaning: "sea" },
+            },
+            {
+              char: "え",
+              romaji: "e",
+              mnemonic: "え looks like an exotic bird or a ninja — 'eh?'",
+              mnemonicEmoji: "🥷",
+              example: { word: "えき", romaji: "eki", meaning: "station" },
+            },
+            {
+              char: "お",
+              romaji: "o",
+              mnemonic: "お is a person kicking a ball — 'oh!'",
+              mnemonicEmoji: "👹",
+              example: { word: "おに", romaji: "oni", meaning: "ogre" },
+            },
+          ],
           exercises: [
             {
               type: "translate-choice",
@@ -63,6 +100,43 @@ export const beginner: Level = {
           icon: "か",
           skill: "writing",
           xp: 20,
+          teach: [
+            {
+              char: "か",
+              romaji: "ka",
+              mnemonic: "か is literally the word for mosquito — picture it about to bite, 'ka!'",
+              mnemonicEmoji: "🦟",
+              example: { word: "かさ", romaji: "kasa", meaning: "umbrella" },
+            },
+            {
+              char: "き",
+              romaji: "ki",
+              mnemonic: "き looks like a key. A key says 'kee'.",
+              mnemonicEmoji: "🔑",
+              example: { word: "き", romaji: "ki", meaning: "tree" },
+            },
+            {
+              char: "く",
+              romaji: "ku",
+              mnemonic: "く is a bird's beak opening — a cuckoo going 'ku'.",
+              mnemonicEmoji: "🐦",
+              example: { word: "くつ", romaji: "kutsu", meaning: "shoes" },
+            },
+            {
+              char: "け",
+              romaji: "ke",
+              mnemonic: "け looks like a kettle with the lid and handle. 'Keh'.",
+              mnemonicEmoji: "🫖",
+              example: { word: "けむり", romaji: "kemuri", meaning: "smoke" },
+            },
+            {
+              char: "こ",
+              romaji: "ko",
+              mnemonic: "こ is two short strokes — like a small 'ko' (child).",
+              mnemonicEmoji: "🍚",
+              example: { word: "こめ", romaji: "kome", meaning: "(uncooked) rice" },
+            },
+          ],
           exercises: [
             {
               type: "translate-choice",

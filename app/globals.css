@@ -38,6 +38,12 @@ body {
   .choice-wrong {
     @apply border-heart bg-heart/10 text-heart;
   }
+  /* Calm, paper-like surface for the teach phase. */
+  .teach-surface {
+    background:
+      linear-gradient(0deg, rgba(193, 53, 43, 0.015), rgba(193, 53, 43, 0.015)),
+      #fbf7ef;
+  }
   /* Dojo/Rank header — sumi ink with a torii-red accent edge. */
   .dojo-header {
     @apply font-jp shadow-card;

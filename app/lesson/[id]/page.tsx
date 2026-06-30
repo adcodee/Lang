@@ -1,5 +1,5 @@
-import LessonPlayer from "@/components/LessonPlayer";
+import LessonFlow from "@/components/LessonFlow";
 
 export default function LessonPage({ params }: { params: { id: string } }) {
-  return <LessonPlayer lessonId={params.id} />;
+  return <LessonFlow id={params.id} />;
 }

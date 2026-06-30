@@ -58,6 +58,13 @@ speech-to-text and text-to-speech.
 Next.js (App Router) · React · TypeScript · Tailwind CSS · Zustand ·
 framer-motion · lucide-react · @anthropic-ai/sdk
 
+## Credits
+
+Hiragana stroke-order data is from [KanjiVG](http://kanjivg.tagaini.net) by
+Ulrich Apel, used under the Creative Commons Attribution-Share Alike 3.0 licence.
+The extracted subset in `lib/content/strokes.ts` is distributed under the same
+licence.
+
 ## Scope
 
 This is a **core MVP**. Not yet included: user accounts, a server-side database,
