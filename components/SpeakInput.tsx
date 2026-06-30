@@ -5,6 +5,7 @@ import { Mic, Square, Send } from "lucide-react";
 import { speechSupported, listenOnce } from "@/lib/speech";
 import {
   mediaRecorderSupported,
+  isIOS,
   startRecording,
   type Recorder,
 } from "@/lib/audio";
@@ -37,23 +38,39 @@ export default function SpeakInput({
   const recorderRef = useRef<Recorder | null>(null);
 
   useEffect(() => {
-    if (speechSupported()) setTier("web-speech");
-    else if (mediaRecorderSupported()) setTier("cloud");
-    else {
+    const canRecord = mediaRecorderSupported();
+    // iOS exposes a non-functional webkitSpeechRecognition, so prefer cloud STT
+    // there. Elsewhere, the browser engine is free + instant when present.
+    if (canRecord && (isIOS() || !speechSupported())) {
+      setTier("cloud");
+    } else if (speechSupported()) {
+      setTier("web-speech");
+    } else if (canRecord) {
+      setTier("cloud");
+    } else {
       setTier("typed");
       setShowTyped(true);
+      setDiag("recording isn't supported in this browser");
     }
   }, []);
 
   async function runWebSpeech() {
     setStatus("listening");
     setError(null);
+    setDiag(null);
     try {
       const { promise } = listenOnce("ja-JP");
       const text = await promise;
+      if (!text.trim()) {
+        // Browser recognition returned nothing — make it visible + recover.
+        setDiag("browser speech returned nothing — type instead");
+        setShowTyped(true);
+        return;
+      }
       onTranscript(text);
     } catch {
       // Recognition failed at runtime — offer the typed fallback.
+      setDiag("browser speech failed — type instead");
       setShowTyped(true);
     } finally {
       setStatus("idle");
@@ -165,6 +182,11 @@ export default function SpeakInput({
         </button>
       )}
 
+      {tier !== "typed" && (
+        <p className="text-[10px] text-muted/70">
+          via {tier === "cloud" ? "cloud STT" : "browser"}
+        </p>
+      )}
       {error && <p className="text-xs text-heart">{error}</p>}
       {diag && <p className="text-[11px] text-muted">⚠️ {diag}</p>}
 

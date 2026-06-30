@@ -17,6 +17,18 @@ export function mediaRecorderSupported(): boolean {
   );
 }
 
+// iOS (incl. iPadOS, which reports as "MacIntel" with touch). iOS browsers
+// expose webkitSpeechRecognition but it doesn't actually transcribe, so we must
+// route iOS to the cloud STT path instead of the broken browser recognition.
+export function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  return (
+    navigator.platform === "MacIntel" && (navigator.maxTouchPoints ?? 0) > 1
+  );
+}
+
 // Pick a mime type the current browser actually supports.
 // iOS yields audio/mp4; Chrome/Firefox yield audio/webm.
 function pickMimeType(): string | undefined {
