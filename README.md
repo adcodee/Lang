@@ -33,8 +33,7 @@ cp .env.example .env.local
 | Variable            | Powers                | Get a key                        |
 | ------------------- | --------------------- | -------------------------------- |
 | `ANTHROPIC_API_KEY` | Text tutor (Claude)   | <https://console.anthropic.com/> |
-| `XAI_API_KEY`       | Voice tutor (Grok)    | <https://console.x.ai/>          |
-| `STT_API_KEY`       | "Say it" speech-to-text on iOS | any OpenAI-compatible ASR |
+| `XAI_API_KEY`       | Voice tutor (Grok) **+ "Say it" speech-to-text** | <https://console.x.ai/> |
 
 With a key set, the matching tutor switches from stub to live automatically —
 no code changes. The "Demo mode" badge disappears once a provider is live.
@@ -43,16 +42,18 @@ no code changes. The "Demo mode" badge disappears once a provider is live.
 
 iOS browsers don't expose the Web Speech recognition API, so the "Say it"
 buttons record audio and POST it to `/api/transcribe` for cloud transcription.
-This is **provider-agnostic** — it targets any OpenAI-compatible
-`/audio/transcriptions` endpoint:
 
-| Variable       | Default                      | Notes                          |
-| -------------- | ---------------------------- | ------------------------------ |
-| `STT_API_KEY`  | —                            | Required to enable cloud STT   |
-| `STT_BASE_URL` | `https://api.openai.com/v1`  | Point at any compatible API    |
-| `STT_MODEL`    | `whisper-1`                  | e.g. `whisper-1`               |
+**By default this reuses your `XAI_API_KEY`** via xAI's Grok Voice STT endpoint
+(`https://api.x.ai/v1/stt`) — no extra key needed. To use a different,
+OpenAI-compatible provider instead, set `STT_API_KEY` (which takes precedence):
 
-Without `STT_API_KEY`, the "Say it" flow falls back to **typed-romaji** entry
+| Variable       | Default                      | Notes                              |
+| -------------- | ---------------------------- | ---------------------------------- |
+| `STT_API_KEY`  | —                            | Opt into an OpenAI-compatible ASR  |
+| `STT_BASE_URL` | `https://api.openai.com/v1`  | Used only with `STT_API_KEY`       |
+| `STT_MODEL`    | `whisper-1`                  | Used only with `STT_API_KEY`       |
+
+With no STT key at all, the "Say it" flow falls back to **typed-romaji** entry
 (say it aloud, then type what you said) so speaking practice still works.
 Desktop Chrome and Android keep using the browser's free, instant recognition.
 
