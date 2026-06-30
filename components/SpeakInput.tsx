@@ -33,6 +33,7 @@ export default function SpeakInput({
   const [showTyped, setShowTyped] = useState(false);
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [diag, setDiag] = useState<string | null>(null);
   const recorderRef = useRef<Recorder | null>(null);
 
   useEffect(() => {
@@ -84,11 +85,14 @@ export default function SpeakInput({
       const data = await res.json();
       if (data?.stubbed || !data?.transcript) {
         // No cloud key (or empty) — fall back to typed-romaji practice.
+        setDiag(describeDiag(data, blob));
         setShowTyped(true);
       } else {
+        setDiag(null);
         onTranscript(data.transcript as string);
       }
     } catch {
+      setDiag("network error reaching transcription");
       setShowTyped(true);
     } finally {
       setStatus("idle");
@@ -100,6 +104,26 @@ export default function SpeakInput({
     if (!t) return;
     setTyped("");
     onTranscript(t);
+  }
+
+  // Short, human-readable reason the cloud transcription didn't return text.
+  function describeDiag(
+    data: { reason?: string; status?: number; provider?: string },
+    blob: Blob
+  ): string {
+    const size = `${Math.round(blob.size / 1024)}KB ${blob.type || "?"}`;
+    switch (data?.reason) {
+      case "no-key":
+        return "no STT key on the server (set XAI_API_KEY and redeploy)";
+      case "error":
+        return `STT ${data.provider ?? ""} HTTP ${data.status} (${size})`;
+      case "empty":
+        return `STT heard nothing (${size})`;
+      case "exception":
+        return `STT request failed (${size})`;
+      default:
+        return `fell back (${size})`;
+    }
   }
 
   function handleMic() {
@@ -142,6 +166,7 @@ export default function SpeakInput({
       )}
 
       {error && <p className="text-xs text-heart">{error}</p>}
+      {diag && <p className="text-[11px] text-muted">⚠️ {diag}</p>}
 
       {showTyped && (
         <div className="w-full max-w-xs">

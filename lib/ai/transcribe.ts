@@ -13,6 +13,10 @@ import "server-only";
 export interface Transcription {
   transcript: string;
   stubbed: boolean;
+  // Diagnostics so a failed call can be told apart from "no key configured".
+  reason?: "no-key" | "ok" | "empty" | "error" | "exception";
+  status?: number; // upstream HTTP status on error
+  provider?: "xai" | "openai";
 }
 
 type SttConfig =
@@ -46,7 +50,7 @@ export async function transcribeAudio(
   language = "ja"
 ): Promise<Transcription> {
   const cfg = sttConfig();
-  if (!cfg) return { transcript: "", stubbed: true };
+  if (!cfg) return { transcript: "", stubbed: true, reason: "no-key" };
 
   try {
     const form = new FormData();
@@ -67,13 +71,32 @@ export async function transcribeAudio(
       body: form,
     });
 
-    if (!res.ok) throw new Error(`STT responded ${res.status}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error(
+        `STT (${cfg.mode}) responded ${res.status} for ${audio.type} ${audio.size}B:`,
+        body.slice(0, 500)
+      );
+      return {
+        transcript: "",
+        stubbed: true,
+        reason: "error",
+        status: res.status,
+        provider: cfg.mode,
+      };
+    }
+
     const data = await res.json();
     const transcript: string = typeof data?.text === "string" ? data.text : "";
-    return { transcript, stubbed: false };
+    return {
+      transcript,
+      stubbed: false,
+      reason: transcript ? "ok" : "empty",
+      provider: cfg.mode,
+    };
   } catch (err) {
-    console.error("Transcription failed, falling back to stub:", err);
-    return { transcript: "", stubbed: true };
+    console.error("Transcription request threw, falling back to stub:", err);
+    return { transcript: "", stubbed: true, reason: "exception", provider: cfg.mode };
   }
 }
 
