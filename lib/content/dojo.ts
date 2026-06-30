@@ -1,63 +1,116 @@
 import type { Exercise, Lesson, SkillCategory } from "@/lib/types";
 import { getLesson } from "@/lib/content/curriculum";
 
-// Dojo drills — standalone, replayable practice not tied to lesson progression.
-// They reuse the Lesson shape so LessonPlayer can render them in freePlay mode.
-// Each drill tags a `skill` so the Rank tab attributes the practice correctly.
-export const dojoDrills: Lesson[] = [
+// Dojo drills. Endless kinds (trace/category) render their own components;
+// fixed kinds carry `exercises` and run through LessonPlayer (mode "drill").
+// Each drill unlocks once the lesson that introduces its content is completed.
+export type DrillKind =
+  | "trace"
+  | "category"
+  | "match"
+  | "listen"
+  | "punctuation";
+
+export interface DojoDrill {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  skill: SkillCategory;
+  kind: DrillKind;
+  unlockAfter: string; // lessonId that must be completed
+  exercises?: Exercise[]; // present for fixed kinds
+}
+
+export const dojoDrills: DojoDrill[] = [
   {
-    id: "drill-kana-sort",
-    title: "Vowel & Kana Sorting",
-    subtitle: "Park kana into their rows",
+    id: "trace",
+    title: "Kana Trace",
+    subtitle: "Draw the kana — auto-graded",
+    icon: "✍️",
+    skill: "writing",
+    kind: "trace",
+    unlockAfter: "u1-vowels",
+  },
+  {
+    id: "category",
+    title: "Category Fill",
+    subtitle: "Sort kana & words into groups",
     icon: "🗂️",
     skill: "writing",
-    xp: 0,
+    kind: "category",
+    unlockAfter: "u1-ka-row", // need 2+ groups to sort
+  },
+  {
+    id: "match",
+    title: "Quick Match Pairs",
+    subtitle: "Kana ↔ sound",
+    icon: "⚡",
+    skill: "listening",
+    kind: "match",
+    unlockAfter: "u1-vowels",
     exercises: [
       {
-        type: "category-sort",
-        prompt: "Sort each kana into its row",
-        categories: ["Vowels", "K-row", "S-row"],
-        items: [
-          { label: "あ", romaji: "a", category: "Vowels" },
-          { label: "え", romaji: "e", category: "Vowels" },
-          { label: "か", romaji: "ka", category: "K-row" },
-          { label: "こ", romaji: "ko", category: "K-row" },
-          { label: "さ", romaji: "sa", category: "S-row" },
-          { label: "す", romaji: "su", category: "S-row" },
+        type: "match-pairs",
+        prompt: "Match the kana to its sound",
+        pairs: [
+          { left: "あ", right: "a" },
+          { left: "か", right: "ka" },
+          { left: "さ", right: "sa" },
+          { left: "た", right: "ta" },
+        ],
+      },
+      {
+        type: "match-pairs",
+        prompt: "Match the word to its meaning",
+        pairs: [
+          { left: "りんご", right: "apple" },
+          { left: "くるま", right: "car" },
+          { left: "ほん", right: "book" },
         ],
       },
     ],
   },
   {
-    id: "drill-word-categorise",
-    title: "Word Categorising",
-    subtitle: "Food, people & objects",
-    icon: "🍙",
-    skill: "writing",
-    xp: 0,
+    id: "listen",
+    title: "Listen & Repeat",
+    subtitle: "Hear it, then say it",
+    icon: "👂",
+    skill: "speaking",
+    kind: "listen",
+    unlockAfter: "u2-greetings-core",
     exercises: [
       {
-        type: "category-sort",
-        prompt: "Park each word into the right group",
-        categories: ["たべもの (food)", "ひと (people)", "もの (objects)"],
-        items: [
-          { label: "ごはん", romaji: "rice", category: "たべもの (food)" },
-          { label: "りんご", romaji: "apple", category: "たべもの (food)" },
-          { label: "せんせい", romaji: "teacher", category: "ひと (people)" },
-          { label: "おかあさん", romaji: "mother", category: "ひと (people)" },
-          { label: "くるま", romaji: "car", category: "もの (objects)" },
-          { label: "ほん", romaji: "book", category: "もの (objects)" },
-        ],
+        type: "listen-choice",
+        prompt: "What did you hear?",
+        audio: "こんにちは",
+        options: ["Hello", "Thank you", "Good evening", "Goodbye"],
+        answer: "Hello",
+      },
+      {
+        type: "speak-phrase",
+        prompt: "Now say it back",
+        display: "こんにちは",
+        romaji: "konnichiwa",
+        accept: ["こんにちわ", "konnichiwa"],
+      },
+      {
+        type: "speak-phrase",
+        prompt: "Say 'Thank you'",
+        display: "ありがとう",
+        romaji: "arigatou",
+        accept: ["ありがとうございます", "arigato", "arigatou"],
       },
     ],
   },
   {
-    id: "drill-punctuation",
+    id: "punctuation",
     title: "Punctuation Dojo",
     subtitle: "Fix the 。 、 ー っ",
     icon: "。",
     skill: "punctuation",
-    xp: 0,
+    kind: "punctuation",
+    unlockAfter: "u2-punctuation",
     exercises: [
       {
         type: "translate-choice",
@@ -85,75 +138,44 @@ export const dojoDrills: Lesson[] = [
       },
     ],
   },
-  {
-    id: "drill-listen-repeat",
-    title: "Listen & Repeat",
-    subtitle: "Hear it, then say it",
-    icon: "👂",
-    skill: "speaking",
-    xp: 0,
-    exercises: [
-      {
-        type: "listen-choice",
-        prompt: "What did you hear?",
-        audio: "こんにちは",
-        options: ["Hello", "Thank you", "Good evening", "Goodbye"],
-        answer: "Hello",
-      },
-      {
-        type: "speak-phrase",
-        prompt: "Now say it back",
-        display: "こんにちは",
-        romaji: "konnichiwa",
-        accept: ["こんにちわ", "konnichiwa"],
-      },
-      {
-        type: "speak-phrase",
-        prompt: "Say 'Thank you'",
-        display: "ありがとう",
-        romaji: "arigatou",
-        accept: ["ありがとうございます", "arigato", "arigatou"],
-      },
-    ],
-  },
-  {
-    id: "drill-quick-match",
-    title: "Quick Match Pairs",
-    subtitle: "Kana ↔ meaning",
-    icon: "⚡",
-    skill: "listening",
-    xp: 0,
-    exercises: [
-      {
-        type: "match-pairs",
-        prompt: "Match the kana to its sound",
-        pairs: [
-          { left: "あ", right: "a" },
-          { left: "か", right: "ka" },
-          { left: "さ", right: "sa" },
-          { left: "た", right: "ta" },
-        ],
-      },
-      {
-        type: "match-pairs",
-        prompt: "Match the word to its meaning",
-        pairs: [
-          { left: "りんご", right: "apple" },
-          { left: "くるま", right: "car" },
-          { left: "ほん", right: "book" },
-        ],
-      },
-    ],
-  },
 ];
 
-export function getDrill(id: string): Lesson | undefined {
+export function getDrillConfig(id: string): DojoDrill | undefined {
   return dojoDrills.find((d) => d.id === id);
 }
 
-// The drill that best trains a given skill (for "Train your weakness").
-export function getDrillForSkill(skill: SkillCategory): Lesson | undefined {
-  return dojoDrills.find((d) => d.skill === skill);
+export function isDrillUnlocked(drill: DojoDrill, completed: string[]): boolean {
+  return completed.includes(drill.unlockAfter);
+}
+
+// Title of the lesson a drill unlocks after (for the "Complete X" hint).
+export function unlockLessonTitle(drill: DojoDrill): string {
+  return getLesson(drill.unlockAfter)?.title ?? "the relevant lesson";
+}
+
+// Lesson-shaped view for the fixed kinds, consumed by LessonPlayer.
+export function getDrill(id: string): Lesson | undefined {
+  const d = getDrillConfig(id);
+  if (!d || !d.exercises) return undefined;
+  return {
+    id: d.id,
+    title: d.title,
+    subtitle: d.subtitle,
+    icon: d.icon,
+    skill: d.skill,
+    xp: 0,
+    exercises: d.exercises,
+  };
+}
+
+// First unlocked drill that trains a given skill (for "Train your weakness").
+export function getDrillForSkill(
+  skill: SkillCategory,
+  completed: string[]
+): DojoDrill | undefined {
+  return dojoDrills.find(
+    (d) => d.skill === skill && isDrillUnlocked(d, completed)
+  );
 }
 
 // Build a synthetic "Review mistakes" drill from flagged revision item ids
@@ -162,8 +184,7 @@ export function buildReviewLesson(itemIds: string[]): Lesson | null {
   const exercises = itemIds
     .map((id) => {
       const [lessonId, idxStr] = id.split("#");
-      const ex = getLesson(lessonId)?.exercises[Number(idxStr)];
-      return ex;
+      return getLesson(lessonId)?.exercises[Number(idxStr)];
     })
     .filter((ex): ex is Exercise => Boolean(ex));
 

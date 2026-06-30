@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Sword, Target, RotateCcw } from "lucide-react";
-import { dojoDrills, getDrillForSkill } from "@/lib/content/dojo";
+import { Sword, Target, RotateCcw, Lock } from "lucide-react";
+import {
+  dojoDrills,
+  getDrillForSkill,
+  isDrillUnlocked,
+  unlockLessonTitle,
+} from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import { SKILL_BADGE } from "@/components/LessonNode";
 import type { SkillCategory } from "@/lib/types";
@@ -19,12 +24,14 @@ export default function DojoPage() {
   const skillStats = useGameStore((s) => s.skillStats);
   const revisionSkills = useGameStore((s) => s.revisionSkills);
   const revisionCount = useGameStore((s) => s.revisionItems.length);
+  const completed = useGameStore((s) => s.completedLessons);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   // Weakness = skill with the most flagged items, else lowest accuracy.
   const weakest = mounted ? weakestSkill(skillStats, revisionSkills) : null;
-  const weaknessDrill = weakest ? getDrillForSkill(weakest) : null;
+  const weaknessDrill =
+    mounted && weakest ? getDrillForSkill(weakest, completed) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -77,22 +84,43 @@ export default function DojoPage() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {dojoDrills.map((drill) => (
-          <Link
-            key={drill.id}
-            href={`/dojo/${drill.id}`}
-            className="card flex items-center gap-3 p-4 transition hover:border-sky"
-          >
-            <span className="text-3xl">{drill.icon}</span>
-            <div>
-              <div className="font-extrabold text-ink">{drill.title}</div>
-              <div className="text-sm text-muted">{drill.subtitle}</div>
-              <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-muted">
-                {SKILL_BADGE[drill.skill].icon} {SKILL_BADGE[drill.skill].label}
+        {dojoDrills.map((drill) => {
+          const unlocked = !mounted || isDrillUnlocked(drill, completed);
+          if (!unlocked) {
+            return (
+              <div
+                key={drill.id}
+                className="card flex items-center gap-3 p-4 opacity-60"
+              >
+                <span className="text-3xl grayscale">{drill.icon}</span>
+                <div>
+                  <div className="flex items-center gap-1 font-extrabold text-ink">
+                    <Lock className="h-3.5 w-3.5 text-muted" /> {drill.title}
+                  </div>
+                  <div className="text-sm text-muted">
+                    Complete “{unlockLessonTitle(drill)}” to unlock
+                  </div>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            );
+          }
+          return (
+            <Link
+              key={drill.id}
+              href={`/dojo/${drill.id}`}
+              className="card flex items-center gap-3 p-4 transition hover:border-sky"
+            >
+              <span className="text-3xl">{drill.icon}</span>
+              <div>
+                <div className="font-extrabold text-ink">{drill.title}</div>
+                <div className="text-sm text-muted">{drill.subtitle}</div>
+                <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-muted">
+                  {SKILL_BADGE[drill.skill].icon} {SKILL_BADGE[drill.skill].label}
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
