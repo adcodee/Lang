@@ -20,10 +20,16 @@ export default function TraceDrill() {
   const pool = useMemo(() => learnedKana(completed), [completed]);
   const session = useDrillSession("writing");
 
-  const [target, setTarget] = useState<Kana | null>(() => pick(pool, null));
+  const [target, setTarget] = useState<Kana | null>(null);
   const [checked, setChecked] = useState<DrawScore | null>(null);
   const [done, setDone] = useState(false);
   const [hasInk, setHasInk] = useState(false);
+
+  // Seed the first card once the pool is available (survives store hydration,
+  // where `completedLessons` is briefly empty on first render).
+  useEffect(() => {
+    if (!target && pool.length > 0) setTarget(pick(pool, null));
+  }, [pool, target]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const strokes = useRef<Point[][]>([]);
@@ -47,13 +53,15 @@ export default function TraceDrill() {
     }
   }, [target]);
 
-  if (!target) {
+  if (pool.length === 0) {
     return (
       <div className="card p-8 text-center">
         <p className="font-bold">Learn some kana first, then come back to trace.</p>
       </div>
     );
   }
+
+  if (!target) return null; // seeding the first card after hydration
 
   if (done) {
     return (

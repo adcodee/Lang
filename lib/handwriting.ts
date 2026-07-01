@@ -22,20 +22,39 @@ const refCache = new Map<string, Point[][]>();
 export function referenceStrokes(char: string): Point[][] {
   const cached = refCache.get(char);
   if (cached) return cached;
+  if (typeof document === "undefined") return [];
 
   const paths = strokeData[char] ?? [];
   const svgNS = "http://www.w3.org/2000/svg";
-  const strokes = paths.map((d) => {
-    const el = document.createElementNS(svgNS, "path");
-    el.setAttribute("d", d);
-    const len = el.getTotalLength();
-    const pts: Point[] = [];
-    for (let i = 0; i < SAMPLES; i++) {
-      const p = el.getPointAtLength((len * i) / (SAMPLES - 1));
-      pts.push({ x: p.x, y: p.y });
-    }
-    return pts;
-  });
+
+  // The path must be attached to the document for getTotalLength/
+  // getPointAtLength to be reliable — detached measuring throws/returns 0 on
+  // WebKit (iOS). Use a hidden offscreen <svg>.
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", "0 0 109 109");
+  svg.style.position = "absolute";
+  svg.style.width = "0";
+  svg.style.height = "0";
+  svg.style.left = "-9999px";
+  document.body.appendChild(svg);
+
+  let strokes: Point[][] = [];
+  try {
+    strokes = paths.map((d) => {
+      const el = document.createElementNS(svgNS, "path");
+      el.setAttribute("d", d);
+      svg.appendChild(el);
+      const len = el.getTotalLength();
+      const pts: Point[] = [];
+      for (let i = 0; i < SAMPLES; i++) {
+        const p = el.getPointAtLength((len * i) / (SAMPLES - 1));
+        pts.push({ x: p.x, y: p.y });
+      }
+      return pts;
+    });
+  } finally {
+    document.body.removeChild(svg);
+  }
 
   refCache.set(char, strokes);
   return strokes;
