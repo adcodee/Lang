@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import TeachCard from "@/components/teach/TeachCard";
 import PhraseCard from "@/components/teach/PhraseCard";
+import RecallRound from "@/components/teach/RecallRound";
 import type { TeachCard as TeachCardData } from "@/lib/types";
 
 const TRACE_XP = 2; // small writing credit per character traced
@@ -25,10 +26,13 @@ export default function TeachPhase({
   const recordAnswer = useGameStore((s) => s.recordAnswer);
   const addXp = useGameStore((s) => s.addXp);
 
+  const [phase, setPhase] = useState<"learn" | "recall">("learn");
   const [index, setIndex] = useState(0);
   const tracedCredited = useRef<Set<number>>(new Set());
   const card = cards[index];
   const isLast = index === cards.length - 1;
+  // A recall warm-up needs at least 2 cards for distractors.
+  const hasRecall = cards.length >= 2;
 
   function handleTraced() {
     if (tracedCredited.current.has(index)) return;
@@ -45,13 +49,43 @@ export default function TeachPhase({
     if (correct) addXp(2);
   }
 
+  // The recall warm-up is a light reinforcement — small XP on first-correct.
+  function handleRecall(correct: boolean) {
+    if (correct) addXp(2);
+  }
+
   function next() {
     if (isLast) {
       addXp(TEACH_BONUS);
-      onReady();
+      if (hasRecall) setPhase("recall");
+      else onReady();
     } else {
       setIndex((i) => i + 1);
     }
+  }
+
+  if (phase === "recall") {
+    return (
+      <div>
+        <div className="mb-6 flex items-center gap-3">
+          <button
+            onClick={() => router.push("/")}
+            aria-label="Quit"
+            className="text-muted hover:text-ink"
+          >
+            <X />
+          </button>
+          <div className="flex-1" />
+          <button
+            onClick={onReady}
+            className="text-sm font-bold text-muted hover:text-ink"
+          >
+            Skip
+          </button>
+        </div>
+        <RecallRound cards={cards} onDone={onReady} onAnswer={handleRecall} />
+      </div>
+    );
   }
 
   return (
@@ -101,7 +135,7 @@ export default function TeachPhase({
       )}
 
       <button onClick={next} className="btn-brand mt-6 w-full">
-        {isLast ? "Ready to practice?" : "Next"}
+        {isLast ? (hasRecall ? "Quick recall →" : "Ready to practice?") : "Next"}
       </button>
     </div>
   );
