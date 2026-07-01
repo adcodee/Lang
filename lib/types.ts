@@ -99,14 +99,36 @@ export interface KanaTeachCard {
   example: { word: string; romaji: string; meaning: string }; // あめ / ame / rain
 }
 
+// One segment of a phrase's interactive breakdown.
+export interface PhrasePart {
+  kana: string; // a segment of the term, e.g. "は" or "こ"
+  reading: string; // in-context sound, e.g. "wa"
+  base?: string; // literal sound when it differs (triggers the "why" callout)
+  note?: string; // e.g. "sentence-ending は is said 'wa'"
+}
+
+// A quick active-recall question shown in the breakdown.
+export interface PhraseCheck {
+  prompt: string;
+  options: string[];
+  answer: string;
+  note?: string; // explanation shown after answering
+}
+
 // A word/phrase intro (greetings, nouns, adjectives) — hear it, read it, say
-// it. No stroke order/tracing (those are kana-only).
+// it, and (optionally) break it down interactively. No stroke order for the
+// whole word; a single tricky kana can offer a trace hook.
 export interface PhraseTeachCard {
   kind: "phrase";
   term: string; // こんにちは
   reading: string; // konnichiwa
   meaning: string; // Hello (daytime)
   note?: string; // short usage tip
+  parts?: PhrasePart[]; // interactive kana-by-kana breakdown
+  check?: PhraseCheck; // 1-tap active recall
+  context?: string; // when/where you'd say it
+  polite?: { term: string; reading: string }; // casual → polite variant
+  trace?: string; // one kana to trace (only if strokeData has it)
 }
 
 export type TeachCard = KanaTeachCard | PhraseTeachCard;

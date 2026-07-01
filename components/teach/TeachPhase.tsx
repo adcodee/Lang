@@ -40,6 +40,11 @@ export default function TeachPhase({
     recordAnswer("speaking", correct, correct ? 2 : 0);
   }
 
+  // The breakdown's recall check is a light warm-up — small XP, no skill skew.
+  function handleCheck(correct: boolean) {
+    if (correct) addXp(2);
+  }
+
   function next() {
     if (isLast) {
       addXp(TEACH_BONUS);
@@ -83,6 +88,8 @@ export default function TeachPhase({
           key={`p-${index}`}
           card={card}
           onSpeakAttempt={handleSpeakAttempt}
+          onTraced={handleTraced}
+          onCheck={handleCheck}
         />
       ) : (
         <TeachCard
