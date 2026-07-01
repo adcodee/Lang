@@ -68,7 +68,7 @@ export default function PhraseCard({
       <section className="flex flex-col items-center gap-3">
         <button
           onClick={() => speak(card.term)}
-          className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#1a8fc7]"
+          className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#244a40]"
         >
           <Volume2 className="h-4 w-4" /> Hear it
         </button>

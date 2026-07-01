@@ -32,7 +32,7 @@ export default function TraceCanvas({
       ctx.lineWidth = 6;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.strokeStyle = "#c1352b"; // torii vermilion ink
+      ctx.strokeStyle = "#b0524a"; // torii vermilion ink
     }
   }, [size]);
 

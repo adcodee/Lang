@@ -37,7 +37,7 @@ export default function TeachCard({
         <div className="mt-3 flex flex-col items-center gap-3">
           <button
             onClick={() => speak(card.char)}
-            className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#1a8fc7]"
+            className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#244a40]"
           >
             <Volume2 className="h-4 w-4" /> Hear it
           </button>
@@ -93,7 +93,7 @@ export default function TeachCard({
         </div>
         <button
           onClick={() => speak(card.example.word)}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-sky text-white shadow-[0_2px_0_#1a8fc7]"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-sky text-white shadow-[0_2px_0_#244a40]"
           aria-label="Hear the example word"
         >
           <Volume2 className="h-5 w-5" />

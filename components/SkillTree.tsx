@@ -101,7 +101,7 @@ export default function SkillTree() {
               onClick={() => setActiveLevelId(lvl.id)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-extrabold transition ${
                 isActive
-                  ? "bg-brand text-white shadow-[0_3px_0_#46a302]"
+                  ? "bg-brand text-white shadow-[0_3px_0_#3a5a34]"
                   : "bg-white text-muted shadow-card hover:text-ink"
               }`}
             >

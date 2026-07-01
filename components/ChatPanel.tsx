@@ -98,7 +98,7 @@ export default function ChatPanel({ starter }: { starter?: ChatMessage }) {
         <button
           onClick={send}
           disabled={loading || !input.trim()}
-          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky text-white shadow-[0_3px_0_#1a8fc7] disabled:opacity-50"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky text-white shadow-[0_3px_0_#244a40] disabled:opacity-50"
           aria-label="Send"
         >
           <Send className="h-5 w-5" />

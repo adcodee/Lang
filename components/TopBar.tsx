@@ -30,8 +30,8 @@ export default function TopBar() {
         </Link>
 
         <div className="flex items-center gap-4 text-sm font-bold">
-          <Stat icon={<Star className="h-5 w-5 text-gold" fill="#ffc800" />} value={mounted ? xp : 0} label="XP" />
-          <Stat icon={<Flame className="h-5 w-5 text-orange-500" fill="#f97316" />} value={mounted ? streak : 0} label="day streak" />
+          <Stat icon={<Star className="h-5 w-5 text-gold" fill="#c9a962" />} value={mounted ? xp : 0} label="XP" />
+          <Stat icon={<Flame className="h-5 w-5 text-orange-500" fill="#c2703a" />} value={mounted ? streak : 0} label="day streak" />
         </div>
       </div>
     </header>

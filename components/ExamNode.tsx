@@ -19,10 +19,10 @@ export default function ExamNode({
 
   const ring =
     status === "passed"
-      ? "bg-torii shadow-[0_5px_0_#8f2820]"
+      ? "bg-torii shadow-[0_5px_0_#7a3a34]"
       : status === "available"
       ? "bg-sumi shadow-[0_5px_0_#0c0f15]"
-      : "bg-gray-200 shadow-[0_5px_0_#cfcfcf]";
+      : "bg-gray-200 shadow-[0_5px_0_#d9d2c6]";
 
   const inner = (
     <motion.div

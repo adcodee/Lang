@@ -111,7 +111,7 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
             <Heart
               key={i}
               className={i < hearts ? "text-heart" : "text-gray-200"}
-              fill={i < hearts ? "#ff4b4b" : "#e5e7eb"}
+              fill={i < hearts ? "#c15a5a" : "#e5e7eb"}
               strokeWidth={0}
             />
           ))}

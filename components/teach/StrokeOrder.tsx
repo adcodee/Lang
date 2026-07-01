@@ -62,7 +62,7 @@ export default function StrokeOrder({
       >
         <svg viewBox={STROKE_VIEWBOX} width={size} height={size}>
           {/* Faint full character as a guide. */}
-          <g stroke="#e5e5e5" fill="none" strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round">
+          <g stroke="#e6e0d6" fill="none" strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round">
             {strokes.map((d, i) => (
               <path key={`g-${i}`} d={d} />
             ))}

@@ -23,7 +23,7 @@ export default function FeedbackBanner({
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={`fixed inset-x-0 bottom-0 z-30 border-t-2 shadow-[0_-4px_12px_rgba(0,0,0,0.06)] ${
-        correct ? "border-brand bg-[#eefbe3]" : "border-heart bg-[#ffecec]"
+        correct ? "border-brand bg-[#eaf1e6]" : "border-heart bg-[#f6eaea]"
       }`}
     >
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">

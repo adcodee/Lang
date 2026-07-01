@@ -218,7 +218,7 @@ export default function VoiceChat() {
             </div>
             <button
               onClick={() => stopHandsFree()}
-              className="flex items-center gap-1.5 rounded-full bg-heart px-4 py-2 font-bold text-white shadow-[0_2px_0_#c93a3a]"
+              className="flex items-center gap-1.5 rounded-full bg-heart px-4 py-2 font-bold text-white shadow-[0_2px_0_#a04a4a]"
             >
               <Square className="h-4 w-4" /> Stop conversation
             </button>
@@ -227,7 +227,7 @@ export default function VoiceChat() {
           <div className="flex flex-col items-center gap-3">
             <button
               onClick={startHandsFree}
-              className="flex items-center gap-2 rounded-full bg-brand px-5 py-2 font-bold text-white shadow-[0_3px_0_#46a302]"
+              className="flex items-center gap-2 rounded-full bg-brand px-5 py-2 font-bold text-white shadow-[0_3px_0_#3a5a34]"
             >
               <Radio className="h-4 w-4" /> Start hands-free conversation
             </button>

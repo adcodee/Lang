@@ -153,7 +153,7 @@ export default function RecallRound({
         {q.mode === "audio-to-meaning" ? (
           <button
             onClick={() => speak(q.audio!)}
-            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-sky text-white shadow-[0_4px_0_#1a8fc7]"
+            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-sky text-white shadow-[0_4px_0_#244a40]"
             aria-label="Play audio"
           >
             <Volume2 className="h-7 w-7" />

@@ -141,7 +141,7 @@ export default function SpeakInput({
         <button
           onClick={handleMic}
           disabled={busy}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-2 font-bold text-white shadow-[0_2px_0_#46a302] disabled:opacity-60 ${
+          className={`flex items-center gap-1.5 rounded-full px-4 py-2 font-bold text-white shadow-[0_2px_0_#3a5a34] disabled:opacity-60 ${
             active ? "animate-pulse bg-torii" : "bg-brand"
           }`}
         >

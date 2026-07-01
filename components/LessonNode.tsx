@@ -38,10 +38,10 @@ export default function LessonNode({
 
   const ring =
     status === "completed"
-      ? "bg-gold shadow-[0_5px_0_#caa000]"
+      ? "bg-gold shadow-[0_5px_0_#a98b45]"
       : status === "current"
-      ? "bg-brand shadow-[0_5px_0_#46a302]"
-      : "bg-gray-200 shadow-[0_5px_0_#cfcfcf]";
+      ? "bg-brand shadow-[0_5px_0_#3a5a34]"
+      : "bg-gray-200 shadow-[0_5px_0_#d9d2c6]";
 
   const inner = (
     <motion.div
@@ -99,7 +99,7 @@ export default function LessonNode({
         </div>
         {variant !== "learn" && (
           <div className="flex items-center justify-center gap-1 text-xs text-muted">
-            <Star className="h-3 w-3 text-gold" fill="#ffc800" /> {lesson.xp} XP
+            <Star className="h-3 w-3 text-gold" fill="#c9a962" /> {lesson.xp} XP
           </div>
         )}
       </div>

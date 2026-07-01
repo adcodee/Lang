@@ -9,22 +9,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Tokens read CSS custom properties (globals.css) so the whole palette
+        // is themeable and opacity modifiers (bg-brand/10) still work.
         brand: {
-          DEFAULT: "#58cc02",
-          dark: "#46a302",
-          light: "#89e219",
+          DEFAULT: "rgb(var(--c-brand) / <alpha-value>)",
+          dark: "rgb(var(--c-brand-dark) / <alpha-value>)",
+          light: "rgb(var(--c-brand-light) / <alpha-value>)",
         },
-        ink: "#3c3c3c",
-        muted: "#777777",
-        sky: "#1cb0f6",
-        gold: "#ffc800",
-        heart: "#ff4b4b",
-        surface: "#ffffff",
-        canvas: "#f7f7f7",
+        ink: "rgb(var(--c-ink) / <alpha-value>)",
+        muted: "rgb(var(--c-muted) / <alpha-value>)",
+        sky: "rgb(var(--c-sky) / <alpha-value>)",
+        gold: "rgb(var(--c-gold) / <alpha-value>)",
+        heart: "rgb(var(--c-heart) / <alpha-value>)",
+        surface: "rgb(var(--c-surface) / <alpha-value>)",
+        canvas: "rgb(var(--c-canvas) / <alpha-value>)",
         // Japanese "dojo" accents.
-        sumi: "#1f2530", // ink black-blue
-        washi: "#f4ede0", // paper
-        torii: "#c1352b", // vermilion gate red
+        sumi: "rgb(var(--c-sumi) / <alpha-value>)",
+        washi: "rgb(var(--c-washi) / <alpha-value>)",
+        torii: "rgb(var(--c-torii) / <alpha-value>)",
+        wood: "rgb(var(--c-wood) / <alpha-value>)",
       },
       fontFamily: {
         jp: ["var(--font-noto-jp)", "ui-rounded", "Nunito", "sans-serif"],

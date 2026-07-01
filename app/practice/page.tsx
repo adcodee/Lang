@@ -88,7 +88,7 @@ export default function PracticePage() {
             onClick={() => setScenarioId(s.id)}
             className={`rounded-full px-3 py-1.5 text-sm font-bold transition ${
               scenarioId === s.id
-                ? "bg-brand text-white shadow-[0_2px_0_#46a302]"
+                ? "bg-brand text-white shadow-[0_2px_0_#3a5a34]"
                 : "bg-white text-muted shadow-card hover:text-ink"
             }`}
           >

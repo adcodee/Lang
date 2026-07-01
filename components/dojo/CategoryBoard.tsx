@@ -48,7 +48,7 @@ export default function CategoryBoard({
 
   function tileClass(it: BoardItem, inBucket: boolean): string {
     const base =
-      "rounded-xl border-2 px-3 py-2 text-center font-semibold shadow-[0_2px_0_#e5e5e5]";
+      "rounded-xl border-2 px-3 py-2 text-center font-semibold shadow-[0_2px_0_#e6e0d6]";
     if (!checked)
       return `${base} ${
         selected === it.label && !inBucket

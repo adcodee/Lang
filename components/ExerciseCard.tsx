@@ -260,7 +260,7 @@ function BuildSentence({
             key={`${w}-${pos}`}
             disabled={checked}
             onClick={() => removeTile(pos)}
-            className="rounded-xl border-2 border-gray-200 bg-white px-3 py-2 font-semibold shadow-[0_2px_0_#e5e5e5]"
+            className="rounded-xl border-2 border-gray-200 bg-white px-3 py-2 font-semibold shadow-[0_2px_0_#e6e0d6]"
           >
             {w}
           </button>
@@ -272,7 +272,7 @@ function BuildSentence({
             key={`${w}-${i}`}
             disabled={checked || used.has(i)}
             onClick={() => addTile(i)}
-            className={`rounded-xl border-2 border-gray-200 bg-white px-3 py-2 font-semibold shadow-[0_2px_0_#e5e5e5] ${
+            className={`rounded-xl border-2 border-gray-200 bg-white px-3 py-2 font-semibold shadow-[0_2px_0_#e6e0d6] ${
               used.has(i) ? "opacity-30" : ""
             }`}
           >
@@ -325,7 +325,7 @@ function ListenChoice({
       <button
         type="button"
         onClick={play}
-        className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-sky text-white shadow-[0_5px_0_#1899d6] transition active:translate-y-0.5 active:shadow-[0_2px_0_#1899d6]"
+        className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-sky text-white shadow-[0_5px_0_#244a40] transition active:translate-y-0.5 active:shadow-[0_2px_0_#244a40]"
         aria-label="Play audio"
       >
         <Volume2 className="h-10 w-10" />
@@ -444,7 +444,7 @@ function CategorySort({
 
   function tileClass(label: string, inBucket: boolean): string {
     const base =
-      "rounded-xl border-2 px-3 py-2 text-center font-semibold shadow-[0_2px_0_#e5e5e5]";
+      "rounded-xl border-2 px-3 py-2 text-center font-semibold shadow-[0_2px_0_#e6e0d6]";
     if (!checked)
       return `${base} ${
         selected === label && !inBucket
