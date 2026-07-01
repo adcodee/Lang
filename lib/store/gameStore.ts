@@ -33,6 +33,8 @@ interface GameStore extends GameState {
   loseHeart: () => void;
   refillHearts: () => void;
   completeLesson: (lessonId: string, bonusXp: number) => void;
+  markLearned: (lessonId: string) => void;
+  revokeLearned: (lessonId: string) => void;
   passExam: (unitId: string, bonusXp: number) => void;
   registerActivity: () => void;
   reset: () => void;
@@ -48,6 +50,7 @@ const initialState: GameState = {
   lastActiveDay: null,
   hearts: MAX_HEARTS,
   completedLessons: [],
+  learnedLessons: [],
   skillStats: emptySkillStats(),
   revisionItems: [],
   revisionSkills: emptyRevisionSkills(),
@@ -123,6 +126,20 @@ export const useGameStore = create<GameStore>()(
             : [...s.completedLessons, lessonId],
         })),
 
+      // Mark a lesson's Learn part done (unlocks its Test part).
+      markLearned: (lessonId) =>
+        set((s) => ({
+          learnedLessons: s.learnedLessons.includes(lessonId)
+            ? s.learnedLessons
+            : [...s.learnedLessons, lessonId],
+        })),
+
+      // Failing the Test re-locks it: the Learn part must be redone.
+      revokeLearned: (lessonId) =>
+        set((s) => ({
+          learnedLessons: s.learnedLessons.filter((id) => id !== lessonId),
+        })),
+
       // Pass a unit's exam: award bonus XP and record the belt (opens the gate).
       passExam: (unitId, bonusXp) =>
         set((s) => ({
@@ -148,6 +165,7 @@ export const useGameStore = create<GameStore>()(
         lastActiveDay: s.lastActiveDay,
         hearts: s.hearts,
         completedLessons: s.completedLessons,
+        learnedLessons: s.learnedLessons,
         skillStats: s.skillStats,
         revisionItems: s.revisionItems,
         revisionSkills: s.revisionSkills,

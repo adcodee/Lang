@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Lock } from "lucide-react";
 import { levels } from "@/lib/content/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
-import LessonNode, { NodeStatus } from "@/components/LessonNode";
+import LessonNode, { NodeStatus, NodeVariant } from "@/components/LessonNode";
 import ExamNode, { ExamStatus } from "@/components/ExamNode";
-import type { Unit } from "@/lib/types";
+import type { Lesson, Unit } from "@/lib/types";
 
 // Gentle zig-zag pattern for the path of nodes within a unit.
 const OFFSETS = [0, 1, 0, -1, 0, 1, 0, -1];
@@ -19,10 +19,16 @@ export default function SkillTree() {
   const [activeLevelId, setActiveLevelId] = useState(levels[0].id);
   useEffect(() => setMounted(true), []);
 
+  const learned = useGameStore((s) => s.learnedLessons);
+
   // Before hydration, treat nothing as completed — matches initial store.
   const completedSet = useMemo(
     () => new Set(mounted ? completed : []),
     [mounted, completed]
+  );
+  const learnedSet = useMemo(
+    () => new Set(mounted ? learned : []),
+    [mounted, learned]
   );
   const examsPassedSet = useMemo(
     () => new Set(mounted ? examsPassed : []),
@@ -32,6 +38,11 @@ export default function SkillTree() {
   const activeLevel = levels.find((l) => l.id === activeLevelId) ?? levels[0];
   const units = activeLevel.units;
 
+  // A lesson expands to Learn + Test nodes when it teaches; else just a Test.
+  const hasTeach = (l: Lesson) => Boolean(l.teach?.length);
+  const nodesOf = (l: Lesson): NodeVariant[] =>
+    hasTeach(l) ? ["learn", "test"] : ["single"];
+
   // A unit is unlocked if it's first, or the previous unit's exam is passed.
   function unitUnlocked(index: number): boolean {
     return index === 0 || examsPassedSet.has(units[index - 1].id);
@@ -40,25 +51,36 @@ export default function SkillTree() {
     return unit.lessons.every((l) => completedSet.has(l.id));
   }
 
-  // The single "current" lesson: first incomplete lesson in the first unlocked
-  // unit that still has lesson work. If a unit's lessons are all done but its
-  // exam isn't passed, the exam is the frontier (no lesson is current).
-  const currentId = useMemo(() => {
+  // The single "current" node key (`${id}:learn|test`): the first unfinished
+  // node — Learn before its Test — in the first unlocked, incomplete unit.
+  const currentKey = useMemo(() => {
     for (let i = 0; i < units.length; i++) {
       if (!unitUnlocked(i)) break;
-      const next = units[i].lessons.find((l) => !completedSet.has(l.id));
-      if (next) return next.id;
+      for (const l of units[i].lessons) {
+        if (hasTeach(l) && !learnedSet.has(l.id)) return `${l.id}:learn`;
+        if (!completedSet.has(l.id)) return `${l.id}:test`;
+      }
       if (!examsPassedSet.has(units[i].id)) break; // frontier is the exam
     }
     return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [units, completedSet, examsPassedSet]);
+  }, [units, completedSet, learnedSet, examsPassedSet]);
 
-  function statusFor(unitIndex: number, id: string): NodeStatus {
+  function statusFor(
+    unitIndex: number,
+    lesson: Lesson,
+    variant: NodeVariant
+  ): NodeStatus {
     if (!unitUnlocked(unitIndex)) return "locked";
-    if (completedSet.has(id)) return "completed";
-    if (id === currentId) return "current";
-    return "locked";
+    const key = `${lesson.id}:${variant === "learn" ? "learn" : "test"}`;
+    if (variant === "learn") {
+      if (learnedSet.has(lesson.id)) return "completed";
+      return key === currentKey ? "current" : "locked";
+    }
+    // test / single
+    if (variant === "test" && !learnedSet.has(lesson.id)) return "locked";
+    if (completedSet.has(lesson.id)) return "completed";
+    return key === currentKey ? "current" : "locked";
   }
 
   function examStatusFor(unit: Unit, unitIndex: number): ExamStatus {
@@ -116,14 +138,24 @@ export default function SkillTree() {
                 <div className="text-sm text-muted">{unit.subtitle}</div>
               </div>
               <div className="flex flex-col items-center gap-10">
-                {unit.lessons.map((lesson, i) => (
-                  <LessonNode
-                    key={lesson.id}
-                    lesson={lesson}
-                    status={statusFor(unitIndex, lesson.id)}
-                    offset={OFFSETS[i % OFFSETS.length]}
-                  />
-                ))}
+                {(() => {
+                  let n = 0; // running node index for the zig-zag offset
+                  return unit.lessons.flatMap((lesson) =>
+                    nodesOf(lesson).map((variant) => {
+                      const node = (
+                        <LessonNode
+                          key={`${lesson.id}:${variant}`}
+                          lesson={lesson}
+                          variant={variant}
+                          status={statusFor(unitIndex, lesson, variant)}
+                          offset={OFFSETS[n % OFFSETS.length]}
+                        />
+                      );
+                      n += 1;
+                      return node;
+                    })
+                  );
+                })()}
                 <ExamNode
                   unit={unit}
                   status={examStatusFor(unit, unitIndex)}

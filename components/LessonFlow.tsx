@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   getLesson,
   getUnitForLesson,
@@ -11,37 +12,92 @@ import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TeachPhase from "@/components/teach/TeachPhase";
 
-// Composes the optional Teach phase with the exercise player. Lessons without
-// `teach` content go straight into exercises (unchanged behavior).
+// A teachable lesson is a 2-part lesson: a Learn part (teach + recall) and a
+// Test part (exercises, 80% gate). The Test is locked until Learn is done, and
+// failing it re-locks Learn. Lessons without teach are Test-only.
 export default function LessonFlow({ id }: { id: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const examsPassed = useGameStore((s) => s.examsPassed);
+  const learnedLessons = useGameStore((s) => s.learnedLessons);
+  const markLearned = useGameStore((s) => s.markLearned);
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const lesson = getLesson(id);
   const unit = getUnitForLesson(id);
-  // Guard: opening a lesson whose unit is gated (prior exam unpassed) bounces
-  // back to the map, so the exam can't be bypassed via a direct link.
-  const locked =
+  const hasTeach = Boolean(lesson?.teach?.length);
+  const part: "learn" | "test" = hasTeach
+    ? searchParams.get("part") === "test"
+      ? "test"
+      : "learn"
+    : "test";
+
+  // Guard: gated unit (prior exam unpassed) bounces to the map; a Test opened
+  // before its Learn part bounces to the Learn part.
+  const unitLocked =
     mounted && Boolean(unit) && !isUnitUnlocked(unit!.id, examsPassed);
+  const testLocked =
+    mounted && part === "test" && hasTeach && !learnedLessons.includes(id);
 
   useEffect(() => {
-    if (locked) router.replace("/");
-  }, [locked, router]);
+    if (unitLocked) router.replace("/");
+    else if (testLocked) router.replace(`/lesson/${id}?part=learn`);
+  }, [unitLocked, testLocked, id, router]);
 
-  const hasTeach = Boolean(lesson?.teach?.length);
-  const [phase, setPhase] = useState<"teach" | "practice">(
-    hasTeach ? "teach" : "practice"
-  );
+  const [learnDone, setLearnDone] = useState(false);
 
-  if (locked) return null;
+  if (!lesson || unitLocked || testLocked) return null;
 
-  if (phase === "teach" && lesson?.teach) {
+  // --- Learn part ---
+  if (part === "learn") {
+    if (!learnDone && lesson.teach) {
+      return (
+        <TeachPhase
+          cards={lesson.teach}
+          onReady={() => {
+            markLearned(id);
+            setLearnDone(true);
+          }}
+        />
+      );
+    }
     return (
-      <TeachPhase cards={lesson.teach} onReady={() => setPhase("practice")} />
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="card p-8 text-center"
+      >
+        <div className="text-6xl">📖</div>
+        <h1 className="mt-4 text-2xl font-extrabold text-brand-dark">
+          Learn complete!
+        </h1>
+        <p className="mt-2 text-muted">
+          You&apos;ve unlocked the test for{" "}
+          <span className="font-bold text-ink">{lesson.title}</span>.
+        </p>
+        <div className="mt-6 flex flex-col gap-3">
+          <button
+            className="btn-brand"
+            onClick={() => router.push(`/lesson/${id}?part=test`)}
+          >
+            Start the test →
+          </button>
+          <button className="btn-ghost" onClick={() => router.push("/")}>
+            Back to map
+          </button>
+        </div>
+      </motion.div>
     );
   }
 
-  return <LessonPlayer lessonId={id} mode="lesson" />;
+  // --- Test part ---
+  return (
+    <LessonPlayer
+      lessonId={id}
+      mode="lesson"
+      relearn={hasTeach ? { id } : undefined}
+    />
+  );
 }

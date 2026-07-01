@@ -6,6 +6,7 @@ import { Check, Lock, Star } from "lucide-react";
 import type { Lesson, SkillCategory } from "@/lib/types";
 
 export type NodeStatus = "completed" | "current" | "locked";
+export type NodeVariant = "learn" | "test" | "single";
 
 export const SKILL_BADGE: Record<SkillCategory, { icon: string; label: string }> = {
   speaking: { icon: "🗣️", label: "Speaking" },
@@ -18,12 +19,22 @@ export default function LessonNode({
   lesson,
   status,
   offset,
+  variant = "single",
 }: {
   lesson: Lesson;
   status: NodeStatus;
   offset: number; // -1, 0, 1 — gives the path a gentle zig-zag
+  variant?: NodeVariant;
 }) {
   const locked = status === "locked";
+  const href =
+    variant === "single"
+      ? `/lesson/${lesson.id}`
+      : `/lesson/${lesson.id}?part=${variant}`;
+  const nodeIcon =
+    variant === "learn" ? "📖" : variant === "test" ? "📝" : lesson.icon;
+  const partLabel =
+    variant === "learn" ? "Learn" : variant === "test" ? "Test" : null;
 
   const ring =
     status === "completed"
@@ -45,7 +56,7 @@ export default function LessonNode({
       ) : locked ? (
         <Lock className="h-7 w-7 text-gray-400" />
       ) : (
-        <span>{lesson.icon}</span>
+        <span>{nodeIcon}</span>
       )}
     </motion.div>
   );
@@ -63,19 +74,34 @@ export default function LessonNode({
       {locked ? (
         inner
       ) : (
-        <Link href={`/lesson/${lesson.id}`} aria-label={lesson.title}>
+        <Link href={href} aria-label={`${partLabel ?? ""} ${lesson.title}`.trim()}>
           {inner}
         </Link>
       )}
       <div className="text-center">
-        <div className="text-sm font-extrabold text-ink">{lesson.title}</div>
+        <div className="flex items-center justify-center gap-1 text-sm font-extrabold text-ink">
+          {partLabel && (
+            <span
+              className={`rounded px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${
+                variant === "learn"
+                  ? "bg-sky/15 text-sky"
+                  : "bg-brand/15 text-brand-dark"
+              }`}
+            >
+              {partLabel}
+            </span>
+          )}
+          {lesson.title}
+        </div>
         <div className="mt-0.5 flex items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide text-muted">
           <span>{SKILL_BADGE[lesson.skill].icon}</span>
           {SKILL_BADGE[lesson.skill].label}
         </div>
-        <div className="flex items-center justify-center gap-1 text-xs text-muted">
-          <Star className="h-3 w-3 text-gold" fill="#ffc800" /> {lesson.xp} XP
-        </div>
+        {variant !== "learn" && (
+          <div className="flex items-center justify-center gap-1 text-xs text-muted">
+            <Star className="h-3 w-3 text-gold" fill="#ffc800" /> {lesson.xp} XP
+          </div>
+        )}
       </div>
     </div>
   );

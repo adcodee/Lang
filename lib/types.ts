@@ -182,6 +182,8 @@ export interface GameState {
   lastActiveDay: string | null; // YYYY-MM-DD
   hearts: number;
   completedLessons: string[];
+  // Lessons whose Learn part (teach + recall) is done — gates the Test part.
+  learnedLessons: string[];
   skillStats: SkillStats;
   // Items missed on the first try, kept for revision (id = `${lessonId}#${i}`).
   revisionItems: string[];

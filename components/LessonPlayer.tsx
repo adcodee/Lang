@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -21,10 +21,12 @@ export default function LessonPlayer({
   lessonId,
   lesson: lessonOverride,
   mode = "lesson",
+  relearn,
 }: {
   lessonId?: string;
   lesson?: Lesson; // synthetic lesson (used by the Review drill)
   mode?: PlayerMode;
+  relearn?: { id: string }; // when set, failing re-locks the Learn part
 }) {
   const router = useRouter();
   // Lessons come from the curriculum tree; drills from the drill set; the
@@ -130,6 +132,7 @@ export default function LessonPlayer({
           total={total}
           passed={firstTryCount / total >= PASS_RATE}
           onRetry={restart}
+          relearn={relearn}
         />
       );
     }
@@ -196,6 +199,7 @@ function LessonComplete({
   total,
   passed,
   onRetry,
+  relearn,
 }: {
   lessonId: string;
   xp: number;
@@ -203,8 +207,15 @@ function LessonComplete({
   total: number;
   passed: boolean;
   onRetry: () => void;
+  relearn?: { id: string };
 }) {
   const router = useRouter();
+  const revokeLearned = useGameStore((s) => s.revokeLearned);
+  // A failed gated Test re-locks its Learn part (once, on mount of the fail
+  // screen) so it must be redone before the Test reopens.
+  useEffect(() => {
+    if (!passed && relearn) revokeLearned(relearn.id);
+  }, [passed, relearn, revokeLearned]);
   // Progress within the unit only — crossing into the next unit must go through
   // the unit exam, not straight to the next unit's first lesson.
   const unit = getUnitForLesson(lessonId);
@@ -215,7 +226,8 @@ function LessonComplete({
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   if (!passed) {
-    // Below the pass rate — no completion/unlock; encourage a retry.
+    // Below the pass rate — no completion. For a gated 2-part lesson, the Learn
+    // part is re-locked by the effect above so it must be redone.
     return (
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
@@ -231,13 +243,22 @@ function LessonComplete({
           <span className="font-bold text-ink">
             {correct}/{total} ({pct}%)
           </span>
-          . You need {Math.round(PASS_RATE * 100)}% on the first try to pass —
-          give it another go.
+          . You need {Math.round(PASS_RATE * 100)}% to pass
+          {relearn ? " — run through the lesson again to reinforce it." : " — give it another go."}
         </p>
         <div className="mt-6 flex flex-col gap-3">
-          <button className="btn-brand" onClick={onRetry}>
-            Retry lesson
-          </button>
+          {relearn ? (
+            <button
+              className="btn-brand"
+              onClick={() => router.push(`/lesson/${relearn.id}?part=learn`)}
+            >
+              Redo the Learn part
+            </button>
+          ) : (
+            <button className="btn-brand" onClick={onRetry}>
+              Retry lesson
+            </button>
+          )}
           <button className="btn-ghost" onClick={() => router.push("/")}>
             Back to map
           </button>

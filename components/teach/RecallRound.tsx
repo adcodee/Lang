@@ -116,11 +116,17 @@ export default function RecallRound({
 
   function optionClass(opt: string): string {
     const base = "rounded-xl border-2 px-4 py-3 font-bold";
+    const jp = q.jpOptions ? "font-jp text-xl" : "";
     if (!picked)
       return `${base} border-gray-200 bg-white ${q.jpOptions ? "font-jp text-xl" : "text-ink"}`;
-    if (opt === q.answer) return `${base} border-brand bg-brand/10 text-brand-dark ${q.jpOptions ? "font-jp text-xl" : ""}`;
-    if (opt === picked) return `${base} border-heart bg-heart/10 text-heart ${q.jpOptions ? "font-jp text-xl" : ""}`;
-    return `${base} border-gray-200 bg-white opacity-60 ${q.jpOptions ? "font-jp text-xl" : ""}`;
+    const gotItRight = picked === q.answer;
+    // Only reveal the correct answer when the learner actually picked it — a
+    // wrong pick just goes red, so they still have to recall it (it repeats).
+    if (opt === picked)
+      return gotItRight
+        ? `${base} border-brand bg-brand/10 text-brand-dark ${jp}`
+        : `${base} border-heart bg-heart/10 text-heart ${jp}`;
+    return `${base} border-gray-200 bg-white opacity-60 ${jp}`;
   }
 
   return (
