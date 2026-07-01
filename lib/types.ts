@@ -91,12 +91,25 @@ export type Exercise =
 
 // One character's intro shown in the Teach phase before the exercises.
 export interface KanaTeachCard {
+  kind?: "kana"; // default; omitted on existing content
   char: string; // あ
   romaji: string; // a
   mnemonic: string; // "あ looks like a fish saying 'ah'"
   mnemonicEmoji?: string; // 🐟
   example: { word: string; romaji: string; meaning: string }; // あめ / ame / rain
 }
+
+// A word/phrase intro (greetings, nouns, adjectives) — hear it, read it, say
+// it. No stroke order/tracing (those are kana-only).
+export interface PhraseTeachCard {
+  kind: "phrase";
+  term: string; // こんにちは
+  reading: string; // konnichiwa
+  meaning: string; // Hello (daytime)
+  note?: string; // short usage tip
+}
+
+export type TeachCard = KanaTeachCard | PhraseTeachCard;
 
 export interface Lesson {
   id: string; // globally unique — used by completedLessons + routing
@@ -105,7 +118,7 @@ export interface Lesson {
   icon: string; // emoji used on the node
   skill: SkillCategory; // which skill this lesson trains
   xp: number; // bonus XP awarded on completion
-  teach?: KanaTeachCard[]; // optional intro phase shown before exercises
+  teach?: TeachCard[]; // optional intro phase shown before exercises
   exercises: Exercise[];
 }
 

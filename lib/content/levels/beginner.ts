@@ -273,6 +273,12 @@ export const beginner: Level = {
           icon: "👋",
           skill: "writing",
           xp: 25,
+          teach: [
+            { kind: "phrase", term: "おはよう", reading: "ohayou", meaning: "Good morning", note: "Add ございます to be more polite." },
+            { kind: "phrase", term: "こんにちは", reading: "konnichiwa", meaning: "Hello (daytime)", note: "The は here is said 'wa'." },
+            { kind: "phrase", term: "こんばんは", reading: "konbanwa", meaning: "Good evening" },
+            { kind: "phrase", term: "ありがとう", reading: "arigatou", meaning: "Thank you" },
+          ],
           exercises: [
             {
               type: "match-pairs",
@@ -310,6 +316,12 @@ export const beginner: Level = {
           icon: "🙋",
           skill: "writing",
           xp: 30,
+          teach: [
+            { kind: "phrase", term: "はじめまして", reading: "hajimemashite", meaning: "Nice to meet you", note: "Said when meeting someone new." },
+            { kind: "phrase", term: "です", reading: "desu", meaning: "am / is (polite)", note: "わたしは たなか です = 'I am Tanaka'." },
+            { kind: "phrase", term: "よろしく", reading: "yoroshiku", meaning: "Please be kind to me", note: "Often follows your introduction." },
+            { kind: "phrase", term: "すみません", reading: "sumimasen", meaning: "Excuse me / Sorry" },
+          ],
           exercises: [
             {
               type: "translate-choice",
@@ -450,6 +462,14 @@ export const beginner: Level = {
           icon: "🔢",
           skill: "writing",
           xp: 25,
+          teach: [
+            { kind: "phrase", term: "いち", reading: "ichi", meaning: "one (1)" },
+            { kind: "phrase", term: "に", reading: "ni", meaning: "two (2)" },
+            { kind: "phrase", term: "さん", reading: "san", meaning: "three (3)" },
+            { kind: "phrase", term: "よん", reading: "yon", meaning: "four (4)", note: "Also read し (shi)." },
+            { kind: "phrase", term: "ご", reading: "go", meaning: "five (5)" },
+            { kind: "phrase", term: "じゅう", reading: "juu", meaning: "ten (10)", note: "6–10: ろく なな はち きゅう じゅう." },
+          ],
           exercises: [
             {
               type: "match-pairs",
@@ -503,6 +523,11 @@ export const beginner: Level = {
           icon: "⏰",
           skill: "writing",
           xp: 30,
+          teach: [
+            { kind: "phrase", term: "〜さい", reading: "sai", meaning: "~ years old", note: "わたしは ごさい です = 'I am 5 years old'." },
+            { kind: "phrase", term: "なんさいですか", reading: "nansai desu ka", meaning: "How old are you?" },
+            { kind: "phrase", term: "いまなんじですか", reading: "ima nanji desu ka", meaning: "What time is it now?" },
+          ],
           exercises: [
             {
               type: "build-sentence",
@@ -565,6 +590,12 @@ export const beginner: Level = {
           icon: "👪",
           skill: "writing",
           xp: 25,
+          teach: [
+            { kind: "phrase", term: "おかあさん", reading: "okaasan", meaning: "mother" },
+            { kind: "phrase", term: "おとうさん", reading: "otousan", meaning: "father" },
+            { kind: "phrase", term: "あに", reading: "ani", meaning: "older brother" },
+            { kind: "phrase", term: "いもうと", reading: "imouto", meaning: "younger sister" },
+          ],
           exercises: [
             {
               type: "match-pairs",
@@ -586,6 +617,12 @@ export const beginner: Level = {
           icon: "🗂️",
           skill: "writing",
           xp: 30,
+          teach: [
+            { kind: "phrase", term: "せんせい", reading: "sensei", meaning: "teacher" },
+            { kind: "phrase", term: "ほん", reading: "hon", meaning: "book" },
+            { kind: "phrase", term: "くるま", reading: "kuruma", meaning: "car" },
+            { kind: "phrase", term: "でんわ", reading: "denwa", meaning: "phone" },
+          ],
           exercises: [
             {
               type: "category-sort",
@@ -610,6 +647,14 @@ export const beginner: Level = {
           icon: "🍙",
           skill: "writing",
           xp: 30,
+          teach: [
+            { kind: "phrase", term: "ごはん", reading: "gohan", meaning: "rice / meal" },
+            { kind: "phrase", term: "さかな", reading: "sakana", meaning: "fish" },
+            { kind: "phrase", term: "りんご", reading: "ringo", meaning: "apple" },
+            { kind: "phrase", term: "やさい", reading: "yasai", meaning: "vegetable" },
+            { kind: "phrase", term: "いえ", reading: "ie", meaning: "house" },
+            { kind: "phrase", term: "つくえ", reading: "tsukue", meaning: "desk" },
+          ],
           exercises: [
             {
               type: "category-sort",
@@ -676,6 +721,12 @@ export const beginner: Level = {
           icon: "📏",
           skill: "writing",
           xp: 25,
+          teach: [
+            { kind: "phrase", term: "おおきい", reading: "ookii", meaning: "big" },
+            { kind: "phrase", term: "ちいさい", reading: "chiisai", meaning: "small" },
+            { kind: "phrase", term: "あつい", reading: "atsui", meaning: "hot" },
+            { kind: "phrase", term: "さむい", reading: "samui", meaning: "cold", note: "Most basic adjectives end in い." },
+          ],
           exercises: [
             {
               type: "match-pairs",
@@ -727,6 +778,14 @@ export const beginner: Level = {
           icon: "⚖️",
           skill: "writing",
           xp: 30,
+          teach: [
+            { kind: "phrase", term: "おいしい", reading: "oishii", meaning: "delicious" },
+            { kind: "phrase", term: "まずい", reading: "mazui", meaning: "bad-tasting" },
+            { kind: "phrase", term: "いい", reading: "ii", meaning: "good" },
+            { kind: "phrase", term: "わるい", reading: "warui", meaning: "bad" },
+            { kind: "phrase", term: "あたらしい", reading: "atarashii", meaning: "new" },
+            { kind: "phrase", term: "ふるい", reading: "furui", meaning: "old" },
+          ],
           exercises: [
             {
               type: "category-sort",

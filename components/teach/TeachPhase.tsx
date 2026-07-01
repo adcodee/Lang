@@ -5,19 +5,20 @@ import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import TeachCard from "@/components/teach/TeachCard";
-import type { KanaTeachCard } from "@/lib/types";
+import PhraseCard from "@/components/teach/PhraseCard";
+import type { TeachCard as TeachCardData } from "@/lib/types";
 
 const TRACE_XP = 2; // small writing credit per character traced
 const TEACH_BONUS = 5; // flat bonus for finishing the intro
 
-// Walks the learner through each character's intro, then hands off via
-// onReady(). Feeds Rank honestly: real speaking attempts + flat/writing XP
-// (no fake accuracy).
+// Walks the learner through each item's intro (kana or word/phrase), then hands
+// off via onReady(). Feeds Rank honestly: real speaking attempts + flat/writing
+// XP (no fake accuracy).
 export default function TeachPhase({
   cards,
   onReady,
 }: {
-  cards: KanaTeachCard[];
+  cards: TeachCardData[];
   onReady: () => void;
 }) {
   const router = useRouter();
@@ -77,15 +78,23 @@ export default function TeachPhase({
         </button>
       </div>
 
-      <TeachCard
-        key={card.char}
-        card={card}
-        onSpeakAttempt={handleSpeakAttempt}
-        onTraced={handleTraced}
-      />
+      {card.kind === "phrase" ? (
+        <PhraseCard
+          key={`p-${index}`}
+          card={card}
+          onSpeakAttempt={handleSpeakAttempt}
+        />
+      ) : (
+        <TeachCard
+          key={card.char}
+          card={card}
+          onSpeakAttempt={handleSpeakAttempt}
+          onTraced={handleTraced}
+        />
+      )}
 
       <button onClick={next} className="btn-brand mt-6 w-full">
-        {isLast ? "Ready to practice?" : "Next character"}
+        {isLast ? "Ready to practice?" : "Next"}
       </button>
     </div>
   );
