@@ -8,6 +8,7 @@ import {
   getDrillForSkill,
   isDrillUnlocked,
   unlockLessonTitle,
+  dueReviewCards,
 } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import { SKILL_BADGE } from "@/components/LessonNode";
@@ -25,8 +26,12 @@ export default function DojoPage() {
   const revisionSkills = useGameStore((s) => s.revisionSkills);
   const revisionCount = useGameStore((s) => s.revisionItems.length);
   const completed = useGameStore((s) => s.completedLessons);
+  const seen = useGameStore((s) => s.seen);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  const dueCount = mounted ? dueReviewCards(completed, seen).length : 0;
+  const reviewCount = revisionCount + dueCount;
 
   // Weakness = skill with the most flagged items, else lowest accuracy.
   const weakest = mounted ? weakestSkill(skillStats, revisionSkills) : null;
@@ -45,7 +50,7 @@ export default function DojoPage() {
         </p>
       </header>
 
-      {mounted && revisionCount > 0 && (
+      {mounted && reviewCount > 0 && (
         <Link
           href="/dojo/review"
           className="flex items-center justify-between rounded-2xl border-2 border-torii bg-torii/10 p-4"
@@ -53,10 +58,14 @@ export default function DojoPage() {
           <div className="flex items-center gap-3">
             <RotateCcw className="h-6 w-6 text-torii" />
             <div>
-              <div className="font-extrabold text-ink">Review mistakes</div>
+              <div className="font-extrabold text-ink">Review</div>
               <div className="text-sm text-muted">
-                {revisionCount} question{revisionCount === 1 ? "" : "s"} flagged
-                for revision
+                {reviewCount} item{reviewCount === 1 ? "" : "s"} due
+                {dueCount > 0 && revisionCount > 0
+                  ? " (spaced + mistakes)"
+                  : dueCount > 0
+                  ? " for spaced repetition"
+                  : " flagged from mistakes"}
               </div>
             </div>
           </div>

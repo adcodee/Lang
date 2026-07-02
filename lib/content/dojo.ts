@@ -1,5 +1,8 @@
-import type { Exercise, Lesson, SkillCategory } from "@/lib/types";
+import type { Exercise, Lesson, SkillCategory, TeachCard } from "@/lib/types";
 import { getLesson } from "@/lib/content/curriculum";
+import { learnedKana } from "@/lib/content/kana";
+import { learnedVocab } from "@/lib/content/vocab";
+import { isDue, type SeenEntry } from "@/lib/srs";
 
 // Dojo drills. Endless kinds (trace/category) render their own components;
 // fixed kinds carry `exercises` and run through LessonPlayer (mode "drill").
@@ -139,6 +142,32 @@ export const dojoDrills: DojoDrill[] = [
     ],
   },
 ];
+
+// Learned kana/vocab that are due for spaced-repetition review, as teach cards
+// the RecallRound can quiz over. Snapshot once per review session.
+export function dueReviewCards(
+  completed: string[],
+  seen: Record<string, SeenEntry>
+): TeachCard[] {
+  const now = Date.now();
+  const cards: TeachCard[] = [];
+  for (const k of learnedKana(completed)) {
+    if (isDue(seen[`kana:${k.char}`], now)) {
+      cards.push({
+        char: k.char,
+        romaji: k.romaji,
+        mnemonic: "",
+        example: { word: k.char, romaji: k.romaji, meaning: "" },
+      });
+    }
+  }
+  for (const v of learnedVocab(completed)) {
+    if (isDue(seen[`vocab:${v.word}`], now)) {
+      cards.push({ kind: "phrase", term: v.word, reading: "", meaning: v.gloss });
+    }
+  }
+  return cards;
+}
 
 export function getDrillConfig(id: string): DojoDrill | undefined {
   return dojoDrills.find((d) => d.id === id);

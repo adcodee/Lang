@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GameState, SkillCategory, SkillStats } from "@/lib/types";
+import { nextLevel } from "@/lib/srs";
 
 const MAX_HEARTS = 5;
 
@@ -35,6 +36,7 @@ interface GameStore extends GameState {
   completeLesson: (lessonId: string, bonusXp: number) => void;
   markLearned: (lessonId: string) => void;
   revokeLearned: (lessonId: string) => void;
+  recordSeen: (itemId: string, correct: boolean) => void;
   passExam: (unitId: string, bonusXp: number) => void;
   registerActivity: () => void;
   reset: () => void;
@@ -55,6 +57,7 @@ const initialState: GameState = {
   revisionItems: [],
   revisionSkills: emptyRevisionSkills(),
   examsPassed: [],
+  seen: {},
 };
 
 export const useGameStore = create<GameStore>()(
@@ -140,6 +143,19 @@ export const useGameStore = create<GameStore>()(
           learnedLessons: s.learnedLessons.filter((id) => id !== lessonId),
         })),
 
+      // Record a spaced-repetition exposure: stamp the time and advance/reset
+      // the interval level. Feeds the Dojo review's "due" queue.
+      recordSeen: (itemId, correct) =>
+        set((s) => ({
+          seen: {
+            ...s.seen,
+            [itemId]: {
+              last: Date.now(),
+              level: nextLevel(s.seen[itemId]?.level, correct),
+            },
+          },
+        })),
+
       // Pass a unit's exam: award bonus XP and record the belt (opens the gate).
       passExam: (unitId, bonusXp) =>
         set((s) => ({
@@ -157,7 +173,9 @@ export const useGameStore = create<GameStore>()(
         }),
     }),
     {
-      name: "lang-game-state",
+      // v2 key = clean slate: old "lang-game-state" progress (under stale lesson
+      // IDs) is no longer read, so the learner starts from the beginning.
+      name: "lang-game-state-v2",
       // Only persist the serializable game fields.
       partialize: (s) => ({
         xp: s.xp,
@@ -170,6 +188,7 @@ export const useGameStore = create<GameStore>()(
         revisionItems: s.revisionItems,
         revisionSkills: s.revisionSkills,
         examsPassed: s.examsPassed,
+        seen: s.seen,
       }),
     }
   )

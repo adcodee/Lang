@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import { speak } from "@/lib/speech";
+import { useGameStore } from "@/lib/store/gameStore";
 import PhraseCard from "@/components/teach/PhraseCard";
 import TeachCard from "@/components/teach/TeachCard";
 import type { TeachCard as TeachCardData } from "@/lib/types";
@@ -38,6 +39,7 @@ export default function RecallRound({
   onDone: () => void;
   onAnswer: (correct: boolean) => void;
 }) {
+  const recordSeen = useGameStore((s) => s.recordSeen);
   const questions = useMemo(() => buildQuestions(cards), [cards]);
   const total = questions.length;
 
@@ -92,6 +94,11 @@ export default function RecallRound({
     setPicked(opt);
     const correct = opt === q.answer;
     onAnswer(correct);
+    const card = cards[q.cardIndex];
+    recordSeen(
+      card.kind === "phrase" ? `vocab:${card.term}` : `kana:${card.char}`,
+      correct
+    );
     window.setTimeout(() => advance(correct), 1100);
   }
 

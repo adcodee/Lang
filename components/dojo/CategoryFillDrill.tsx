@@ -12,13 +12,14 @@ import CategoryBoard, { type BoardItem } from "@/components/dojo/CategoryBoard";
 
 interface Group {
   category: string;
-  items: { label: string; sub?: string }[];
+  items: { label: string; sub?: string; srs: string }[];
 }
 
 // Endless sorting drill: each round builds a fresh board from the groups the
 // learner has unlocked (kana rows + word groups), grading per item.
 export default function CategoryFillDrill() {
   const completed = useGameStore((s) => s.completedLessons);
+  const recordSeen = useGameStore((s) => s.recordSeen);
   const session = useDrillSession("writing");
   const [done, setDone] = useState(false);
   const [round, setRound] = useState(0);
@@ -29,14 +30,14 @@ export default function CategoryFillDrill() {
     for (const [category, ks] of Object.entries(rows)) {
       out.push({
         category,
-        items: ks.map((k) => ({ label: k.char, sub: k.romaji })),
+        items: ks.map((k) => ({ label: k.char, sub: k.romaji, srs: `kana:${k.char}` })),
       });
     }
     const wordGroups = learnedVocabGroups(completed);
     for (const [category, vs] of Object.entries(wordGroups)) {
       out.push({
         category,
-        items: vs.map((v) => ({ label: v.word, sub: v.gloss })),
+        items: vs.map((v) => ({ label: v.word, sub: v.gloss, srs: `vocab:${v.word}` })),
       });
     }
     return out;
@@ -73,7 +74,11 @@ export default function CategoryFillDrill() {
   }
 
   function handleResult(results: boolean[]) {
-    results.forEach((ok) => session.record(ok));
+    results.forEach((ok, i) => {
+      session.record(ok);
+      const srs = board!.items[i]?.srs;
+      if (srs) recordSeen(srs, ok);
+    });
     window.setTimeout(() => setRound((r) => r + 1), 1100);
   }
 
@@ -104,7 +109,7 @@ function buildBoard(
   for (const g of chosen) {
     const perGroup = 2 + (Math.random() < 0.5 ? 0 : 1); // 2–3
     for (const it of shuffle(g.items).slice(0, perGroup)) {
-      items.push({ label: it.label, sub: it.sub, category: g.category });
+      items.push({ label: it.label, sub: it.sub, category: g.category, srs: it.srs });
     }
   }
   return { items: shuffle(items), categories: chosen.map((g) => g.category) };

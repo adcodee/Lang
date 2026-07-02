@@ -7,6 +7,7 @@ export interface BoardItem {
   label: string;
   sub?: string;
   category: string;
+  srs?: string; // spaced-repetition item id, e.g. `kana:さ`
 }
 
 // A single "fill the boxes" round: tap an item, tap a category to park it.

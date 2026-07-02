@@ -191,4 +191,6 @@ export interface GameState {
   revisionSkills: Record<SkillCategory, number>;
   // Unit ids whose end-of-unit exam has been passed (belt earned + gate open).
   examsPassed: string[];
+  // Spaced-repetition schedule per item (`kana:さ` / `vocab:...`).
+  seen: Record<string, { last: number; level: number }>;
 }

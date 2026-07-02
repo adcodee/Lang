@@ -17,6 +17,7 @@ const SIZE = 240;
 // auto-graded against the reference strokes (green/red), then flows on.
 export default function TraceDrill() {
   const completed = useGameStore((s) => s.completedLessons);
+  const recordSeen = useGameStore((s) => s.recordSeen);
   const pool = useMemo(() => learnedKana(completed), [completed]);
   const session = useDrillSession("writing");
 
@@ -116,6 +117,7 @@ export default function TraceDrill() {
     const result = scoreDrawing(strokes.current, target!.char, SIZE);
     setChecked(result);
     session.record(result.correct);
+    recordSeen(`kana:${target!.char}`, result.correct);
     if (result.correct) {
       window.setTimeout(next, 1000);
     }

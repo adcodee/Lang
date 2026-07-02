@@ -25,6 +25,14 @@ export default function TeachPhase({
   const router = useRouter();
   const recordAnswer = useGameStore((s) => s.recordAnswer);
   const addXp = useGameStore((s) => s.addXp);
+  const recordSeen = useGameStore((s) => s.recordSeen);
+
+  // Seed the spaced-repetition schedule for everything just taught.
+  function seedSeen() {
+    for (const c of cards) {
+      recordSeen(c.kind === "phrase" ? `vocab:${c.term}` : `kana:${c.char}`, true);
+    }
+  }
 
   const [phase, setPhase] = useState<"learn" | "recall">("learn");
   const [index, setIndex] = useState(0);
@@ -57,6 +65,7 @@ export default function TeachPhase({
   function next() {
     if (isLast) {
       addXp(TEACH_BONUS);
+      seedSeen();
       if (hasRecall) setPhase("recall");
       else onReady();
     } else {
