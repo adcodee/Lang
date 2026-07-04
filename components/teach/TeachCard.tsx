@@ -4,6 +4,7 @@ import { Volume2 } from "lucide-react";
 import { speak } from "@/lib/speech";
 import StrokeOrder from "@/components/teach/StrokeOrder";
 import TraceCanvas from "@/components/teach/TraceCanvas";
+import { strokeData } from "@/lib/content/strokes";
 import type { KanaTeachCard } from "@/lib/types";
 
 // One character's introduction: listen, mnemonic, stroke order, trace, and an
@@ -16,6 +17,9 @@ export default function TeachCard({
   card: KanaTeachCard;
   onTraced: () => void;
 }) {
+  // Voiced/combined kana (が, ぱ, きゃ…) reuse base shapes and carry no separate
+  // stroke data — skip the stroke-order/trace sections for them gracefully.
+  const hasStrokes = Boolean(strokeData[card.char]);
   return (
     <div className="teach-surface flex flex-col gap-6 rounded-2xl border-2 border-gray-100 p-6">
       {/* 1) Listen */}
@@ -39,24 +43,28 @@ export default function TeachCard({
         <p className="mt-1 text-sm text-sumi">{card.mnemonic}</p>
       </section>
 
-      {/* 3) Stroke order */}
-      <section className="flex flex-col items-center">
-        <h3 className="mb-2 text-sm font-extrabold uppercase tracking-wide text-muted">
-          Stroke order
-        </h3>
-        <StrokeOrder char={card.char} />
-      </section>
+      {/* 3) Stroke order (only for kana with their own stroke data) */}
+      {hasStrokes && (
+        <section className="flex flex-col items-center">
+          <h3 className="mb-2 text-sm font-extrabold uppercase tracking-wide text-muted">
+            Stroke order
+          </h3>
+          <StrokeOrder char={card.char} />
+        </section>
+      )}
 
       {/* 4) Trace */}
-      <section className="flex flex-col items-center">
-        <h3 className="mb-2 text-sm font-extrabold uppercase tracking-wide text-muted">
-          Your turn — trace it
-        </h3>
-        <TraceCanvas
-          char={card.char}
-          onDrawnChange={(drawn) => drawn && onTraced()}
-        />
-      </section>
+      {hasStrokes && (
+        <section className="flex flex-col items-center">
+          <h3 className="mb-2 text-sm font-extrabold uppercase tracking-wide text-muted">
+            Your turn — trace it
+          </h3>
+          <TraceCanvas
+            char={card.char}
+            onDrawnChange={(drawn) => drawn && onTraced()}
+          />
+        </section>
+      )}
 
       {/* 5) Example word */}
       <section className="flex items-center justify-between rounded-2xl border-2 border-gray-100 p-4">

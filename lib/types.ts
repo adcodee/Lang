@@ -141,6 +141,9 @@ export interface Lesson {
   skill: SkillCategory; // which skill this lesson trains
   xp: number; // bonus XP awarded on completion
   teach?: TeachCard[]; // optional intro phase shown before exercises
+  // Mandatory review checkpoint: no new material, mixes previously-taught
+  // items to keep them fresh. Rendered as a distinct dojo node in the path.
+  checkpoint?: boolean;
   exercises: Exercise[];
 }
 

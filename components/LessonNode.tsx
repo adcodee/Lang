@@ -27,6 +27,7 @@ export default function LessonNode({
   variant?: NodeVariant;
 }) {
   const locked = status === "locked";
+  const checkpoint = Boolean(lesson.checkpoint);
   const href =
     variant === "single"
       ? `/lesson/${lesson.id}`
@@ -36,12 +37,19 @@ export default function LessonNode({
   const partLabel =
     variant === "learn" ? "Learn" : variant === "test" ? "Test" : null;
 
-  const ring =
-    status === "completed"
+  // Checkpoints get a torii/dojo identity so they read as "prove it" gates,
+  // not new lessons. Completed keeps the shared gold; current/locked go indigo.
+  const ring = checkpoint
+    ? status === "completed"
       ? "bg-gold shadow-[0_5px_0_#a98b45]"
       : status === "current"
-      ? "bg-brand shadow-[0_5px_0_#3a5a34]"
-      : "bg-gray-200 shadow-[0_5px_0_#d9d2c6]";
+      ? "bg-torii shadow-[0_5px_0_#7a2f3a]"
+      : "bg-gray-200 shadow-[0_5px_0_#d9d2c6]"
+    : status === "completed"
+    ? "bg-gold shadow-[0_5px_0_#a98b45]"
+    : status === "current"
+    ? "bg-brand shadow-[0_5px_0_#3a5a34]"
+    : "bg-gray-200 shadow-[0_5px_0_#d9d2c6]";
 
   const inner = (
     <motion.div
@@ -67,8 +75,12 @@ export default function LessonNode({
       style={{ transform: `translateX(${offset * 64}px)` }}
     >
       {status === "current" && (
-        <span className="rounded-full bg-white px-3 py-1 text-xs font-extrabold uppercase text-brand-dark shadow-card">
-          Start
+        <span
+          className={`rounded-full bg-white px-3 py-1 text-xs font-extrabold uppercase shadow-card ${
+            checkpoint ? "text-torii" : "text-brand-dark"
+          }`}
+        >
+          {checkpoint ? "⛩️ Checkpoint" : "Start"}
         </span>
       )}
       {locked ? (
