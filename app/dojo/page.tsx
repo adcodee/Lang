@@ -11,6 +11,7 @@ import {
   dueReviewCards,
 } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
+import { kanaRowProgress } from "@/lib/content/kana";
 import { SKILL_BADGE } from "@/components/LessonNode";
 import type { SkillCategory } from "@/lib/types";
 
@@ -113,6 +114,13 @@ export default function DojoPage() {
               </div>
             );
           }
+          // The Vowel Sort drill grows with progress — show how many rows are in.
+          const subtitle =
+            drill.kind === "vowel-sort" && mounted
+              ? `${kanaRowProgress(completed).unlocked}/${
+                  kanaRowProgress(completed).total
+                } rows unlocked`
+              : drill.subtitle;
           return (
             <Link
               key={drill.id}
@@ -122,7 +130,7 @@ export default function DojoPage() {
               <span className="text-3xl">{drill.icon}</span>
               <div>
                 <div className="font-extrabold text-ink">{drill.title}</div>
-                <div className="text-sm text-muted">{drill.subtitle}</div>
+                <div className="text-sm text-muted">{subtitle}</div>
                 <div className="mt-1 text-[11px] font-bold uppercase tracking-wide text-muted">
                   {SKILL_BADGE[drill.skill].icon} {SKILL_BADGE[drill.skill].label}
                 </div>

@@ -62,6 +62,17 @@ export function learnedKana(completed: string[]): Kana[] {
   return kana.filter((k) => completed.includes(k.lessonId));
 }
 
+// Progress across the base-kana rows (Vowels, K-row, …) — drives the
+// "N/M rows unlocked" hint on the progressive Vowel Sort drill.
+export function kanaRowProgress(completed: string[]): {
+  unlocked: number;
+  total: number;
+} {
+  const total = new Set(kana.map((k) => k.row)).size;
+  const unlocked = new Set(learnedKana(completed).map((k) => k.row)).size;
+  return { unlocked, total };
+}
+
 // Learned kana grouped by row, keeping only rows with 2+ entries (sortable).
 export function learnedKanaRows(completed: string[]): Record<string, Kana[]> {
   const rows: Record<string, Kana[]> = {};

@@ -10,6 +10,7 @@ import { isDue, type SeenEntry } from "@/lib/srs";
 export type DrillKind =
   | "trace"
   | "category"
+  | "vowel-sort"
   | "match"
   | "listen"
   | "punctuation";
@@ -43,6 +44,17 @@ export const dojoDrills: DojoDrill[] = [
     skill: "writing",
     kind: "category",
     unlockAfter: "u1-ka-row", // need 2+ groups to sort
+  },
+  {
+    id: "vowel-sort",
+    title: "Vowel Row Sort",
+    subtitle: "Sort kana by their vowel sound",
+    icon: "🔤",
+    skill: "listening",
+    kind: "vowel-sort",
+    // Unlocks once the vowels are learned, then grows one row at a time as
+    // each later row lesson is completed (the drill draws only from learned kana).
+    unlockAfter: "u1-vowels",
   },
   {
     id: "match",
