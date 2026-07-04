@@ -65,6 +65,8 @@ function TranslateChoice({
   onChecked: (correct: boolean) => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+  // Shuffle once on mount so the answer isn't always in the same slot.
+  const options = useMemo(() => shuffle(exercise.options), [exercise]);
 
   function classFor(option: string): string {
     if (!checked) return selected === option ? "choice choice-selected" : "choice";
@@ -82,7 +84,7 @@ function TranslateChoice({
       onCheck={() => onChecked(selected === exercise.answer)}
     >
       <div className="grid grid-cols-2 gap-3">
-        {exercise.options.map((opt) => (
+        {options.map((opt) => (
           <button
             key={opt}
             disabled={checked}
@@ -296,6 +298,8 @@ function ListenChoice({
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [played, setPlayed] = useState(false);
+  // Shuffle once on mount so the answer isn't always in the same slot.
+  const options = useMemo(() => shuffle(exercise.options), [exercise]);
 
   const play = () => {
     speak(exercise.audio);
@@ -336,7 +340,7 @@ function ListenChoice({
         </p>
       )}
       <div className="grid grid-cols-2 gap-3">
-        {exercise.options.map((opt) => (
+        {options.map((opt) => (
           <button
             key={opt}
             disabled={checked}

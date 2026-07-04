@@ -36,6 +36,12 @@ export default function PhraseCard({
   const [answered, setAnswered] = useState<string | null>(null);
   const [showTrace, setShowTrace] = useState(false);
 
+  // Shuffle the recall-check options so the answer isn't always in one slot.
+  const checkOptions = useMemo(
+    () => (card.check ? shuffle(card.check.options) : []),
+    [card]
+  );
+
   function gradeSpoken(text: string) {
     const ok = matchesSpoken(text, card.term, [card.reading]);
     setHeard(ok);
@@ -122,7 +128,7 @@ export default function PhraseCard({
             {card.check.prompt}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {card.check.options.map((opt) => {
+            {checkOptions.map((opt) => {
               const isAns = opt === card.check!.answer;
               const picked = answered === opt;
               const cls = !answered
@@ -198,6 +204,15 @@ export default function PhraseCard({
       )}
     </div>
   );
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 function PartDetail({
