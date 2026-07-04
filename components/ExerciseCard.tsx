@@ -394,6 +394,7 @@ function SpeakPhrase({
           <SpeakInput
             onTranscript={setCaptured}
             idleLabel="Tap and speak"
+            hint={exercise.display}
             typedPlaceholder={
               exercise.romaji ? `Type "${exercise.romaji}"` : "Type the romaji…"
             }

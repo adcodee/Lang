@@ -19,8 +19,12 @@ export async function POST(req: NextRequest) {
       typeof form.get("language") === "string"
         ? (form.get("language") as string)
         : "ja";
+    const prompt =
+      typeof form.get("prompt") === "string"
+        ? (form.get("prompt") as string)
+        : undefined;
 
-    const result = await transcribeAudio(file, language);
+    const result = await transcribeAudio(file, language, prompt);
     return NextResponse.json(result);
   } catch (err) {
     console.error("/api/transcribe error", err);

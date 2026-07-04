@@ -69,7 +69,7 @@ export default function RecallRound({
         {card.kind === "phrase" ? (
           <PhraseCard card={card} onSpeakAttempt={noop} onTraced={noop} onCheck={noop} />
         ) : (
-          <TeachCard card={card} onSpeakAttempt={noop} onTraced={noop} />
+          <TeachCard card={card} onTraced={noop} />
         )}
         <button
           className="btn-brand mt-6 w-full"

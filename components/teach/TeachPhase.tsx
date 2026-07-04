@@ -135,12 +135,7 @@ export default function TeachPhase({
           onCheck={handleCheck}
         />
       ) : (
-        <TeachCard
-          key={card.char}
-          card={card}
-          onSpeakAttempt={handleSpeakAttempt}
-          onTraced={handleTraced}
-        />
+        <TeachCard key={card.char} card={card} onTraced={handleTraced} />
       )}
 
       <button onClick={next} className="btn-brand mt-6 w-full">

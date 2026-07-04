@@ -75,6 +75,7 @@ export default function PhraseCard({
         <SpeakInput
           onTranscript={gradeSpoken}
           typedPlaceholder={`Type "${card.reading}"`}
+          hint={card.term}
         />
         {heard !== null && (
           <p className={`text-sm font-bold ${heard ? "text-brand-dark" : "text-muted"}`}>

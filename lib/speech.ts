@@ -101,7 +101,7 @@ export function matchesSpoken(
     if (short.length === 0) return false;
     let hits = 0;
     for (const ch of short) if (long.includes(ch)) hits++;
-    return hits / short.length >= 0.7;
+    return hits / short.length >= 0.6;
   });
 }
 

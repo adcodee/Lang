@@ -23,11 +23,13 @@ export default function SpeakInput({
   idleLabel = "Say it",
   typedPrompt = "Say it aloud, then type what you said (romaji)",
   typedPlaceholder = "Type the romaji…",
+  hint,
 }: {
   onTranscript: (text: string) => void;
   idleLabel?: string;
   typedPrompt?: string;
   typedPlaceholder?: string;
+  hint?: string; // expected phrase — biases the cloud ASR toward it
 }) {
   const [tier, setTier] = useState<Tier>("typed");
   const [status, setStatus] = useState<Status>("idle");
@@ -93,6 +95,7 @@ export default function SpeakInput({
       const form = new FormData();
       form.append("audio", blob, "audio");
       form.append("language", "ja");
+      if (hint) form.append("prompt", hint);
       const res = await fetch("/api/transcribe", { method: "POST", body: form });
       const data = await res.json();
       if (data?.stubbed || !data?.transcript) {
@@ -155,6 +158,16 @@ export default function SpeakInput({
       )}
 
       {note && <p className="text-center text-xs text-muted">{note}</p>}
+
+      {/* Always-available escape: if the mic mis-hears, type what you said. */}
+      {tier !== "typed" && !showTyped && (
+        <button
+          onClick={() => setShowTyped(true)}
+          className="text-xs font-bold text-muted underline underline-offset-2 hover:text-ink"
+        >
+          ⌨️ Type what you said instead
+        </button>
+      )}
 
       {showTyped && (
         <div className="w-full max-w-xs">

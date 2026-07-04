@@ -47,7 +47,8 @@ export function transcribeConfigured(): boolean {
 
 export async function transcribeAudio(
   audio: Blob,
-  language = "ja"
+  language = "ja",
+  prompt?: string
 ): Promise<Transcription> {
   const cfg = sttConfig();
   if (!cfg) return { transcript: "", stubbed: true, reason: "no-key" };
@@ -59,10 +60,14 @@ export async function transcribeAudio(
     let url: string;
     if (cfg.mode === "xai") {
       url = "https://api.x.ai/v1/stt";
+      // xAI /v1/stt ignores unknown fields; send hints best-effort.
+      form.append("language", language);
+      if (prompt) form.append("prompt", prompt);
     } else {
       url = `${cfg.base}/audio/transcriptions`;
       form.append("model", cfg.model);
       form.append("language", language);
+      if (prompt) form.append("prompt", prompt);
     }
 
     const res = await fetch(url, {
