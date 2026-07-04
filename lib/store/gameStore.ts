@@ -173,9 +173,11 @@ export const useGameStore = create<GameStore>()(
         }),
     }),
     {
-      // v2 key = clean slate: old "lang-game-state" progress (under stale lesson
-      // IDs) is no longer read, so the learner starts from the beginning.
-      name: "lang-game-state-v2",
+      // Bump the key to wipe progress on a curriculum restructure: the old
+      // state (under stale lesson IDs / unit ordering) is no longer read, so
+      // the learner starts from the beginning. v3 = after inserting the
+      // Voiced & Combo Sounds unit + mandatory Dojo checkpoints.
+      name: "lang-game-state-v3",
       // Only persist the serializable game fields.
       partialize: (s) => ({
         xp: s.xp,
