@@ -147,11 +147,19 @@ function MatchPairs({
   onChecked: (correct: boolean) => void;
 }) {
   const lefts = exercise.pairs.map((p) => p.left);
-  // Shuffle the right column once on mount.
-  const rights = useMemo(
-    () => shuffle(exercise.pairs.map((p) => p.right)),
-    [exercise]
-  );
+  // Shuffle the right column once on mount — and re-deal until no right sits
+  // beside its own left. Plain shuffling lands the fully-aligned (self-
+  // answering) order 1-in-6 times on a 3-pair board.
+  const rights = useMemo(() => {
+    const solution = exercise.pairs.map((p) => p.right);
+    if (solution.length < 2) return solution;
+    let dealt = shuffle(solution);
+    let guard = 0;
+    while (guard++ < 20 && dealt.some((r, i) => r === solution[i])) {
+      dealt = shuffle(solution);
+    }
+    return dealt;
+  }, [exercise]);
 
   const [pickLeft, setPickLeft] = useState<string | null>(null);
   const [matches, setMatches] = useState<Record<string, string>>({});
@@ -228,7 +236,20 @@ function BuildSentence({
   checked: boolean;
   onChecked: (correct: boolean) => void;
 }) {
-  const pool = useMemo(() => shuffle(exercise.tiles), [exercise]);
+  // Shuffle the tile tray — re-dealing if it lands in the exact answer order,
+  // which would hand over the sentence pre-built.
+  const pool = useMemo(() => {
+    let dealt = shuffle(exercise.tiles);
+    let guard = 0;
+    while (
+      guard++ < 10 &&
+      exercise.tiles.length > 1 &&
+      JSON.stringify(dealt) === JSON.stringify(exercise.answer)
+    ) {
+      dealt = shuffle(exercise.tiles);
+    }
+    return dealt;
+  }, [exercise]);
   const [built, setBuilt] = useState<number[]>([]); // indices into pool
 
   const used = new Set(built);
