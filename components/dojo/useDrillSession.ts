@@ -19,6 +19,7 @@ export interface DrillSession {
 // the Rank skill stats via recordAnswer, so grinding improves the dashboard.
 export function useDrillSession(skill: SkillCategory): DrillSession {
   const recordAnswer = useGameStore((s) => s.recordAnswer);
+  const registerActivity = useGameStore((s) => s.registerActivity);
   const [count, setCount] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -26,6 +27,9 @@ export function useDrillSession(skill: SkillCategory): DrillSession {
 
   function record(isCorrect: boolean) {
     recordAnswer(skill, isCorrect, isCorrect ? XP_PER_CORRECT : 0);
+    // Drilling is real practice — keep the daily streak alive (idempotent:
+    // registerActivity returns early once today is already counted).
+    registerActivity();
     setCount((c) => c + 1);
     if (isCorrect) {
       setCorrect((c) => c + 1);

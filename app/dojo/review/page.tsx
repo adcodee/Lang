@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
-import { buildReviewLesson, dueReviewCards } from "@/lib/content/dojo";
+import { buildReviewLesson, reviewDeck } from "@/lib/content/dojo";
 import type { Lesson, TeachCard } from "@/lib/types";
 import LessonPlayer from "@/components/LessonPlayer";
 import RecallRound from "@/components/teach/RecallRound";
@@ -18,13 +18,16 @@ export default function ReviewPage() {
   const revisionItems = useGameStore((s) => s.revisionItems);
   const completed = useGameStore((s) => s.completedLessons);
   const seen = useGameStore((s) => s.seen);
+  const registerActivity = useGameStore((s) => s.registerActivity);
 
   // Snapshot the queue once on mount so recording answers doesn't reshuffle it.
   const frozen = useRef<{ due: TeachCard[]; revision: Lesson | null } | null>(null);
   const [stage, setStage] = useState<Stage>(null);
 
   useEffect(() => {
-    const due = dueReviewCards(completed, seen);
+    // reviewDeck pads a lone due item with non-due cards, so a single due
+    // item still gets reviewed (RecallRound needs 2+ for distractors).
+    const due = reviewDeck(completed, seen);
     const revision = buildReviewLesson(revisionItems);
     frozen.current = { due, revision };
     setStage(due.length >= 2 ? "srs" : revision ? "revision" : "empty");
@@ -67,9 +70,11 @@ export default function ReviewPage() {
         <RecallRound
           cards={frozen.current.due}
           onAnswer={() => {}}
-          onDone={() =>
-            setStage(frozen.current!.revision ? "revision" : "empty")
-          }
+          onDone={() => {
+            // An SRS-only review is real practice — count it for the streak.
+            registerActivity();
+            setStage(frozen.current!.revision ? "revision" : "empty");
+          }}
         />
       </div>
     );

@@ -1,8 +1,8 @@
 import type { Exercise, Lesson, SkillCategory, TeachCard } from "@/lib/types";
-import { getLesson } from "@/lib/content/curriculum";
+import { allLessons, getLesson } from "@/lib/content/curriculum";
 import { learnedKana } from "@/lib/content/kana";
 import { learnedVocab } from "@/lib/content/vocab";
-import { isDue, type SeenEntry } from "@/lib/srs";
+import { isDue, kanaItemId, vocabItemId, type SeenEntry } from "@/lib/srs";
 
 // Dojo drills. Endless kinds (trace/category) render their own components;
 // fixed kinds carry `exercises` and run through LessonPlayer (mode "drill").
@@ -54,24 +54,26 @@ export const dojoDrills: DojoDrill[] = [
     skill: "listening",
     kind: "match",
     unlockAfter: "u1-vowels",
+    // Content rule: this unlocks right after the vowels lesson, so it may only
+    // use vowel kana — no later rows or vocab.
     exercises: [
       {
         type: "match-pairs",
         prompt: "Match the kana to its sound",
         pairs: [
           { left: "あ", right: "a" },
-          { left: "か", right: "ka" },
-          { left: "さ", right: "sa" },
-          { left: "た", right: "ta" },
+          { left: "い", right: "i" },
+          { left: "う", right: "u" },
+          { left: "え", right: "e" },
         ],
       },
       {
         type: "match-pairs",
-        prompt: "Match the word to its meaning",
+        prompt: "Match the kana to its sound",
         pairs: [
-          { left: "りんご", right: "apple" },
-          { left: "くるま", right: "car" },
-          { left: "ほん", right: "book" },
+          { left: "お", right: "o" },
+          { left: "え", right: "e" },
+          { left: "あ", right: "a" },
         ],
       },
     ],
@@ -145,30 +147,87 @@ export const dojoDrills: DojoDrill[] = [
   },
 ];
 
+// Authored teach cards indexed by SRS id (`kana:X` / `vocab:X`), so review
+// re-teaching shows the real mnemonic/breakdown instead of a bare fabricated
+// card. Built lazily once — curriculum content is static.
+let teachCardIndex: Map<string, TeachCard> | null = null;
+function authoredCard(srsId: string): TeachCard | undefined {
+  if (!teachCardIndex) {
+    teachCardIndex = new Map();
+    for (const l of allLessons()) {
+      for (const c of l.teach ?? []) {
+        teachCardIndex.set(
+          c.kind === "phrase" ? vocabItemId(c.term) : kanaItemId(c.char),
+          c
+        );
+      }
+    }
+  }
+  return teachCardIndex.get(srsId);
+}
+
 // Learned kana/vocab that are due for spaced-repetition review, as teach cards
 // the RecallRound can quiz over. Snapshot once per review session.
 export function dueReviewCards(
   completed: string[],
   seen: Record<string, SeenEntry>
 ): TeachCard[] {
+  return collectReviewCards(completed, seen).due;
+}
+
+// The deck a review session actually runs. RecallRound needs 2+ cards for
+// distractors, so a lone due item is padded with a couple of non-due learned
+// cards — a little extra review instead of silently skipping the due one.
+export function reviewDeck(
+  completed: string[],
+  seen: Record<string, SeenEntry>
+): TeachCard[] {
+  const { due, fresh } = collectReviewCards(completed, seen);
+  if (due.length === 1 && fresh.length > 0) {
+    return [...due, ...shuffleCards(fresh).slice(0, 2)];
+  }
+  return due;
+}
+
+function collectReviewCards(
+  completed: string[],
+  seen: Record<string, SeenEntry>
+): { due: TeachCard[]; fresh: TeachCard[] } {
   const now = Date.now();
-  const cards: TeachCard[] = [];
+  const due: TeachCard[] = [];
+  const fresh: TeachCard[] = []; // learned but not due (padding material)
   for (const k of learnedKana(completed)) {
-    if (isDue(seen[`kana:${k.char}`], now)) {
-      cards.push({
+    const id = kanaItemId(k.char);
+    const card: TeachCard =
+      authoredCard(id) ?? {
         char: k.char,
         romaji: k.romaji,
         mnemonic: "",
         example: { word: k.char, romaji: k.romaji, meaning: "" },
-      });
-    }
+      };
+    (isDue(seen[id], now) ? due : fresh).push(card);
   }
   for (const v of learnedVocab(completed)) {
-    if (isDue(seen[`vocab:${v.word}`], now)) {
-      cards.push({ kind: "phrase", term: v.word, reading: "", meaning: v.gloss });
-    }
+    const id = vocabItemId(v.word);
+    const card: TeachCard =
+      authoredCard(id) ?? {
+        kind: "phrase",
+        term: v.word,
+        reading: "",
+        meaning: v.gloss,
+      };
+    (isDue(seen[id], now) ? due : fresh).push(card);
   }
-  return cards;
+  return { due, fresh };
+}
+
+function shuffleCards<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 export function getDrillConfig(id: string): DojoDrill | undefined {
@@ -211,6 +270,9 @@ export function getDrillForSkill(
 
 // Build a synthetic "Review mistakes" drill from flagged revision item ids
 // (`${lessonId}#${exerciseIndex}`). Returns null when nothing is flagged.
+// Known limitation: the index refers to the exercise's position at flag time —
+// editing a lesson's exercise list shifts indexes, so a stale flag can point
+// at the wrong (or a missing, silently dropped) exercise until the next reset.
 export function buildReviewLesson(itemIds: string[]): Lesson | null {
   const exercises = itemIds
     .map((id) => {

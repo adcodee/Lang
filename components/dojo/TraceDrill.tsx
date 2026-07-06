@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Eraser } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { learnedKana, type Kana } from "@/lib/content/kana";
+import { strokeData } from "@/lib/content/strokes";
 import { scoreDrawing, type Point, type DrawScore } from "@/lib/handwriting";
 import StrokeOrder from "@/components/teach/StrokeOrder";
 import { useDrillSession } from "@/components/dojo/useDrillSession";
@@ -18,7 +19,12 @@ const SIZE = 240;
 export default function TraceDrill() {
   const completed = useGameStore((s) => s.completedLessons);
   const recordSeen = useGameStore((s) => s.recordSeen);
-  const pool = useMemo(() => learnedKana(completed), [completed]);
+  // Only kana with reference strokes are traceable (voiced/combo kana reuse
+  // base shapes and carry no stroke data of their own).
+  const pool = useMemo(
+    () => learnedKana(completed).filter((k) => strokeData[k.char]),
+    [completed]
+  );
   const session = useDrillSession("writing");
 
   const [target, setTarget] = useState<Kana | null>(null);

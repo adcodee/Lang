@@ -1,6 +1,8 @@
 // The kana the curriculum teaches, tagged with the lesson that introduces them
-// and their row. Drives drill scoping ("whatever you've learned so far") and
-// category sorting. Every entry has stroke data in lib/content/strokes.ts.
+// and their row. Drives drill scoping ("whatever you've learned so far"),
+// vowel sorting, and the SRS review registry. The 46 base kana have stroke
+// data in lib/content/strokes.ts; voiced/combo entries don't (they reuse base
+// shapes) — trace surfaces must filter on strokeData.
 export interface Kana {
   char: string;
   romaji: string;
@@ -55,6 +57,32 @@ export const kana: Kana[] = [
   { char: "わ", romaji: "wa", row: "W-row", lessonId: "u1-wa-row" },
   { char: "を", romaji: "wo", row: "W-row", lessonId: "u1-wa-row" },
   { char: "ん", romaji: "n", row: "W-row", lessonId: "u1-wa-row" },
+  // Voiced & combo sounds (u1b) — only the kana taught as cards are registered
+  // (the remaining dakuten/yōon are future content). None have stroke data:
+  // they reuse base shapes, so trace surfaces must filter on strokeData.
+  // Small っ is teach-only (no standalone sound), so it isn't registered.
+  { char: "が", romaji: "ga", row: "G-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ぎ", romaji: "gi", row: "G-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ご", romaji: "go", row: "G-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ざ", romaji: "za", row: "Z-row", lessonId: "u1b-dakuten-gz" },
+  { char: "じ", romaji: "ji", row: "Z-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ず", romaji: "zu", row: "Z-row", lessonId: "u1b-dakuten-gz" },
+  { char: "だ", romaji: "da", row: "D-row", lessonId: "u1b-dakuten-db" },
+  { char: "で", romaji: "de", row: "D-row", lessonId: "u1b-dakuten-db" },
+  { char: "ど", romaji: "do", row: "D-row", lessonId: "u1b-dakuten-db" },
+  { char: "ば", romaji: "ba", row: "B-row", lessonId: "u1b-dakuten-db" },
+  { char: "び", romaji: "bi", row: "B-row", lessonId: "u1b-dakuten-db" },
+  { char: "ぼ", romaji: "bo", row: "B-row", lessonId: "u1b-dakuten-db" },
+  { char: "ぱ", romaji: "pa", row: "P-row", lessonId: "u1b-handakuten" },
+  { char: "ぴ", romaji: "pi", row: "P-row", lessonId: "u1b-handakuten" },
+  { char: "ぷ", romaji: "pu", row: "P-row", lessonId: "u1b-handakuten" },
+  { char: "ぺ", romaji: "pe", row: "P-row", lessonId: "u1b-handakuten" },
+  { char: "ぽ", romaji: "po", row: "P-row", lessonId: "u1b-handakuten" },
+  { char: "きゃ", romaji: "kya", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "しゅ", romaji: "shu", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "ちょ", romaji: "cho", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "じゃ", romaji: "ja", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "りょ", romaji: "ryo", row: "Yōon", lessonId: "u1b-yoon" },
 ];
 
 // Kana the learner has unlocked (its introducing lesson is completed).

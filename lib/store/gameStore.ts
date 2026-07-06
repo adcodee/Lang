@@ -17,7 +17,12 @@ function emptySkillStats(): SkillStats {
 }
 
 function todayKey(): string {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  // Local date (not UTC) — a 00:30 session should count as *today* for the
+  // learner, or late-night practice silently splits/breaks the streak.
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`; // YYYY-MM-DD
 }
 
 function dayDiff(a: string, b: string): number {
@@ -122,12 +127,17 @@ export const useGameStore = create<GameStore>()(
         set({ revisionItems: [], revisionSkills: emptyRevisionSkills() }),
 
       completeLesson: (lessonId, bonusXp) =>
-        set((s) => ({
-          xp: s.xp + bonusXp,
-          completedLessons: s.completedLessons.includes(lessonId)
-            ? s.completedLessons
-            : [...s.completedLessons, lessonId],
-        })),
+        set((s) => {
+          // The completion bonus is once per lesson — replays still earn
+          // per-answer XP, but can't farm the bonus.
+          const already = s.completedLessons.includes(lessonId);
+          return {
+            xp: s.xp + (already ? 0 : bonusXp),
+            completedLessons: already
+              ? s.completedLessons
+              : [...s.completedLessons, lessonId],
+          };
+        }),
 
       // Mark a lesson's Learn part done (unlocks its Test part).
       markLearned: (lessonId) =>

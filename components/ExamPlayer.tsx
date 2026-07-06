@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X, Heart } from "lucide-react";
 import { buildExam } from "@/lib/content/exam";
-import { getNextUnit } from "@/lib/content/curriculum";
+import { getNextUnit, getUnit, isUnitUnlocked } from "@/lib/content/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import { answerLabel } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
@@ -23,6 +23,23 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
   const recordAnswer = useGameStore((s) => s.recordAnswer);
   const passExam = useGameStore((s) => s.passExam);
   const registerActivity = useGameStore((s) => s.registerActivity);
+  const examsPassed = useGameStore((s) => s.examsPassed);
+  const completed = useGameStore((s) => s.completedLessons);
+
+  // Deep-link guard: the exam route is public, so mirror the SkillTree's
+  // "available" condition — unit unlocked and every lesson completed —
+  // otherwise /exam/<later-unit> would let the learner skip the progression.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const unit = getUnit(unitId);
+  const available =
+    Boolean(unit) &&
+    isUnitUnlocked(unitId, examsPassed) &&
+    unit!.lessons.every((l) => completed.includes(l.id));
+  const blocked = mounted && !available;
+  useEffect(() => {
+    if (blocked) router.replace("/");
+  }, [blocked, router]);
 
   const [attemptKey, setAttemptKey] = useState(0);
   const exam = useMemo(
@@ -38,6 +55,8 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
   const [lastCorrect, setLastCorrect] = useState(false);
   const [correct, setCorrect] = useState(0);
   const [done, setDone] = useState<null | "pass" | "fail">(null);
+
+  if (blocked) return null; // redirecting to the map
 
   if (!exam) {
     return (
