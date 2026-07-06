@@ -27,15 +27,3 @@ export const vocab: Vocab[] = [
 export function learnedVocab(completed: string[]): Vocab[] {
   return vocab.filter((v) => completed.includes(v.lessonId));
 }
-
-// Learned vocab grouped by category, keeping categories with 2+ entries.
-export function learnedVocabGroups(completed: string[]): Record<string, Vocab[]> {
-  const groups: Record<string, Vocab[]> = {};
-  for (const v of learnedVocab(completed)) {
-    (groups[v.category] ??= []).push(v);
-  }
-  for (const c of Object.keys(groups)) {
-    if (groups[c].length < 2) delete groups[c];
-  }
-  return groups;
-}

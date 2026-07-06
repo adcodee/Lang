@@ -6,7 +6,6 @@ import { getDrillConfig, isDrillUnlocked } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TraceDrill from "@/components/dojo/TraceDrill";
-import CategoryFillDrill from "@/components/dojo/CategoryFillDrill";
 import VowelSortDrill from "@/components/dojo/VowelSortDrill";
 
 export default function DrillPage({ params }: { params: { id: string } }) {
@@ -27,8 +26,6 @@ export default function DrillPage({ params }: { params: { id: string } }) {
   switch (drill.kind) {
     case "trace":
       return <TraceDrill />;
-    case "category":
-      return <CategoryFillDrill />;
     case "vowel-sort":
       return <VowelSortDrill />;
     default:

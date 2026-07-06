@@ -73,14 +73,3 @@ export function kanaRowProgress(completed: string[]): {
   return { unlocked, total };
 }
 
-// Learned kana grouped by row, keeping only rows with 2+ entries (sortable).
-export function learnedKanaRows(completed: string[]): Record<string, Kana[]> {
-  const rows: Record<string, Kana[]> = {};
-  for (const k of learnedKana(completed)) {
-    (rows[k.row] ??= []).push(k);
-  }
-  for (const r of Object.keys(rows)) {
-    if (rows[r].length < 2) delete rows[r];
-  }
-  return rows;
-}

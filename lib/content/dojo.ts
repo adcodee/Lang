@@ -9,7 +9,6 @@ import { isDue, type SeenEntry } from "@/lib/srs";
 // Each drill unlocks once the lesson that introduces its content is completed.
 export type DrillKind =
   | "trace"
-  | "category"
   | "vowel-sort"
   | "match"
   | "listen"
@@ -35,15 +34,6 @@ export const dojoDrills: DojoDrill[] = [
     skill: "writing",
     kind: "trace",
     unlockAfter: "u1-vowels",
-  },
-  {
-    id: "category",
-    title: "Category Fill",
-    subtitle: "Sort kana & words into groups",
-    icon: "🗂️",
-    skill: "writing",
-    kind: "category",
-    unlockAfter: "u1-ka-row", // need 2+ groups to sort
   },
   {
     id: "vowel-sort",

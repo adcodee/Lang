@@ -34,12 +34,23 @@ export default function LessonFlow({ id }: { id: string }) {
       : "learn"
     : "test";
 
+  // Whether the Test was legitimately entered this session. Failing the Test
+  // revokes Learn mid-session, which would otherwise flip the lock guard and
+  // hijack the fail screen with an instant redirect — so the entry check is
+  // snapshotted: once in, the result screen always gets to show.
+  const [testEntered, setTestEntered] = useState(false);
+  const learned = learnedLessons.includes(id);
+  useEffect(() => {
+    if (mounted && part === "test" && learned) setTestEntered(true);
+    if (part === "learn") setTestEntered(false);
+  }, [mounted, part, learned]);
+
   // Guard: gated unit (prior exam unpassed) bounces to the map; a Test opened
   // before its Learn part bounces to the Learn part.
   const unitLocked =
     mounted && Boolean(unit) && !isUnitUnlocked(unit!.id, examsPassed);
   const testLocked =
-    mounted && part === "test" && hasTeach && !learnedLessons.includes(id);
+    mounted && part === "test" && hasTeach && !learned && !testEntered;
 
   useEffect(() => {
     if (unitLocked) router.replace("/");
@@ -52,7 +63,10 @@ export default function LessonFlow({ id }: { id: string }) {
 
   // --- Learn part ---
   if (part === "learn") {
-    if (!learnDone && lesson.teach) {
+    // `learnDone` is session state; a failed Test revokes `learned` in the
+    // store, so both must hold or the teach phase runs again (not the stale
+    // "Learn complete" screen).
+    if (!(learnDone && learned) && lesson.teach) {
       return (
         <TeachPhase
           cards={lesson.teach}
