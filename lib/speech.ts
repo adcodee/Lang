@@ -143,12 +143,19 @@ function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
 // Speak text aloud. Uses a cached Japanese voice when available. `onEnd` fires
 // when the utterance finishes (or errors, or if TTS is unavailable) so a
 // hands-free conversation loop knows when to re-open the mic.
+//
+// Engines clip the first phoneme when speak() follows cancel() immediately —
+// fatal for single kana, where ご/こ differ only in the opening consonant. So
+// the utterance is padded with a leading pause (、) and scheduled a beat after
+// the cancel; a pending-speak handle keeps rapid calls from double-speaking.
+let pendingSpeak: number | null = null;
+
 export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
   if (typeof window === "undefined" || !window.speechSynthesis) {
     onEnd?.();
     return;
   }
-  const utter = new SpeechSynthesisUtterance(text);
+  const utter = new SpeechSynthesisUtterance(`、${text}`);
   utter.lang = lang;
   const jaVoice = pickJapaneseVoice();
   if (jaVoice) utter.voice = jaVoice;
@@ -157,5 +164,9 @@ export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
     utter.onerror = () => onEnd();
   }
   window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utter);
+  if (pendingSpeak !== null) window.clearTimeout(pendingSpeak);
+  pendingSpeak = window.setTimeout(() => {
+    pendingSpeak = null;
+    window.speechSynthesis.speak(utter);
+  }, 90);
 }
