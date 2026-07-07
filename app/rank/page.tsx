@@ -12,6 +12,7 @@ export default function RankPage() {
   const skillStats = useGameStore((s) => s.skillStats);
   const revisionCount = useGameStore((s) => s.revisionItems.length);
   const belts = useGameStore((s) => s.examsPassed.length);
+  const reviewLog = useGameStore((s) => s.reviewLog);
   const totalUnits = unitsInOrder().length;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -50,6 +51,10 @@ export default function RankPage() {
 
       <SkillStats />
 
+      {mounted && reviewLog.length > 0 && (
+        <Retention log={reviewLog} />
+      )}
+
       {mounted && revisionCount > 0 && (
         <Link
           href="/dojo/review"
@@ -62,5 +67,57 @@ export default function RankPage() {
         </Link>
       )}
     </div>
+  );
+}
+
+// Retention: scheduled-review accuracy per day. This is the honest metric —
+// streaks/XP say you showed up; this says whether the recalls are holding.
+function Retention({
+  log,
+}: {
+  log: { day: string; total: number; correct: number }[];
+}) {
+  const recent = log.slice(-7);
+  const pct = (e: { total: number; correct: number }) =>
+    e.total === 0 ? 0 : Math.round((e.correct / e.total) * 100);
+
+  let trend: string | null = null;
+  if (recent.length >= 2) {
+    const delta = pct(recent[recent.length - 1]) - pct(recent[0]);
+    trend =
+      delta > 5 ? "↑ improving" : delta < -5 ? "↓ slipping" : "→ steady";
+  }
+
+  return (
+    <section className="card p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="font-extrabold text-ink">🧠 Retention</h2>
+        {trend && <span className="text-sm font-bold text-muted">{trend}</span>}
+      </div>
+      <p className="mb-3 text-xs text-muted">
+        First-try accuracy in spaced reviews — the real measure of what&apos;s
+        sticking.
+      </p>
+      <div className="flex flex-col gap-1.5">
+        {recent.map((e) => (
+          <div key={e.day} className="flex items-center gap-2 text-sm">
+            <span className="w-24 shrink-0 tabular-nums text-muted">
+              {e.day.slice(5)}
+            </span>
+            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+              <div
+                className={`h-full rounded-full ${
+                  pct(e) >= 80 ? "bg-brand" : pct(e) >= 50 ? "bg-gold" : "bg-heart"
+                }`}
+                style={{ width: `${pct(e)}%` }}
+              />
+            </div>
+            <span className="w-14 shrink-0 text-right font-bold tabular-nums text-ink">
+              {pct(e)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

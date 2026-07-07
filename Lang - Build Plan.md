@@ -20,28 +20,33 @@ tags: [lang, japanese, build-plan, app]
 
 ---
 
-## Phase 1 — Close the kana gap (now)
+## Phase 1 — Close the kana gap ✅ DONE (2026-07)
 
 The single highest-priority fix. Unit 1 currently teaches 10 of 46 hiragana (vowels + K-row), yet Unit 2 phrases (こんにちは, ありがとう, こんばんは) use kana never taught: ん に ち ば り が と. The phrase cards patch this with per-kana readings, but the learner arrives at Unit 2 unable to genuinely read the material.
 
 **Tasks:**
-- [ ] Author remaining base rows in Unit 1's existing lesson format: さ-row, た-row, な-row, は-row, ま-row, や-row, ら-row, わ/を/ん (~4–6 lessons)
-- [ ] Author dakuten/handakuten lesson (が ざ だ ば ぱ rows)
-- [ ] Author small っ (sokuon), combination sounds (きゃ しゅ ちょ etc.), and long vowels
-- [ ] Verify `strokes.ts` has stroke data for all 46+ kana so the trace drill covers everything (suspect it only covers the authored subset)
-- [ ] Re-order so no Unit 2 phrase uses an untaught kana — enforce this as a content rule going forward
+- [x] Author remaining base rows in Unit 1's existing lesson format: さ-row, た-row, な-row, は-row, ま-row, や-row, ら-row, わ/を/ん
+- [x] Author dakuten/handakuten lessons (unit "Voiced & Combo Sounds" between hiragana and greetings)
+- [x] Author small っ (sokuon), combination sounds (きゃ しゅ ちょ etc.), and long vowels
+- [x] `strokes.ts` covers all 46 base kana (KanjiVG); voiced/combo kana reuse base shapes — trace surfaces filter on stroke data
+- [x] Re-ordered so no Unit 2 phrase uses an untaught kana — content rule enforced going forward
+- Bonus shipped alongside: mandatory Dojo checkpoints (mixed-review gates mid-unit), progressive Vowel Row Sort drill, taught-content SRS registry (kana + vocab)
 
 **Content rule (permanent):** every lesson may only use characters/vocabulary introduced in earlier lessons. Test each new unit against this before shipping.
 
-## Phase 2 — Spaced repetition (now, alongside Phase 1)
+## Phase 2 — Spaced repetition ✅ DONE (2026-07)
 
 Current review only resurfaces items answered *wrong*. A kana learned three weeks ago and never failed simply never comes back. Script retention lives or dies on scheduled resurfacing.
 
 **Tasks:**
-- [ ] Add `lastSeen` timestamp per kana/vocab item in the game store
-- [ ] Crude interval rule to start: resurface anything not seen in N days into the Dojo review queue (N = 3 to begin; tune later)
-- [ ] Later refinement: expanding intervals on success (1 → 3 → 7 → 14 → 30 days), reset on failure
-- [ ] Keep the existing wrong-answer queue — merge both sources into one review session
+- [x] Add `lastSeen` timestamp per kana/vocab item in the game store
+- [x] Expanding intervals on success (1 → 3 → 7 → 14 → 30 days), reset on failure
+- [x] Keep the existing wrong-answer queue — merge both sources into one review session
+
+### Phase 2b — Review depth (done 2026-07)
+- [x] **Production + interleaved reviews**: spaced reviews now cycle three formats per item (recognition choice, audio/reverse choice, *typed production*) instead of recognition-only chips — retrieval practice over passive recognition
+- [x] **Retention log**: scheduled-review accuracy tracked per day (`reviewLog`), surfaced as the Retention card on /rank — the honest metric behind the Sept 2026 milestone check
+- Deferred: half-life-regression scheduling (Duolingo-style) — needs population-scale data; the interval ladder + reset is adequate for one learner. Speaking-format reviews also deferred (mic friction in a quick loop).
 
 ## Phase 3 — Vocabulary-constrained AI tutor (when I reach Unit 2)
 
@@ -70,6 +75,7 @@ Skip textbook completeness. Author what gets used in Japan, in order of encounte
 **Content order:**
 - [ ] Katakana (menus, signs, and loanwords are saturated with it — arguably more immediately useful in-country than half of hiragana vocab)
 - [ ] Core particles: は が を に で へ の
+	- Note: pull *light* particle elaboration into greetings/intro reviews earlier than the full particle unit (the は-as-"wa" phrase-part callouts already start this) — attacks the "superficial grammar" plateau without waiting for Phase 5
 - [ ] Present/past polite verb forms (ます / ました / ません)
 - [ ] **Scenario units**, each ending in an AI roleplay in that setting:
 	- [ ] Konbini (buying, paying, bag or no bag)
@@ -93,7 +99,8 @@ Romaji-graded type-answers run through Unit 5, training a transliteration reflex
 
 - **Gamification friction:** hearts and streaks are retention mechanics for *other* users. Solo, they're friction — don't let engagement mechanics distort my own practice. Revisit only at membership stage.
 - **Audio quality:** browser TTS is serviceable for kana, weak for pitch accent. Revisit recorded native audio before the trip.
-- **Persistence:** localStorage-only progress is fine solo but is the first thing that breaks a membership version. Don't invest here until the app has proven itself on me.
+- **Persistence:** localStorage-only progress is fine solo but is the first thing that breaks a membership version. Middle path before any account system: progress **export/import** (or a tiny KV sync) — solo progress is currently per-device and one cleared cache away from gone. Full accounts still wait for the membership stage.
+- **Retention metric:** the /rank Retention card (daily spaced-review accuracy) is the number to check at the Sept 2026 milestone — not streaks/XP.
 - **Exam integrity:** re-check after every new unit that exams aren't drifting back to lesson-question replay.
 - **Content rule compliance:** no lesson uses untaught characters. Check on every unit ship.
 

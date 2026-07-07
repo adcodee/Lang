@@ -42,6 +42,7 @@ interface GameStore extends GameState {
   markLearned: (lessonId: string) => void;
   revokeLearned: (lessonId: string) => void;
   recordSeen: (itemId: string, correct: boolean) => void;
+  logReview: (correct: boolean) => void;
   passExam: (unitId: string, bonusXp: number) => void;
   registerActivity: () => void;
   reset: () => void;
@@ -63,7 +64,11 @@ const initialState: GameState = {
   revisionSkills: emptyRevisionSkills(),
   examsPassed: [],
   seen: {},
+  reviewLog: [],
 };
+
+// Keep the retention log bounded — enough history for trend-watching.
+const REVIEW_LOG_DAYS = 60;
 
 export const useGameStore = create<GameStore>()(
   persist(
@@ -166,6 +171,26 @@ export const useGameStore = create<GameStore>()(
           },
         })),
 
+      // Log a scheduled-review answer into today's retention entry. Only
+      // SRS-driven reviews call this — it measures whether spaced recalls
+      // hold up over time, so lesson/drill answers stay out of it.
+      logReview: (correct) =>
+        set((s) => {
+          const day = todayKey();
+          const log = [...s.reviewLog];
+          const last = log[log.length - 1];
+          if (last?.day === day) {
+            log[log.length - 1] = {
+              day,
+              total: last.total + 1,
+              correct: last.correct + (correct ? 1 : 0),
+            };
+          } else {
+            log.push({ day, total: 1, correct: correct ? 1 : 0 });
+          }
+          return { reviewLog: log.slice(-REVIEW_LOG_DAYS) };
+        }),
+
       // Pass a unit's exam: award bonus XP and record the belt (opens the gate).
       passExam: (unitId, bonusXp) =>
         set((s) => ({
@@ -201,6 +226,7 @@ export const useGameStore = create<GameStore>()(
         revisionSkills: s.revisionSkills,
         examsPassed: s.examsPassed,
         seen: s.seen,
+        reviewLog: s.reviewLog,
       }),
     }
   )

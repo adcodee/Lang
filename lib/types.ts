@@ -196,4 +196,7 @@ export interface GameState {
   examsPassed: string[];
   // Spaced-repetition schedule per item (`kana:さ` / `vocab:...`).
   seen: Record<string, { last: number; level: number }>;
+  // Scheduled-review accuracy per local day — the retention signal (are
+  // recalls holding up over time?), as opposed to streak/XP vanity metrics.
+  reviewLog: { day: string; total: number; correct: number }[];
 }

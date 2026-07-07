@@ -15,7 +15,9 @@ type Mode =
   | "meaning-to-term"
   | "audio-to-meaning"
   | "romaji-to-kana"
-  | "kana-to-romaji";
+  | "kana-to-romaji"
+  | "kana-type-romaji" // typed production: see the kana, type its romaji
+  | "term-type-reading"; // typed production: see the term, type its reading
 
 interface Question {
   cardIndex: number;
@@ -23,9 +25,16 @@ interface Question {
   prompt: string; // shown text (or "" when audio-led)
   audio?: string; // spoken when present
   answer: string;
-  options: string[];
+  options: string[]; // empty for typed questions
+  typed?: boolean; // typed production instead of choice chips
   jpOptions: boolean; // option chips are Japanese
   jpPrompt: boolean; // prompt text is Japanese (big)
+}
+
+// Case/space-insensitive comparison for typed answers (same rule as the
+// lesson players' type-answer grading).
+function normalize(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, "");
 }
 
 // Short active-recall round auto-generated from the just-taught cards. Missed
@@ -48,6 +57,7 @@ export default function RecallRound({
   );
   const [misses, setMisses] = useState<Record<number, number>>({});
   const [picked, setPicked] = useState<string | null>(null);
+  const [entry, setEntry] = useState(""); // typed-question input
   const [reteach, setReteach] = useState<number | null>(null);
   const [mastered, setMastered] = useState(0);
 
@@ -78,6 +88,7 @@ export default function RecallRound({
             setQueue((q) => [...q.filter((c) => c !== reteach), reteach]);
             setReteach(null);
             setPicked(null);
+            setEntry("");
           }}
         >
           Got it — try again
@@ -92,7 +103,9 @@ export default function RecallRound({
   function answer(opt: string) {
     if (picked) return;
     setPicked(opt);
-    const correct = opt === q.answer;
+    const correct = q.typed
+      ? normalize(opt) === normalize(q.answer)
+      : opt === q.answer;
     onAnswer(correct);
     const card = cards[q.cardIndex];
     recordSeen(
@@ -102,8 +115,15 @@ export default function RecallRound({
     window.setTimeout(() => advance(correct), 1100);
   }
 
+  function submitTyped() {
+    const t = entry.trim();
+    if (!t || picked) return;
+    answer(t);
+  }
+
   function advance(correct: boolean) {
     setPicked(null);
+    setEntry("");
     if (correct) {
       const nextMastered = mastered + 1;
       setMastered(nextMastered);
@@ -175,18 +195,62 @@ export default function RecallRound({
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          {q.options.map((opt) => (
-            <button
-              key={opt}
-              disabled={!!picked}
-              onClick={() => answer(opt)}
-              className={optionClass(opt)}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
+        {q.typed ? (
+          // Typed production: recall the sound and produce it — no chips to
+          // recognise from. A miss stays hidden (the item recycles).
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex w-full max-w-xs items-center gap-2">
+              <input
+                autoFocus
+                value={entry}
+                disabled={!!picked}
+                onChange={(e) => setEntry(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submitTyped()}
+                placeholder="Type the romaji…"
+                className={`flex-1 rounded-2xl border-2 px-4 py-3 text-lg outline-none ${
+                  !picked
+                    ? "border-gray-200 focus:border-sky"
+                    : normalize(picked) === normalize(q.answer)
+                    ? "border-brand bg-brand/10 text-brand-dark"
+                    : "border-heart bg-heart/10 text-heart"
+                }`}
+              />
+              <button
+                onClick={submitTyped}
+                disabled={!entry.trim() || !!picked}
+                className="rounded-2xl bg-brand px-4 py-3 font-bold text-white disabled:opacity-50"
+              >
+                ✓
+              </button>
+            </div>
+            {picked && (
+              <p
+                className={`text-sm font-bold ${
+                  normalize(picked) === normalize(q.answer)
+                    ? "text-brand-dark"
+                    : "text-heart"
+                }`}
+              >
+                {normalize(picked) === normalize(q.answer)
+                  ? "✓ Nice recall!"
+                  : "✗ Not quite — it'll come back around."}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {q.options.map((opt) => (
+              <button
+                key={opt}
+                disabled={!!picked}
+                onClick={() => answer(opt)}
+                className={optionClass(opt)}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );
@@ -202,6 +266,10 @@ function promptLabel(mode: Mode): string {
       return "Which kana makes this sound?";
     case "kana-to-romaji":
       return "What sound is this?";
+    case "kana-type-romaji":
+      return "Type the sound this makes";
+    case "term-type-reading":
+      return "Type the reading (romaji)";
   }
 }
 
@@ -212,34 +280,48 @@ function buildQuestions(cards: TeachCardData[]): Question[] {
   const romaji = cards.filter((c) => c.kind !== "phrase").map((c) => (c as { romaji: string }).romaji);
 
   const out: Question[] = [];
+  // Cycle three formats per kind — recognition, audio/reverse recognition,
+  // typed production — so a review interleaves formats instead of blocking.
   cards.forEach((c, i) => {
     let q: Question | null = null;
     if (c.kind === "phrase") {
-      if (i % 2 === 0) {
+      const variant = i % 3;
+      if (variant === 2 && c.reading) {
         q = {
-          cardIndex: i, mode: "meaning-to-term", prompt: c.meaning, answer: c.term,
-          options: opts(c.term, terms), jpOptions: true, jpPrompt: false,
+          cardIndex: i, mode: "term-type-reading", prompt: c.term, answer: c.reading,
+          options: [], typed: true, jpOptions: false, jpPrompt: true,
         };
-      } else {
+      } else if (variant === 1) {
         q = {
           cardIndex: i, mode: "audio-to-meaning", prompt: "", audio: c.term, answer: c.meaning,
           options: opts(c.meaning, meanings), jpOptions: false, jpPrompt: false,
         };
+      } else {
+        q = {
+          cardIndex: i, mode: "meaning-to-term", prompt: c.meaning, answer: c.term,
+          options: opts(c.term, terms), jpOptions: true, jpPrompt: false,
+        };
       }
     } else {
-      if (i % 2 === 0) {
+      const variant = i % 3;
+      if (variant === 2) {
         q = {
-          cardIndex: i, mode: "romaji-to-kana", prompt: c.romaji, answer: c.char,
-          options: opts(c.char, chars), jpOptions: true, jpPrompt: false,
+          cardIndex: i, mode: "kana-type-romaji", prompt: c.char, answer: c.romaji,
+          options: [], typed: true, jpOptions: false, jpPrompt: true,
         };
-      } else {
+      } else if (variant === 1) {
         q = {
           cardIndex: i, mode: "kana-to-romaji", prompt: c.char, answer: c.romaji,
           options: opts(c.romaji, romaji), jpOptions: false, jpPrompt: true,
         };
+      } else {
+        q = {
+          cardIndex: i, mode: "romaji-to-kana", prompt: c.romaji, answer: c.char,
+          options: opts(c.char, chars), jpOptions: true, jpPrompt: false,
+        };
       }
     }
-    if (q && q.options.length >= 2) out.push(q);
+    if (q && (q.typed || q.options.length >= 2)) out.push(q);
   });
   return out;
 }

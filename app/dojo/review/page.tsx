@@ -19,6 +19,7 @@ export default function ReviewPage() {
   const completed = useGameStore((s) => s.completedLessons);
   const seen = useGameStore((s) => s.seen);
   const registerActivity = useGameStore((s) => s.registerActivity);
+  const logReview = useGameStore((s) => s.logReview);
 
   // Snapshot the queue once on mount so recording answers doesn't reshuffle it.
   const frozen = useRef<{ due: TeachCard[]; revision: Lesson | null } | null>(null);
@@ -69,7 +70,7 @@ export default function ReviewPage() {
         </div>
         <RecallRound
           cards={frozen.current.due}
-          onAnswer={() => {}}
+          onAnswer={logReview}
           onDone={() => {
             // An SRS-only review is real practice — count it for the streak.
             registerActivity();
