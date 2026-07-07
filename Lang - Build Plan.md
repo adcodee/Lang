@@ -74,7 +74,7 @@ Skip textbook completeness. Author what gets used in Japan, in order of encounte
 
 **Content order:**
 - [ ] Katakana (menus, signs, and loanwords are saturated with it — arguably more immediately useful in-country than half of hiragana vocab)
-	- Reuse the teach-card **`contrast` minimal-pair mechanic** (built 2026-07 for っ/ー: hear きて vs きって, おじさん vs おじいさん side by side) for everything with no standalone sound or where the difference *is* the lesson: katakana ー (ラーメン vs ラメン), voiced-pair listening (こ/ご, は/ば/ぱ), and later pitch-accent pairs (はし bridge vs chopsticks). Pattern: never "say the mark" — always hear the pair.
+	- Reuse the teach-card **`contrast` minimal-pair mechanic** for everything where the difference *is* the lesson. Built 2026-07 for っ/ー (きて vs きって, おじさん vs おじいさん); **already applied to every dakuten/handakuten card** (base ↔ voiced: か↔が, は↔ば, は↔ぱ — hear how the diacritic changes the value). Still to reuse here: katakana ー (ラーメン vs ラメン) and later pitch-accent pairs (はし bridge vs chopsticks). Pattern: never "say the mark" — always hear the pair.
 - [ ] Core particles: は が を に で へ の
 	- Note: pull *light* particle elaboration into greetings/intro reviews earlier than the full particle unit (the は-as-"wa" phrase-part callouts already start this) — attacks the "superficial grammar" plateau without waiting for Phase 5
 - [ ] Present/past polite verb forms (ます / ました / ません)

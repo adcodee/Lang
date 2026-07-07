@@ -543,6 +543,10 @@ export const beginner: Level = {
               mnemonic: "Add two dashes ゛(dakuten) to か and voice it: ka → ga.",
               mnemonicEmoji: "゛",
               example: { word: "かがみ", romaji: "kagami", meaning: "mirror" },
+              contrast: {
+                a: { word: "か", romaji: "ka", meaning: "plain" },
+                b: { word: "が", romaji: "ga", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ぎ",
@@ -550,6 +554,10 @@ export const beginner: Level = {
               mnemonic: "き + ゛ = ぎ. The same 'g' voicing: ki → gi.",
               mnemonicEmoji: "゛",
               example: { word: "かぎ", romaji: "kagi", meaning: "key" },
+              contrast: {
+                a: { word: "き", romaji: "ki", meaning: "plain" },
+                b: { word: "ぎ", romaji: "gi", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ご",
@@ -557,6 +565,10 @@ export const beginner: Level = {
               mnemonic: "こ + ゛ = ご. ko → go.",
               mnemonicEmoji: "゛",
               example: { word: "ごご", romaji: "gogo", meaning: "afternoon" },
+              contrast: {
+                a: { word: "こ", romaji: "ko", meaning: "plain" },
+                b: { word: "ご", romaji: "go", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ざ",
@@ -564,6 +576,10 @@ export const beginner: Level = {
               mnemonic: "さ + ゛ = ざ. The 's' becomes a buzzing 'z': sa → za.",
               mnemonicEmoji: "゛",
               example: { word: "ざる", romaji: "zaru", meaning: "a strainer" },
+              contrast: {
+                a: { word: "さ", romaji: "sa", meaning: "plain" },
+                b: { word: "ざ", romaji: "za", meaning: "voiced ゛" },
+              },
             },
             {
               char: "じ",
@@ -571,6 +587,10 @@ export const beginner: Level = {
               mnemonic: "し + ゛ = じ. shi → ji (not 'zi').",
               mnemonicEmoji: "゛",
               example: { word: "じかん", romaji: "jikan", meaning: "time" },
+              contrast: {
+                a: { word: "し", romaji: "shi", meaning: "plain" },
+                b: { word: "じ", romaji: "ji", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ず",
@@ -578,6 +598,10 @@ export const beginner: Level = {
               mnemonic: "す + ゛ = ず. su → zu.",
               mnemonicEmoji: "゛",
               example: { word: "みず", romaji: "mizu", meaning: "water" },
+              contrast: {
+                a: { word: "す", romaji: "su", meaning: "plain" },
+                b: { word: "ず", romaji: "zu", meaning: "voiced ゛" },
+              },
             },
           ],
           exercises: [
@@ -638,6 +662,10 @@ export const beginner: Level = {
               mnemonic: "た + ゛ = だ. ta → da.",
               mnemonicEmoji: "゛",
               example: { word: "からだ", romaji: "karada", meaning: "body" },
+              contrast: {
+                a: { word: "た", romaji: "ta", meaning: "plain" },
+                b: { word: "だ", romaji: "da", meaning: "voiced ゛" },
+              },
             },
             {
               char: "で",
@@ -645,6 +673,10 @@ export const beginner: Level = {
               mnemonic: "て + ゛ = で. te → de.",
               mnemonicEmoji: "゛",
               example: { word: "でんき", romaji: "denki", meaning: "electricity" },
+              contrast: {
+                a: { word: "て", romaji: "te", meaning: "plain" },
+                b: { word: "で", romaji: "de", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ど",
@@ -652,6 +684,10 @@ export const beginner: Level = {
               mnemonic: "と + ゛ = ど. to → do.",
               mnemonicEmoji: "゛",
               example: { word: "どこ", romaji: "doko", meaning: "where" },
+              contrast: {
+                a: { word: "と", romaji: "to", meaning: "plain" },
+                b: { word: "ど", romaji: "do", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ば",
@@ -659,6 +695,10 @@ export const beginner: Level = {
               mnemonic: "は + ゛ = ば. ha → ba.",
               mnemonicEmoji: "゛",
               example: { word: "そば", romaji: "soba", meaning: "buckwheat noodles" },
+              contrast: {
+                a: { word: "は", romaji: "ha", meaning: "plain" },
+                b: { word: "ば", romaji: "ba", meaning: "voiced ゛" },
+              },
             },
             {
               char: "び",
@@ -666,6 +706,10 @@ export const beginner: Level = {
               mnemonic: "ひ + ゛ = び. hi → bi.",
               mnemonicEmoji: "゛",
               example: { word: "くび", romaji: "kubi", meaning: "neck" },
+              contrast: {
+                a: { word: "ひ", romaji: "hi", meaning: "plain" },
+                b: { word: "び", romaji: "bi", meaning: "voiced ゛" },
+              },
             },
             {
               char: "ぼ",
@@ -673,6 +717,10 @@ export const beginner: Level = {
               mnemonic: "ほ + ゛ = ぼ. ho → bo.",
               mnemonicEmoji: "゛",
               example: { word: "ぼく", romaji: "boku", meaning: "I / me (casual, male)" },
+              contrast: {
+                a: { word: "ほ", romaji: "ho", meaning: "plain" },
+                b: { word: "ぼ", romaji: "bo", meaning: "voiced ゛" },
+              },
             },
           ],
           exercises: [
@@ -731,6 +779,10 @@ export const beginner: Level = {
               mnemonic: "は + a small circle ゜(handakuten) = ぱ. Only the h-row takes ゜, turning h → p.",
               mnemonicEmoji: "゜",
               example: { word: "ぱん", romaji: "pan", meaning: "bread" },
+              contrast: {
+                a: { word: "は", romaji: "ha", meaning: "plain" },
+                b: { word: "ぱ", romaji: "pa", meaning: "with ゜ (p)" },
+              },
             },
             {
               char: "ぴ",
@@ -738,6 +790,10 @@ export const beginner: Level = {
               mnemonic: "ひ + ゜ = ぴ. hi → pi.",
               mnemonicEmoji: "゜",
               example: { word: "ぴあの", romaji: "piano", meaning: "piano" },
+              contrast: {
+                a: { word: "ひ", romaji: "hi", meaning: "plain" },
+                b: { word: "ぴ", romaji: "pi", meaning: "with ゜ (p)" },
+              },
             },
             {
               char: "ぷ",
@@ -745,6 +801,10 @@ export const beginner: Level = {
               mnemonic: "ふ + ゜ = ぷ. fu → pu.",
               mnemonicEmoji: "゜",
               example: { word: "ぷりん", romaji: "purin", meaning: "pudding" },
+              contrast: {
+                a: { word: "ふ", romaji: "fu", meaning: "plain" },
+                b: { word: "ぷ", romaji: "pu", meaning: "with ゜ (p)" },
+              },
             },
             {
               char: "ぺ",
@@ -752,6 +812,10 @@ export const beginner: Level = {
               mnemonic: "へ + ゜ = ぺ. he → pe.",
               mnemonicEmoji: "゜",
               example: { word: "ぺん", romaji: "pen", meaning: "pen" },
+              contrast: {
+                a: { word: "へ", romaji: "he", meaning: "plain" },
+                b: { word: "ぺ", romaji: "pe", meaning: "with ゜ (p)" },
+              },
             },
             {
               char: "ぽ",
@@ -759,6 +823,10 @@ export const beginner: Level = {
               mnemonic: "ほ + ゜ = ぽ. Careful: ぽ looks like ぱ — ほ has an extra line across the top that は doesn't. Extra line = 'o'.",
               mnemonicEmoji: "゜",
               example: { word: "たんぽぽ", romaji: "tanpopo", meaning: "dandelion" },
+              contrast: {
+                a: { word: "ほ", romaji: "ho", meaning: "plain" },
+                b: { word: "ぽ", romaji: "po", meaning: "with ゜ (p)" },
+              },
             },
           ],
           exercises: [
