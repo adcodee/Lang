@@ -45,9 +45,10 @@ export default function TeachCard({
         {card.contrast && (
           <div className="mt-4">
             <p className="mb-2 text-xs text-muted">
-              {speakable
-                ? "Hear how the mark changes the sound:"
-                : "This mark has no sound of its own — hear what it does:"}
+              {card.contrast.label ??
+                (speakable
+                  ? "Hear how the mark changes the sound:"
+                  : "This mark has no sound of its own — hear what it does:")}
             </p>
             <div className="grid grid-cols-2 gap-3">
               {[card.contrast.a, card.contrast.b].map((w) => (

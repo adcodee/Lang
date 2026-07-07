@@ -176,6 +176,9 @@ export default function LessonPlayer({
         exercise={exercise}
         checked={checked}
         onChecked={handleChecked}
+        // While a retry is pending, don't highlight the correct option — the
+        // second attempt has to be recalled, not read off the screen.
+        revealAnswer={!retryOffered}
       />
 
       {checked && (

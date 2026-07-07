@@ -13,15 +13,24 @@ export default function ExerciseCard({
   exercise,
   checked,
   onChecked,
+  revealAnswer = true,
 }: {
   exercise: Exercise;
   checked: boolean; // once true, inputs lock until parent advances
   onChecked: (correct: boolean) => void;
+  // When false (a retry is coming), a wrong pick shows red but the correct
+  // option is NOT highlighted — otherwise the retry answers itself.
+  revealAnswer?: boolean;
 }) {
   switch (exercise.type) {
     case "translate-choice":
       return (
-        <TranslateChoice exercise={exercise} checked={checked} onChecked={onChecked} />
+        <TranslateChoice
+          exercise={exercise}
+          checked={checked}
+          onChecked={onChecked}
+          revealAnswer={revealAnswer}
+        />
       );
     case "type-answer":
       return (
@@ -37,7 +46,12 @@ export default function ExerciseCard({
       );
     case "listen-choice":
       return (
-        <ListenChoice exercise={exercise} checked={checked} onChecked={onChecked} />
+        <ListenChoice
+          exercise={exercise}
+          checked={checked}
+          onChecked={onChecked}
+          revealAnswer={revealAnswer}
+        />
       );
     case "speak-phrase":
       return (
@@ -59,10 +73,12 @@ function TranslateChoice({
   exercise,
   checked,
   onChecked,
+  revealAnswer = true,
 }: {
   exercise: Extract<Exercise, { type: "translate-choice" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  revealAnswer?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   // Shuffle once on mount so the answer isn't always in the same slot.
@@ -70,8 +86,11 @@ function TranslateChoice({
 
   function classFor(option: string): string {
     if (!checked) return selected === option ? "choice choice-selected" : "choice";
-    if (option === exercise.answer) return "choice choice-correct";
-    if (option === selected) return "choice choice-wrong";
+    // The pick always shows its own result; the correct option is only
+    // revealed when no retry follows (otherwise the retry answers itself).
+    if (option === selected)
+      return option === exercise.answer ? "choice choice-correct" : "choice choice-wrong";
+    if (revealAnswer && option === exercise.answer) return "choice choice-correct";
     return "choice opacity-60";
   }
 
@@ -312,10 +331,12 @@ function ListenChoice({
   exercise,
   checked,
   onChecked,
+  revealAnswer = true,
 }: {
   exercise: Extract<Exercise, { type: "listen-choice" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  revealAnswer?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [played, setPlayed] = useState(false);
@@ -335,8 +356,10 @@ function ListenChoice({
 
   function classFor(option: string): string {
     if (!checked) return selected === option ? "choice choice-selected" : "choice";
-    if (option === exercise.answer) return "choice choice-correct";
-    if (option === selected) return "choice choice-wrong";
+    // Same retry-safe reveal rule as TranslateChoice.
+    if (option === selected)
+      return option === exercise.answer ? "choice choice-correct" : "choice choice-wrong";
+    if (revealAnswer && option === exercise.answer) return "choice choice-correct";
     return "choice opacity-60";
   }
 

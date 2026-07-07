@@ -97,9 +97,11 @@ export interface KanaTeachCard {
   mnemonic: string; // "あ looks like a fish saying 'ah'"
   mnemonicEmoji?: string; // 🐟
   example: { word: string; romaji: string; meaning: string }; // あめ / ame / rain
-  // For marks that can't be pronounced alone (っ, ー): a minimal pair heard
-  // side by side, demonstrating what the mark *does* instead of "saying" it.
+  // A pair heard/seen side by side: what a diacritic does (か↔が), what a
+  // silent mark does to a word (きて↔きって), or a lookalike to tell apart
+  // (は↔ほ). `label` overrides the default caption.
   contrast?: {
+    label?: string;
     a: { word: string; romaji: string; meaning: string };
     b: { word: string; romaji: string; meaning: string };
   };

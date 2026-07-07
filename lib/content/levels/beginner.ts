@@ -173,7 +173,7 @@ export const beginner: Level = {
           skill: "writing",
           xp: 20,
           teach: [
-            { char: "さ", romaji: "sa", mnemonic: "さ looks like a fishhook — 'sa'.", example: { word: "あさ", romaji: "asa", meaning: "morning" } },
+            { char: "さ", romaji: "sa", mnemonic: "さ looks like a fishhook — 'sa'.", example: { word: "あさ", romaji: "asa", meaning: "morning" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "き", romaji: "ki", meaning: "two cross-strokes" }, b: { word: "さ", romaji: "sa", meaning: "one cross-stroke" } } },
             { char: "し", romaji: "shi", mnemonic: "し is a single hook swooping down — 'shi'.", example: { word: "しか", romaji: "shika", meaning: "deer" } },
             { char: "す", romaji: "su", mnemonic: "す has a loop like a curl — 'su'.", example: { word: "すし", romaji: "sushi", meaning: "sushi" } },
             { char: "せ", romaji: "se", mnemonic: "せ looks like it says 'set' — 'se'.", example: { word: "せき", romaji: "seki", meaning: "seat" } },
@@ -197,7 +197,7 @@ export const beginner: Level = {
           teach: [
             { char: "た", romaji: "ta", mnemonic: "た has a cross and a hook — 'ta'.", example: { word: "たこ", romaji: "tako", meaning: "octopus" } },
             { char: "ち", romaji: "chi", mnemonic: "ち is like a chin — 'chi'.", example: { word: "くち", romaji: "kuchi", meaning: "mouth" } },
-            { char: "つ", romaji: "tsu", mnemonic: "つ is a swoosh like a wave — 'tsu'.", example: { word: "くつ", romaji: "kutsu", meaning: "shoes" } },
+            { char: "つ", romaji: "tsu", mnemonic: "つ is a swoosh like a wave — 'tsu'.", example: { word: "くつ", romaji: "kutsu", meaning: "shoes" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "し", romaji: "shi", meaning: "drops down" }, b: { word: "つ", romaji: "tsu", meaning: "sweeps across" } } },
             { char: "て", romaji: "te", mnemonic: "て is one hook stroke — 'te'.", example: { word: "て", romaji: "te", meaning: "hand" } },
             { char: "と", romaji: "to", mnemonic: "と is a nail with a drop — 'to'.", example: { word: "いと", romaji: "ito", meaning: "thread" } },
           ],
@@ -218,7 +218,7 @@ export const beginner: Level = {
           xp: 20,
           teach: [
             { char: "な", romaji: "na", mnemonic: "な has a cross and a knot — 'na'.", example: { word: "さかな", romaji: "sakana", meaning: "fish" } },
-            { char: "に", romaji: "ni", mnemonic: "に looks like two marks — 'ni'.", example: { word: "にく", romaji: "niku", meaning: "meat" } },
+            { char: "に", romaji: "ni", mnemonic: "に looks like two marks — 'ni'.", example: { word: "にく", romaji: "niku", meaning: "meat" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "こ", romaji: "ko", meaning: "two strokes only" }, b: { word: "に", romaji: "ni", meaning: "adds the left stem" } } },
             { char: "ぬ", romaji: "nu", mnemonic: "ぬ has a loop like noodles — 'nu'.", example: { word: "いぬ", romaji: "inu", meaning: "dog" } },
             { char: "ね", romaji: "ne", mnemonic: "ね has a loop with a tail — 'ne'.", example: { word: "ねこ", romaji: "neko", meaning: "cat" } },
             { char: "の", romaji: "no", mnemonic: "の is a single spiral — 'no'.", example: { word: "きのこ", romaji: "kinoko", meaning: "mushroom" } },
@@ -243,7 +243,7 @@ export const beginner: Level = {
             { char: "ひ", romaji: "hi", mnemonic: "ひ is a wide smile — 'hi'.", example: { word: "ひと", romaji: "hito", meaning: "person" } },
             { char: "ふ", romaji: "fu", mnemonic: "ふ is scattered like Mt. Fuji — 'fu'.", example: { word: "ふね", romaji: "fune", meaning: "boat" } },
             { char: "へ", romaji: "he", mnemonic: "へ is a gentle hill — 'he'.", example: { word: "へそ", romaji: "heso", meaning: "navel" } },
-            { char: "ほ", romaji: "ho", mnemonic: "ほ is は plus a stroke — 'ho'.", example: { word: "ほし", romaji: "hoshi", meaning: "star" } },
+            { char: "ほ", romaji: "ho", mnemonic: "ほ is は plus a stroke — 'ho'.", example: { word: "ほし", romaji: "hoshi", meaning: "star" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "は", romaji: "ha", meaning: "no line on top" }, b: { word: "ほ", romaji: "ho", meaning: "extra line on top" } } },
           ],
           exercises: [
             { type: "translate-choice", prompt: "Which sound does this make?", display: "ふ", options: ["fu", "ho", "hi", "ha"], answer: "fu", note: "ふ = 'fu', a soft h/f sound." },
@@ -321,7 +321,7 @@ export const beginner: Level = {
             { char: "ま", romaji: "ma", mnemonic: "ま has a loop at the bottom — 'ma'.", example: { word: "まめ", romaji: "mame", meaning: "bean" } },
             { char: "み", romaji: "mi", mnemonic: "み curls like the number 21 — 'mi'.", example: { word: "みみ", romaji: "mimi", meaning: "ear" } },
             { char: "む", romaji: "mu", mnemonic: "む has a loop and a flick — 'mu'.", example: { word: "むし", romaji: "mushi", meaning: "insect" } },
-            { char: "め", romaji: "me", mnemonic: "め is a loop like an eye — 'me'.", example: { word: "め", romaji: "me", meaning: "eye" } },
+            { char: "め", romaji: "me", mnemonic: "め is a loop like an eye — 'me'.", example: { word: "め", romaji: "me", meaning: "eye" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "ぬ", romaji: "nu", meaning: "ends in a loop" }, b: { word: "め", romaji: "me", meaning: "no end loop" } } },
             { char: "も", romaji: "mo", mnemonic: "も is a hook with two crosses — 'mo'.", example: { word: "もも", romaji: "momo", meaning: "peach" } },
           ],
           exercises: [
@@ -363,8 +363,8 @@ export const beginner: Level = {
             { char: "ら", romaji: "ra", mnemonic: "ら is a flag on a pole — 'ra'.", example: { word: "そら", romaji: "sora", meaning: "sky" } },
             { char: "り", romaji: "ri", mnemonic: "り is two strokes — 'ri'.", example: { word: "とり", romaji: "tori", meaning: "bird" } },
             { char: "る", romaji: "ru", mnemonic: "る ends in a loop — 'ru'.", example: { word: "よる", romaji: "yoru", meaning: "night" } },
-            { char: "れ", romaji: "re", mnemonic: "れ has a tail that curls out — 're'.", example: { word: "はれ", romaji: "hare", meaning: "sunny" } },
-            { char: "ろ", romaji: "ro", mnemonic: "ろ is る without the loop — 'ro'.", example: { word: "いろ", romaji: "iro", meaning: "colour" } },
+            { char: "れ", romaji: "re", mnemonic: "れ has a tail that curls out — 're'.", example: { word: "はれ", romaji: "hare", meaning: "sunny" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "ね", romaji: "ne", meaning: "loops at the base" }, b: { word: "れ", romaji: "re", meaning: "kicks outward" } } },
+            { char: "ろ", romaji: "ro", mnemonic: "ろ is る without the loop — 'ro'.", example: { word: "いろ", romaji: "iro", meaning: "colour" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "る", romaji: "ru", meaning: "ends in a loop" }, b: { word: "ろ", romaji: "ro", meaning: "no loop" } } },
           ],
           exercises: [
             { type: "translate-choice", prompt: "Which sound does this make?", display: "る", options: ["ru", "ro", "ra", "ri"], answer: "ru", note: "る (loop) vs ろ (no loop)." },
@@ -382,7 +382,7 @@ export const beginner: Level = {
           skill: "writing",
           xp: 20,
           teach: [
-            { char: "わ", romaji: "wa", mnemonic: "わ has a tail — 'wa'.", example: { word: "かわ", romaji: "kawa", meaning: "river" } },
+            { char: "わ", romaji: "wa", mnemonic: "わ has a tail — 'wa'.", example: { word: "かわ", romaji: "kawa", meaning: "river" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "れ", romaji: "re", meaning: "kicks outward" }, b: { word: "わ", romaji: "wa", meaning: "curls inward" } } },
             { char: "を", romaji: "wo", mnemonic: "を is the object-marker particle — said 'o'.", example: { word: "を", romaji: "o", meaning: "marks the object of a verb" } },
             { char: "ん", romaji: "n", mnemonic: "ん is the only solo-consonant kana — 'n'.", example: { word: "ほん", romaji: "hon", meaning: "book" } },
           ],
