@@ -24,7 +24,10 @@ Respond ONLY with a compact JSON object of the form:
 {"reply": "<your reply, Japanese + English>", "correction": "<short correction or empty string>"}`;
 
 export async function getTextFeedback(
-  messages: ChatMessage[]
+  messages: ChatMessage[],
+  // Vocabulary-constraint + scenario block (see lib/ai/constraints.ts) —
+  // keeps the tutor inside what the learner has actually been taught.
+  context?: string
 ): Promise<TextFeedback> {
   if (!claudeConfigured()) {
     return stubFeedback(messages);
@@ -39,7 +42,7 @@ export async function getTextFeedback(
     const response = await client.messages.create({
       model,
       max_tokens: 400,
-      system: SYSTEM_PROMPT,
+      system: context ? `${SYSTEM_PROMPT}\n${context}` : SYSTEM_PROMPT,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
     });
 

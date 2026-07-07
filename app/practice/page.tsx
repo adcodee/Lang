@@ -1,64 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { MessageSquare, Mic } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MessageSquare, Mic, Lock } from "lucide-react";
 import ChatPanel from "@/components/ChatPanel";
 import VoiceChat from "@/components/VoiceChat";
-import type { ChatMessage } from "@/lib/types";
+import { scenarios, isScenarioUnlocked } from "@/lib/content/scenarios";
+import { getLesson } from "@/lib/content/curriculum";
+import { useGameStore } from "@/lib/store/gameStore";
 
 type Mode = "text" | "voice";
 
-// Each scenario seeds the tutor's opening line + context.
-const SCENARIOS: { id: string; label: string; starter: ChatMessage }[] = [
-  {
-    id: "free",
-    label: "Free chat",
-    starter: {
-      role: "assistant",
-      content: "こんにちは！日本語で話しましょう。(Hello! Let's talk in Japanese.)",
-    },
-  },
-  {
-    id: "friend",
-    label: "Meeting a friend",
-    starter: {
-      role: "assistant",
-      content:
-        "やあ！ひさしぶり！げんき？ (Hey! Long time no see! How are you?) — We're friends meeting in Tokyo.",
-    },
-  },
-  {
-    id: "ramen",
-    label: "Ordering ramen",
-    starter: {
-      role: "assistant",
-      content:
-        "いらっしゃいませ！ごちゅうもんは？ (Welcome! What would you like to order?) — You're at a ramen shop.",
-    },
-  },
-  {
-    id: "directions",
-    label: "Asking directions",
-    starter: {
-      role: "assistant",
-      content:
-        "はい、どうしましたか？ (Yes, can I help you?) — You're lost and asking a passer-by for directions.",
-    },
-  },
-];
+// The tutor unlocks with the first greetings lesson — same progression
+// pattern as the Dojo drills. Scenarios unlock individually after the
+// lesson that teaches their language.
+const TUTOR_UNLOCK = "u2-greetings-core";
 
 export default function PracticePage() {
+  const completed = useGameStore((s) => s.completedLessons);
   const [mode, setMode] = useState<Mode>("text");
-  const [scenarioId, setScenarioId] = useState("free");
-  const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0];
+  const [scenarioId, setScenarioId] = useState(scenarios[0].id);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const tutorUnlocked = !mounted || completed.includes(TUTOR_UNLOCK);
+  const unlockedScenarios = scenarios.filter(
+    (s) => !mounted || isScenarioUnlocked(s, completed)
+  );
+  const scenario =
+    unlockedScenarios.find((s) => s.id === scenarioId) ??
+    unlockedScenarios[0] ??
+    scenarios[0];
+
+  if (!tutorUnlocked) {
+    return (
+      <div className="card flex flex-col items-center gap-3 p-10 text-center">
+        <Lock className="h-8 w-8 text-muted" />
+        <h1 className="text-xl font-extrabold text-ink">
+          Your tutor is waiting
+        </h1>
+        <p className="max-w-xs text-sm text-muted">
+          Complete “{getLesson(TUTOR_UNLOCK)?.title ?? "Basic Greetings"}” to
+          unlock conversation practice — the tutor only ever uses the Japanese
+          you&apos;ve learned.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="card mb-4 p-6 text-center">
         <h1 className="text-2xl font-extrabold text-ink">Conversation practice</h1>
         <p className="mt-1 text-muted">
-          Hold a real conversation with your AI tutor and get corrective
-          feedback.
+          Hold a real conversation with your AI tutor — it sticks to the
+          Japanese you&apos;ve learned and corrects you gently.
         </p>
       </div>
 
@@ -80,28 +75,50 @@ export default function PracticePage() {
         </div>
       </div>
 
-      {/* Scenario chips (text mode seeds the opening line) */}
+      {/* Scenario chips — locked ones show until their lesson is completed */}
       <div className="mb-6 flex flex-wrap justify-center gap-2">
-        {SCENARIOS.map((s) => (
-          <button
-            key={s.id}
-            onClick={() => setScenarioId(s.id)}
-            className={`rounded-full px-3 py-1.5 text-sm font-bold transition ${
-              scenarioId === s.id
-                ? "bg-brand text-white shadow-[0_2px_0_#3a5a34]"
-                : "bg-white text-muted shadow-card hover:text-ink"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
+        {scenarios.map((s) => {
+          const unlocked = !mounted || isScenarioUnlocked(s, completed);
+          if (!unlocked) {
+            return (
+              <span
+                key={s.id}
+                title={`Complete “${getLesson(s.unlockAfter)?.title ?? s.unlockAfter}” to unlock`}
+                className="flex cursor-not-allowed items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-muted opacity-60 shadow-card"
+              >
+                <Lock className="h-3 w-3" /> {s.label}
+              </span>
+            );
+          }
+          return (
+            <button
+              key={s.id}
+              onClick={() => setScenarioId(s.id)}
+              className={`rounded-full px-3 py-1.5 text-sm font-bold transition ${
+                scenario.id === s.id
+                  ? "bg-brand text-white shadow-[0_2px_0_#3a5a34]"
+                  : "bg-white text-muted shadow-card hover:text-ink"
+              }`}
+            >
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
       {mode === "text" ? (
         // key on scenario so switching scenarios restarts with the new opener.
-        <ChatPanel key={scenario.id} starter={scenario.starter} />
+        <ChatPanel
+          key={scenario.id}
+          starter={scenario.starter}
+          scenarioId={scenario.id}
+        />
       ) : (
-        <VoiceChat />
+        <VoiceChat
+          key={scenario.id}
+          starter={scenario.starter.content}
+          scenarioId={scenario.id}
+        />
       )}
 
       <p className="mt-4 text-center text-xs text-muted">

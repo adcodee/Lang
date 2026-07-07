@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTextFeedback } from "@/lib/ai/claude";
+import { buildTutorContext } from "@/lib/ai/constraints";
 import type { ChatMessage } from "@/lib/types";
 
-// Text tutor endpoint (Claude). Accepts the conversation so far and returns the
-// assistant reply plus any grammar correction.
+// Text tutor endpoint (Claude). Accepts the conversation so far plus the
+// learner's completed lessons (from which the allowed vocabulary is derived
+// server-side) and returns the assistant reply plus any grammar correction.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -16,7 +18,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const feedback = await getTextFeedback(messages);
+    const completed: string[] = Array.isArray(body?.completedLessons)
+      ? body.completedLessons.filter((id: unknown) => typeof id === "string")
+      : [];
+    const scenario: string | undefined =
+      typeof body?.scenario === "string" ? body.scenario : undefined;
+
+    const context = buildTutorContext(completed, scenario);
+    const feedback = await getTextFeedback(messages, context);
     return NextResponse.json(feedback);
   } catch (err) {
     console.error("/api/chat error", err);

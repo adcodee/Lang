@@ -5,6 +5,7 @@ import { Volume2, Radio, Square } from "lucide-react";
 import { DemoBadge } from "@/components/ChatPanel";
 import { speak, speechSupported, listenOnce } from "@/lib/speech";
 import { recordUntilSilence } from "@/lib/audio";
+import { useGameStore } from "@/lib/store/gameStore";
 import SpeakInput from "@/components/SpeakInput";
 
 interface VoiceLine {
@@ -15,8 +16,17 @@ interface VoiceLine {
 
 type Phase = "idle" | "listening" | "thinking" | "speaking";
 
-export default function VoiceChat() {
-  const [lines, setLines] = useState<VoiceLine[]>([]);
+export default function VoiceChat({
+  starter,
+  scenarioId,
+}: {
+  starter?: string; // opening assistant line (scenario opener)
+  scenarioId?: string;
+}) {
+  const completed = useGameStore((s) => s.completedLessons);
+  const [lines, setLines] = useState<VoiceLine[]>(
+    starter ? [{ role: "assistant", text: starter }] : []
+  );
   const [thinking, setThinking] = useState(false);
   const [demo, setDemo] = useState(false);
   const [handsFree, setHandsFree] = useState(false);
@@ -37,13 +47,22 @@ export default function VoiceChat() {
 
   // Send a user turn to the tutor; append both lines; return the reply text.
   async function sendForReply(text: string): Promise<string> {
+    // Snapshot before appending — the transcript itself goes as `transcript`.
+    const history = lines.map((l) => ({ role: l.role, content: l.text }));
     setLines((l) => [...l, { role: "user", text }]);
     setThinking(true);
     try {
       const res = await fetch("/api/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: text }),
+        // history gives the tutor memory of the exchange; completedLessons
+        // lets the server constrain it to taught vocabulary.
+        body: JSON.stringify({
+          transcript: text,
+          history,
+          completedLessons: completed,
+          scenario: scenarioId,
+        }),
       });
       const data = await res.json();
       setDemo(Boolean(data.stubbed));

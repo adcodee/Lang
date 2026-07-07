@@ -20,7 +20,23 @@ const SYSTEM_PROMPT = `You are a friendly Japanese speaking partner for a beginn
 Keep replies to ONE short, easy spoken sentence in Japanese, then its English.
 Respond ONLY with compact JSON: {"reply":"<Japanese + English>","romaji":"<romaji of the Japanese>"}`;
 
-export async function voiceTurn(transcript: string): Promise<VoiceTurn> {
+// Cap the conversation memory sent upstream — enough to hold a short
+// scripted exchange without growing unbounded.
+const MAX_HISTORY = 12;
+
+export interface VoiceHistoryLine {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export async function voiceTurn(
+  transcript: string,
+  // Prior turns — without them the tutor is amnesiac and can't hold the
+  // greeting → name → nice-to-meet-you → goodbye exchange.
+  history: VoiceHistoryLine[] = [],
+  // Vocabulary-constraint + scenario block (see lib/ai/constraints.ts).
+  context?: string
+): Promise<VoiceTurn> {
   if (!grokConfigured()) {
     return stubVoiceTurn(transcript);
   }
@@ -35,7 +51,11 @@ export async function voiceTurn(transcript: string): Promise<VoiceTurn> {
       body: JSON.stringify({
         model: process.env.XAI_MODEL || "grok-2-latest",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          {
+            role: "system",
+            content: context ? `${SYSTEM_PROMPT}\n${context}` : SYSTEM_PROMPT,
+          },
+          ...history.slice(-MAX_HISTORY),
           { role: "user", content: transcript },
         ],
         temperature: 0.7,

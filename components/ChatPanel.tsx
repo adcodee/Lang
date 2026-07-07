@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Send, Sparkles } from "lucide-react";
+import { useGameStore } from "@/lib/store/gameStore";
 import type { ChatMessage } from "@/lib/types";
 
 const STARTER: ChatMessage = {
@@ -9,7 +10,14 @@ const STARTER: ChatMessage = {
   content: "こんにちは！日本語で話しましょう。(Hello! Let's talk in Japanese.)",
 };
 
-export default function ChatPanel({ starter }: { starter?: ChatMessage }) {
+export default function ChatPanel({
+  starter,
+  scenarioId,
+}: {
+  starter?: ChatMessage;
+  scenarioId?: string;
+}) {
+  const completed = useGameStore((s) => s.completedLessons);
   const [messages, setMessages] = useState<ChatMessage[]>([starter ?? STARTER]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +35,13 @@ export default function ChatPanel({ starter }: { starter?: ChatMessage }) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        // completedLessons lets the server derive the allowed vocabulary —
+        // the tutor stays inside what's actually been taught.
+        body: JSON.stringify({
+          messages: next,
+          completedLessons: completed,
+          scenario: scenarioId,
+        }),
       });
       const data = await res.json();
       setDemo(Boolean(data.stubbed));

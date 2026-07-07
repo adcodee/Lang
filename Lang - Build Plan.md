@@ -53,11 +53,11 @@ Current review only resurfaces items answered *wrong*. A kana learned three week
 Correction of my own assumption: waiting until I'm "at conversation level" is Duolingo's logic — conversation as a reward for finishing. The AI's entire advantage is that it can meet the learner at their level. Readiness starts at Unit 2, not at fluency.
 
 **Tasks:**
-- [ ] Pass completed-lesson state (learned vocab + kana list) from the client to `/api/chat` and `/api/voice`
-- [ ] Rewrite the Claude system prompt: "use ONLY these words/kana: [list]; one short exchange at a time; correct gently; stay in scenario"
-- [ ] Same treatment for the Grok voice prompt
-- [ ] Target after Unit 2: a real four-line exchange — greeting → name → nice to meet you → goodbye
-- [ ] Tutor unlock tied to lesson completion, same as Dojo drills
+- [x] Pass completed-lesson state to `/api/chat` and `/api/voice` — client sends `completedLessons`; the server derives allowed kana/vocab from the content registries (`lib/ai/constraints.ts`)
+- [x] Claude system prompt constrained: only taught kana/words (+ minimal grammar glue), one short exchange per turn, gentle restating corrections, stay in scenario
+- [x] Same treatment for the Grok voice prompt — plus **conversation history** (the voice tutor was single-turn and couldn't hold an exchange)
+- [ ] Target after Unit 2: a real four-line exchange — greeting → name → nice to meet you → goodbye. *Structurally in place (the "Meeting someone new" scenario scripts it one step per turn); verify live with keys.*
+- [x] Tutor unlock tied to lesson completion, same as Dojo drills — /practice gates on Basic Greetings; scenarios unlock individually (free chat → greetings, meet-someone → self-intro, food → Unit 5 nouns; directions returns with Phase 5)
 
 ## Phase 4 — Fix the exams (after Unit 5)
 
