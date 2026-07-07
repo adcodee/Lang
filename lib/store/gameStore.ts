@@ -9,6 +9,7 @@ const MAX_HEARTS = 5;
 
 function emptySkillStats(): SkillStats {
   return {
+    reading: { correct: 0, total: 0, xp: 0 },
     speaking: { correct: 0, total: 0, xp: 0 },
     writing: { correct: 0, total: 0, xp: 0 },
     listening: { correct: 0, total: 0, xp: 0 },
@@ -49,7 +50,7 @@ interface GameStore extends GameState {
 }
 
 function emptyRevisionSkills(): Record<SkillCategory, number> {
-  return { speaking: 0, writing: 0, listening: 0, punctuation: 0 };
+  return { reading: 0, speaking: 0, writing: 0, listening: 0, punctuation: 0 };
 }
 
 const initialState: GameState = {
@@ -228,6 +229,21 @@ export const useGameStore = create<GameStore>()(
         seen: s.seen,
         reviewLog: s.reviewLog,
       }),
+      // Saves written before a skill existed (e.g. `reading`, added 2026-07)
+      // lack its keys in skillStats/revisionSkills — deep-fill from the
+      // current defaults so old progress loads instead of crashing.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<GameState>;
+        return {
+          ...current,
+          ...p,
+          skillStats: { ...current.skillStats, ...(p.skillStats ?? {}) },
+          revisionSkills: {
+            ...current.revisionSkills,
+            ...(p.revisionSkills ?? {}),
+          },
+        };
+      },
     }
   )
 );

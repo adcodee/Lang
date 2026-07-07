@@ -6,6 +6,7 @@ import { SKILL_BADGE } from "@/components/LessonNode";
 import type { SkillCategory } from "@/lib/types";
 
 const SKILLS: SkillCategory[] = [
+  "reading",
   "speaking",
   "writing",
   "listening",
@@ -13,6 +14,7 @@ const SKILLS: SkillCategory[] = [
 ];
 
 const BAR_COLOR: Record<SkillCategory, string> = {
+  reading: "bg-torii",
   speaking: "bg-brand",
   writing: "bg-sky",
   listening: "bg-gold",

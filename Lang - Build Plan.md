@@ -85,6 +85,10 @@ Skip textbook completeness. Author what gets used in Japan, in order of encounte
 	- [ ] Asking directions (where is / how far / left-right)
 	- [ ] Hotel (check-in, requests, checkout)
 
+### Reading as a tracked skill (added 2026-07)
+
+Rank originally tracked speaking/writing/listening/punctuation — **reading was missing**, and kana-recognition exercises were miscredited to writing. Now: `reading` is a first-class skill (Rank bar, balance gate, weakness training); Unit 1/1b kana lessons + checkpoints attribute to it; listen-choice/speak-phrase exercises are modality-bound (always credit listening/speaking) via `exerciseSkill()`; Vowel Row Sort re-tagged reading; new **Word Flash** Dojo drill (read a learned word in kana → pick the meaning, no romaji until answered). Follow-up: a finer per-exercise skill pass over u2+ phrase lessons. **The reading stat is Phase 6's readiness signal** — fade romaji as reading accuracy holds.
+
 ## Phase 6 — Wean the romaji (throughout)
 
 Romaji-graded type-answers run through Unit 5, training a transliteration reflex that has to be unlearned — and would follow me to Japan.

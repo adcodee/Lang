@@ -11,6 +11,7 @@ export type DrillKind =
   | "trace"
   | "vowel-sort"
   | "lookalike"
+  | "word-flash"
   | "match"
   | "listen"
   | "punctuation";
@@ -41,7 +42,7 @@ export const dojoDrills: DojoDrill[] = [
     title: "Vowel Row Sort",
     subtitle: "Sort kana by their vowel sound",
     icon: "🔤",
-    skill: "listening",
+    skill: "reading",
     kind: "vowel-sort",
     // Unlocks once the vowels are learned, then grows one row at a time as
     // each later row lesson is completed (the drill draws only from learned kana).
@@ -56,6 +57,16 @@ export const dojoDrills: DojoDrill[] = [
     kind: "lookalike",
     // あ/お is available from the vowels; more twins join as rows are learned.
     unlockAfter: "u1-vowels",
+  },
+  {
+    id: "word-flash",
+    title: "Word Flash",
+    subtitle: "Read the word, pick its meaning",
+    icon: "📖",
+    skill: "reading",
+    kind: "word-flash",
+    // First lesson that registers enough vocab for distractors.
+    unlockAfter: "u2-greetings-core",
   },
   {
     id: "match",

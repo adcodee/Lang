@@ -9,14 +9,23 @@ export type ExerciseType =
   | "speak-phrase" // see a phrase, say it aloud (speech recognition)
   | "category-sort"; // park items into the correct buckets
 
-// The four learning skills every unit aims to cover.
+// The five learning skills every unit aims to cover.
 export type SkillCategory =
+  | "reading"
   | "speaking"
   | "writing"
   | "listening"
   | "punctuation";
 
-export interface TranslateChoiceExercise {
+// Optional per-exercise override of the lesson's skill, for stat attribution
+// (e.g. one listening question inside a reading lesson). Listen-choice and
+// speak-phrase are modality-bound and default to listening/speaking anyway —
+// see exerciseSkill() in lib/exercise.ts.
+interface ExerciseBase {
+  skill?: SkillCategory;
+}
+
+export interface TranslateChoiceExercise extends ExerciseBase {
   type: "translate-choice";
   prompt: string; // e.g. "Select the meaning of こんにちは"
   display: string; // the term shown big, e.g. "こんにちは"
@@ -25,14 +34,14 @@ export interface TranslateChoiceExercise {
   note?: string; // short teaching note shown after answering
 }
 
-export interface MatchPairsExercise {
+export interface MatchPairsExercise extends ExerciseBase {
   type: "match-pairs";
   prompt: string;
   pairs: { left: string; right: string }[];
   note?: string;
 }
 
-export interface TypeAnswerExercise {
+export interface TypeAnswerExercise extends ExerciseBase {
   type: "type-answer";
   prompt: string;
   display: string;
@@ -41,7 +50,7 @@ export interface TypeAnswerExercise {
   note?: string;
 }
 
-export interface BuildSentenceExercise {
+export interface BuildSentenceExercise extends ExerciseBase {
   type: "build-sentence";
   prompt: string;
   display: string; // the English/meaning to translate
@@ -51,7 +60,7 @@ export interface BuildSentenceExercise {
 }
 
 // hear it (TTS) -> pick the meaning/kana. No on-screen Japanese.
-export interface ListenChoiceExercise {
+export interface ListenChoiceExercise extends ExerciseBase {
   type: "listen-choice";
   prompt: string;
   audio: string; // Japanese text fed to speak()
@@ -61,7 +70,7 @@ export interface ListenChoiceExercise {
 }
 
 // see it -> say it -> matched against speech recognition transcript.
-export interface SpeakPhraseExercise {
+export interface SpeakPhraseExercise extends ExerciseBase {
   type: "speak-phrase";
   prompt: string;
   display: string; // the Japanese phrase to say
@@ -71,7 +80,7 @@ export interface SpeakPhraseExercise {
 }
 
 // park each item into its correct bucket (the "sorting game" mechanic).
-export interface CategorySortExercise {
+export interface CategorySortExercise extends ExerciseBase {
   type: "category-sort";
   prompt: string;
   categories: string[]; // bucket labels

@@ -49,7 +49,8 @@ function vowelOf(romaji: string): string | null {
 export default function VowelSortDrill() {
   const completed = useGameStore((s) => s.completedLessons);
   const recordSeen = useGameStore((s) => s.recordSeen);
-  const session = useDrillSession("listening");
+  // Vowel structure is read off the kana — this trains reading, not the ear.
+  const session = useDrillSession("reading");
   const [done, setDone] = useState(false);
   const [round, setRound] = useState(0);
 

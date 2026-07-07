@@ -1,5 +1,6 @@
 import type { Exercise, SkillCategory } from "@/lib/types";
 import { getUnit } from "@/lib/content/curriculum";
+import { exerciseSkill } from "@/lib/exercise";
 
 const EXAM_LENGTH = 10;
 
@@ -23,7 +24,10 @@ export function buildExam(unitId: string): Exam | null {
   if (!unit) return null;
 
   const pool: ExamItem[] = unit.lessons.flatMap((lesson) =>
-    lesson.exercises.map((exercise) => ({ exercise, skill: lesson.skill }))
+    lesson.exercises.map((exercise) => ({
+      exercise,
+      skill: exerciseSkill(exercise, lesson.skill),
+    }))
   );
   if (pool.length === 0) return null;
 

@@ -16,6 +16,7 @@ import { SKILL_BADGE } from "@/components/LessonNode";
 import type { SkillCategory } from "@/lib/types";
 
 const SKILLS: SkillCategory[] = [
+  "reading",
   "speaking",
   "writing",
   "listening",

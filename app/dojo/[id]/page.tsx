@@ -8,6 +8,7 @@ import LessonPlayer from "@/components/LessonPlayer";
 import TraceDrill from "@/components/dojo/TraceDrill";
 import VowelSortDrill from "@/components/dojo/VowelSortDrill";
 import LookalikeDrill from "@/components/dojo/LookalikeDrill";
+import WordFlashDrill from "@/components/dojo/WordFlashDrill";
 
 export default function DrillPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -31,6 +32,8 @@ export default function DrillPage({ params }: { params: { id: string } }) {
       return <VowelSortDrill />;
     case "lookalike":
       return <LookalikeDrill />;
+    case "word-flash":
+      return <WordFlashDrill />;
     default:
       return <LessonPlayer lessonId={params.id} mode="drill" />;
   }

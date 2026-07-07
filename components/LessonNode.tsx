@@ -9,6 +9,7 @@ export type NodeStatus = "completed" | "current" | "locked";
 export type NodeVariant = "learn" | "test" | "single";
 
 export const SKILL_BADGE: Record<SkillCategory, { icon: string; label: string }> = {
+  reading: { icon: "📖", label: "Reading" },
   speaking: { icon: "🗣️", label: "Speaking" },
   writing: { icon: "✍️", label: "Writing" },
   listening: { icon: "👂", label: "Listening" },

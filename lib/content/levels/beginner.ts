@@ -18,7 +18,7 @@ export const beginner: Level = {
           title: "The 5 Vowels",
           subtitle: "あ い う え お",
           icon: "あ",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             {
@@ -98,7 +98,7 @@ export const beginner: Level = {
           title: "The K-row",
           subtitle: "か き く け こ",
           icon: "か",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             {
@@ -170,7 +170,7 @@ export const beginner: Level = {
           title: "The S-row",
           subtitle: "さ し す せ そ",
           icon: "さ",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "さ", romaji: "sa", mnemonic: "さ looks like a fishhook — 'sa'.", example: { word: "あさ", romaji: "asa", meaning: "morning" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "き", romaji: "ki", meaning: "two cross-strokes" }, b: { word: "さ", romaji: "sa", meaning: "one cross-stroke" } } },
@@ -192,7 +192,7 @@ export const beginner: Level = {
           title: "The T-row",
           subtitle: "た ち つ て と",
           icon: "た",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "た", romaji: "ta", mnemonic: "た has a cross and a hook — 'ta'.", example: { word: "たこ", romaji: "tako", meaning: "octopus" } },
@@ -214,7 +214,7 @@ export const beginner: Level = {
           title: "The N-row",
           subtitle: "な に ぬ ね の",
           icon: "な",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "な", romaji: "na", mnemonic: "な has a cross and a knot — 'na'.", example: { word: "さかな", romaji: "sakana", meaning: "fish" } },
@@ -236,7 +236,7 @@ export const beginner: Level = {
           title: "The H-row",
           subtitle: "は ひ ふ へ ほ",
           icon: "は",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "は", romaji: "ha", mnemonic: "は looks like an 'H' shape — 'ha'.", example: { word: "はな", romaji: "hana", meaning: "flower / nose" } },
@@ -258,7 +258,7 @@ export const beginner: Level = {
           title: "Dojo Checkpoint",
           subtitle: "Prove the rows so far",
           icon: "⛩️",
-          skill: "writing",
+          skill: "reading",
           xp: 30,
           checkpoint: true,
           exercises: [
@@ -315,7 +315,7 @@ export const beginner: Level = {
           title: "The M-row",
           subtitle: "ま み む め も",
           icon: "ま",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "ま", romaji: "ma", mnemonic: "ま has a loop at the bottom — 'ma'.", example: { word: "まめ", romaji: "mame", meaning: "bean" } },
@@ -337,7 +337,7 @@ export const beginner: Level = {
           title: "The Y-row",
           subtitle: "や ゆ よ",
           icon: "や",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "や", romaji: "ya", mnemonic: "や looks like a yak's horns — 'ya'.", example: { word: "やま", romaji: "yama", meaning: "mountain" } },
@@ -357,7 +357,7 @@ export const beginner: Level = {
           title: "The R-row",
           subtitle: "ら り る れ ろ",
           icon: "ら",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "ら", romaji: "ra", mnemonic: "ら is a flag on a pole — 'ra'.", example: { word: "そら", romaji: "sora", meaning: "sky" } },
@@ -379,7 +379,7 @@ export const beginner: Level = {
           title: "わ を ん",
           subtitle: "The last kana",
           icon: "ん",
-          skill: "writing",
+          skill: "reading",
           xp: 20,
           teach: [
             { char: "わ", romaji: "wa", mnemonic: "わ has a tail — 'wa'.", example: { word: "かわ", romaji: "kawa", meaning: "river" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "れ", romaji: "re", meaning: "kicks outward" }, b: { word: "わ", romaji: "wa", meaning: "curls inward" } } },
@@ -399,7 +399,7 @@ export const beginner: Level = {
           title: "Dojo Checkpoint",
           subtitle: "All 46 kana — prove it",
           icon: "⛩️",
-          skill: "listening",
+          skill: "reading",
           xp: 40,
           checkpoint: true,
           exercises: [
@@ -463,7 +463,7 @@ export const beginner: Level = {
           title: "Vowel Sort",
           subtitle: "Group kana by vowel sound",
           icon: "🔤",
-          skill: "listening",
+          skill: "reading",
           xp: 25,
           exercises: [
             {
@@ -534,7 +534,7 @@ export const beginner: Level = {
           title: "Dakuten: G & Z",
           subtitle: "が-row & ざ-row",
           icon: "゛",
-          skill: "writing",
+          skill: "reading",
           xp: 25,
           teach: [
             {
@@ -653,7 +653,7 @@ export const beginner: Level = {
           title: "Dakuten: D & B",
           subtitle: "だ-row & ば-row",
           icon: "゛",
-          skill: "writing",
+          skill: "reading",
           xp: 25,
           teach: [
             {
@@ -770,7 +770,7 @@ export const beginner: Level = {
           title: "Handakuten: P",
           subtitle: "ぱ ぴ ぷ ぺ ぽ",
           icon: "゜",
-          skill: "writing",
+          skill: "reading",
           xp: 25,
           teach: [
             {
@@ -885,7 +885,7 @@ export const beginner: Level = {
           title: "Dojo Checkpoint",
           subtitle: "Dakuten & handakuten — prove it",
           icon: "⛩️",
-          skill: "listening",
+          skill: "reading",
           xp: 40,
           checkpoint: true,
           exercises: [
@@ -951,7 +951,7 @@ export const beginner: Level = {
           title: "Small ゃ ゅ ょ",
           subtitle: "きゃ しゅ ちょ — blended sounds",
           icon: "ゃ",
-          skill: "writing",
+          skill: "reading",
           xp: 25,
           teach: [
             {

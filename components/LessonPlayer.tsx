@@ -8,7 +8,7 @@ import { getLesson, getUnitForLesson } from "@/lib/content/curriculum";
 import { getDrill } from "@/lib/content/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
-import { answerLabel } from "@/lib/exercise";
+import { answerLabel, exerciseSkill } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
@@ -78,13 +78,16 @@ export default function LessonPlayer({
     if (attempt > 0) return; // retries don't change score or stats
 
     // First attempt: this is what scoring, stats and revision are based on.
+    // The skill comes from the exercise (override/modality) with the lesson
+    // skill as the fallback.
+    const skill = exerciseSkill(exercise, lesson!.skill);
     if (mode !== "review") {
-      recordAnswer(lesson!.skill, correct, correct ? XP_PER_CORRECT : 0);
+      recordAnswer(skill, correct, correct ? XP_PER_CORRECT : 0);
     }
     if (correct) {
       setFirstTryCount((c) => c + 1);
     } else if (mode === "lesson") {
-      flagRevision(lesson!.skill, `${lesson!.id}#${step}`);
+      flagRevision(skill, `${lesson!.id}#${step}`);
     }
   }
 
