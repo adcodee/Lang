@@ -22,19 +22,50 @@ export default function TeachCard({
   const hasStrokes = Boolean(strokeData[card.char]);
   return (
     <div className="teach-surface flex flex-col gap-6 rounded-2xl border-2 border-gray-100 p-6">
-      {/* 1) Listen */}
+      {/* 1) Listen — a pronounceable kana speaks itself; a silent mark (っ, ー)
+          demos a minimal pair instead, since the mark can't be said alone. */}
       <section className="text-center">
         <div className="font-jp text-7xl text-sumi">{card.char}</div>
         <div className="mt-1 text-lg font-bold text-muted">{card.romaji}</div>
-        <div className="mt-3 flex flex-col items-center gap-1">
-          <button
-            onClick={() => speak(card.char)}
-            className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#244a40]"
-          >
-            <Volume2 className="h-4 w-4" /> Hear it
-          </button>
-          <p className="mt-1 text-xs text-muted">Tap to hear it, then say it aloud.</p>
-        </div>
+        {card.contrast ? (
+          <div className="mt-3">
+            <p className="mb-2 text-xs text-muted">
+              This mark has no sound of its own — hear what it does:
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[card.contrast.a, card.contrast.b].map((w) => (
+                <button
+                  key={w.word}
+                  onClick={() => speak(w.word)}
+                  className="rounded-2xl border-2 border-gray-200 p-3 transition hover:border-sky"
+                >
+                  <div className="font-jp text-2xl text-sumi">{w.word}</div>
+                  <div className="mt-0.5 text-xs text-muted">
+                    {w.romaji} — {w.meaning}
+                  </div>
+                  <div className="mt-1.5 flex justify-center">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-sky text-white">
+                      <Volume2 className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              Tap both — hear how the mark changes the word.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-3 flex flex-col items-center gap-1">
+            <button
+              onClick={() => speak(card.char)}
+              className="flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-bold text-white shadow-[0_2px_0_#244a40]"
+            >
+              <Volume2 className="h-4 w-4" /> Hear it
+            </button>
+            <p className="mt-1 text-xs text-muted">Tap to hear it, then say it aloud.</p>
+          </div>
+        )}
       </section>
 
       {/* 2) Mnemonic */}

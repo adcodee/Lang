@@ -980,6 +980,10 @@ export const beginner: Level = {
               mnemonic: "A SMALL つ (っ) makes no sound of its own — it doubles the next consonant and adds a tiny pause. きって = ki-t-te.",
               mnemonicEmoji: "✋",
               example: { word: "きって", romaji: "kitte", meaning: "postage stamp" },
+              contrast: {
+                a: { word: "きて", romaji: "kite", meaning: "come!" },
+                b: { word: "きって", romaji: "kitte", meaning: "stamp" },
+              },
             },
             {
               char: "ー",
@@ -987,6 +991,10 @@ export const beginner: Level = {
               mnemonic: "In katakana ー holds the vowel longer; in hiragana you double the vowel instead (おかあさん, おいしい).",
               mnemonicEmoji: "➖",
               example: { word: "おおきい", romaji: "ookii", meaning: "big" },
+              contrast: {
+                a: { word: "おじさん", romaji: "ojisan", meaning: "uncle" },
+                b: { word: "おじいさん", romaji: "ojiisan", meaning: "grandfather" },
+              },
             },
           ],
           exercises: [

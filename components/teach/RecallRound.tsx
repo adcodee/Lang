@@ -304,12 +304,15 @@ function buildQuestions(cards: TeachCardData[]): Question[] {
       }
     } else {
       const variant = i % 3;
-      if (variant === 2) {
+      // Typed production only for real romaji — silent marks (っ/ー carry
+      // labels like "(pause)") can't be "typed", so they fall back to choice.
+      const typable = /^[a-z]+$/.test(c.romaji);
+      if (variant === 2 && typable) {
         q = {
           cardIndex: i, mode: "kana-type-romaji", prompt: c.char, answer: c.romaji,
           options: [], typed: true, jpOptions: false, jpPrompt: true,
         };
-      } else if (variant === 1) {
+      } else if (variant === 1 || (variant === 2 && !typable)) {
         q = {
           cardIndex: i, mode: "kana-to-romaji", prompt: c.char, answer: c.romaji,
           options: opts(c.romaji, romaji), jpOptions: false, jpPrompt: true,
