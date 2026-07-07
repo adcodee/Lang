@@ -10,6 +10,7 @@ import { isDue, kanaItemId, vocabItemId, type SeenEntry } from "@/lib/srs";
 export type DrillKind =
   | "trace"
   | "vowel-sort"
+  | "lookalike"
   | "match"
   | "listen"
   | "punctuation";
@@ -44,6 +45,16 @@ export const dojoDrills: DojoDrill[] = [
     kind: "vowel-sort",
     // Unlocks once the vowels are learned, then grows one row at a time as
     // each later row lesson is completed (the drill draws only from learned kana).
+    unlockAfter: "u1-vowels",
+  },
+  {
+    id: "lookalike",
+    title: "Lookalike Pairs",
+    subtitle: "Near-twins — pick the right one",
+    icon: "👯",
+    skill: "listening",
+    kind: "lookalike",
+    // あ/お is available from the vowels; more twins join as rows are learned.
     unlockAfter: "u1-vowels",
   },
   {

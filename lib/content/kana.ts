@@ -90,6 +90,44 @@ export function learnedKana(completed: string[]): Kana[] {
   return kana.filter((k) => completed.includes(k.lessonId));
 }
 
+// The classic near-twin pairs, with each side's visual tell. Drives the
+// Lookalike Pairs drill (and mirrors the teach cards' contrast pairs). A pair
+// only enters play once BOTH kana are learned.
+export interface LookalikePair {
+  a: string;
+  b: string;
+  tellA: string;
+  tellB: string;
+}
+
+export const lookalikePairs: LookalikePair[] = [
+  { a: "あ", b: "お", tellA: "crossbar sticks out", tellB: "extra dot, tighter loop" },
+  { a: "い", b: "り", tellA: "two short strokes", tellB: "long right drop" },
+  { a: "き", b: "さ", tellA: "two cross-strokes", tellB: "one cross-stroke" },
+  { a: "し", b: "つ", tellA: "drops down", tellB: "sweeps across" },
+  { a: "こ", b: "に", tellA: "two strokes only", tellB: "adds the left stem" },
+  { a: "は", b: "ほ", tellA: "no line on top", tellB: "extra line on top" },
+  { a: "ぬ", b: "め", tellA: "ends in a loop", tellB: "no end loop" },
+  { a: "ね", b: "れ", tellA: "loops at the base", tellB: "kicks outward" },
+  { a: "ね", b: "わ", tellA: "loops at the base", tellB: "curls inward" },
+  { a: "れ", b: "わ", tellA: "kicks outward", tellB: "curls inward" },
+  { a: "る", b: "ろ", tellA: "ends in a loop", tellB: "no loop" },
+  { a: "ば", b: "ぱ", tellA: "dashes ゛= b", tellB: "circle ゜= p" },
+  { a: "び", b: "ぴ", tellA: "dashes ゛= b", tellB: "circle ゜= p" },
+  { a: "ぼ", b: "ぽ", tellA: "dashes ゛= b", tellB: "circle ゜= p" },
+  { a: "ぱ", b: "ぽ", tellA: "no line on top (は)", tellB: "extra line on top (ほ)" },
+];
+
+// Pairs where both kana are already learned — the drill's active pool.
+export function learnedLookalikePairs(completed: string[]): LookalikePair[] {
+  const known = new Set(learnedKana(completed).map((k) => k.char));
+  return lookalikePairs.filter((p) => known.has(p.a) && known.has(p.b));
+}
+
+export function kanaByChar(char: string): Kana | undefined {
+  return kana.find((k) => k.char === char);
+}
+
 // Progress across the base-kana rows (Vowels, K-row, …) — drives the
 // "N/M rows unlocked" hint on the progressive Vowel Sort drill.
 export function kanaRowProgress(completed: string[]): {

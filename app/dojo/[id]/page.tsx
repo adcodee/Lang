@@ -7,6 +7,7 @@ import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TraceDrill from "@/components/dojo/TraceDrill";
 import VowelSortDrill from "@/components/dojo/VowelSortDrill";
+import LookalikeDrill from "@/components/dojo/LookalikeDrill";
 
 export default function DrillPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function DrillPage({ params }: { params: { id: string } }) {
       return <TraceDrill />;
     case "vowel-sort":
       return <VowelSortDrill />;
+    case "lookalike":
+      return <LookalikeDrill />;
     default:
       return <LessonPlayer lessonId={params.id} mode="drill" />;
   }
