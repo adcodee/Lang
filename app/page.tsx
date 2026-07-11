@@ -1,4 +1,5 @@
 import SkillTree from "@/components/SkillTree";
+import NextLessonFAB from "@/components/NextLessonFAB";
 
 export default function HomePage() {
   return (
@@ -11,6 +12,7 @@ export default function HomePage() {
         </p>
       </div>
       <SkillTree />
+      <NextLessonFAB />
     </div>
   );
 }

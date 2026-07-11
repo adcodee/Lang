@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Lock } from "lucide-react";
 import { levels } from "@/lib/content/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
+import { useCurrentLesson } from "@/lib/hooks/useCurrentLesson";
 import LessonNode, { NodeStatus, NodeVariant } from "@/components/LessonNode";
 import ExamNode, { ExamStatus } from "@/components/ExamNode";
 import type { Lesson, Unit } from "@/lib/types";
@@ -51,20 +52,9 @@ export default function SkillTree() {
     return unit.lessons.every((l) => completedSet.has(l.id));
   }
 
-  // The single "current" node key (`${id}:learn|test`): the first unfinished
-  // node — Learn before its Test — in the first unlocked, incomplete unit.
-  const currentKey = useMemo(() => {
-    for (let i = 0; i < units.length; i++) {
-      if (!unitUnlocked(i)) break;
-      for (const l of units[i].lessons) {
-        if (hasTeach(l) && !learnedSet.has(l.id)) return `${l.id}:learn`;
-        if (!completedSet.has(l.id)) return `${l.id}:test`;
-      }
-      if (!examsPassedSet.has(units[i].id)) break; // frontier is the exam
-    }
-    return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [units, completedSet, learnedSet, examsPassedSet]);
+  // The single "current" node key comes from the shared hook (also drives the FAB).
+  const currentLesson = useCurrentLesson();
+  const currentKey = mounted ? currentLesson?.currentKey : undefined;
 
   function statusFor(
     unitIndex: number,

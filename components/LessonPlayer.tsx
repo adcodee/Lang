@@ -231,6 +231,26 @@ function LessonComplete({
     unit && idxInUnit >= 0 ? unit.lessons[idxInUnit + 1] : undefined;
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
+  // Compute the next destination href once so the countdown can use it.
+  const nextHref = isLastInUnit && unit
+    ? `/exam/${unit.id}`
+    : nextInUnit
+    ? `/lesson/${nextInUnit.id}`
+    : "/practice";
+
+  // Auto-advance countdown (passed lessons only).
+  const [countdown, setCountdown] = useState(3);
+  const [autoNavCancelled, setAutoNavCancelled] = useState(false);
+  useEffect(() => {
+    if (!passed || autoNavCancelled) return;
+    if (countdown <= 0) {
+      router.push(nextHref);
+      return;
+    }
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [passed, countdown, autoNavCancelled, nextHref, router]);
+
   if (!passed) {
     // Below the pass rate — no completion. For a gated 2-part lesson, the Learn
     // part is re-locked by the effect above so it must be redone.
@@ -298,23 +318,29 @@ function LessonComplete({
         {isLastInUnit && unit ? (
           <button
             className="btn-brand"
-            onClick={() => router.push(`/exam/${unit.id}`)}
+            onClick={() => { setAutoNavCancelled(true); router.push(`/exam/${unit.id}`); }}
           >
-            Take the {unit.title} exam 🥋
+            Take the {unit.title} exam 🥋{" "}
+            {!autoNavCancelled && <span className="opacity-60">({countdown})</span>}
           </button>
         ) : nextInUnit ? (
           <button
             className="btn-brand"
-            onClick={() => router.push(`/lesson/${nextInUnit.id}`)}
+            onClick={() => { setAutoNavCancelled(true); router.push(`/lesson/${nextInUnit.id}`); }}
           >
-            Next lesson: {nextInUnit.title}
+            Next lesson: {nextInUnit.title}{" "}
+            {!autoNavCancelled && <span className="opacity-60">({countdown})</span>}
           </button>
         ) : (
-          <button className="btn-sky" onClick={() => router.push("/practice")}>
-            Try AI conversation practice
+          <button
+            className="btn-sky"
+            onClick={() => { setAutoNavCancelled(true); router.push("/practice"); }}
+          >
+            Try AI conversation practice{" "}
+            {!autoNavCancelled && <span className="opacity-60">({countdown})</span>}
           </button>
         )}
-        <button className="btn-ghost" onClick={() => router.push("/")}>
+        <button className="btn-ghost" onClick={() => { setAutoNavCancelled(true); router.push("/"); }}>
           Back to map
         </button>
       </div>
