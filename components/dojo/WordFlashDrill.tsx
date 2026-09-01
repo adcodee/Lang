@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import { speak } from "@/lib/speech";
 import { useGameStore } from "@/lib/store/gameStore";
-import { learnedVocab, type Vocab } from "@/lib/content/vocab";
+import { learnedVocab, type Vocab } from "@/lib/content/ja/vocab";
 import { useDrillSession } from "@/components/dojo/useDrillSession";
 import SessionHud from "@/components/dojo/SessionHud";
 import SessionSummary from "@/components/dojo/SessionSummary";

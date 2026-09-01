@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { getRank } from "@/lib/rank";
-import { unitsInOrder } from "@/lib/content/curriculum";
+import { unitsInOrder } from "@/lib/content/ja/curriculum";
 import SkillStats from "@/components/SkillStats";
 
 export default function RankPage() {

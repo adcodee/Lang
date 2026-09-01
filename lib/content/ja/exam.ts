@@ -1,5 +1,5 @@
 import type { Exercise, SkillCategory } from "@/lib/types";
-import { getUnit } from "@/lib/content/curriculum";
+import { getUnit } from "@/lib/content/ja/curriculum";
 import { exerciseSkill } from "@/lib/exercise";
 
 const EXAM_LENGTH = 10;

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Mic, Lock } from "lucide-react";
 import ChatPanel from "@/components/ChatPanel";
 import VoiceChat from "@/components/VoiceChat";
-import { scenarios, isScenarioUnlocked } from "@/lib/content/scenarios";
-import { getLesson } from "@/lib/content/curriculum";
+import { scenarios, isScenarioUnlocked } from "@/lib/content/ja/scenarios";
+import { getLesson } from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 
 type Mode = "text" | "voice";

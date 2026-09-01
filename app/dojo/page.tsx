@@ -9,9 +9,9 @@ import {
   isDrillUnlocked,
   unlockLessonTitle,
   dueReviewCards,
-} from "@/lib/content/dojo";
+} from "@/lib/content/ja/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
-import { kanaRowProgress } from "@/lib/content/kana";
+import { kanaRowProgress } from "@/lib/content/ja/kana";
 import { SKILL_BADGE } from "@/components/LessonNode";
 import type { SkillCategory } from "@/lib/types";
 

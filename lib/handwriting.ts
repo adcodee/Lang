@@ -1,6 +1,6 @@
 "use client";
 
-import { strokeData } from "@/lib/content/strokes";
+import { strokeData } from "@/lib/content/ja/strokes";
 
 // Lightweight, ML-free kana handwriting *verification*. The drill knows the
 // target kana, so we don't recognise open input — we compare the learner's

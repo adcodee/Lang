@@ -7,7 +7,7 @@ import {
   getLesson,
   getUnitForLesson,
   isUnitUnlocked,
-} from "@/lib/content/curriculum";
+} from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TeachPhase from "@/components/teach/TeachPhase";

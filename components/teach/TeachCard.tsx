@@ -4,7 +4,7 @@ import { Volume2 } from "lucide-react";
 import { speak } from "@/lib/speech";
 import StrokeOrder from "@/components/teach/StrokeOrder";
 import TraceCanvas from "@/components/teach/TraceCanvas";
-import { strokeData } from "@/lib/content/strokes";
+import { strokeData } from "@/lib/content/ja/strokes";
 import type { KanaTeachCard } from "@/lib/types";
 
 // One character's introduction: listen, mnemonic, stroke order, trace, and an

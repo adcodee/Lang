@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Volume2, Lightbulb } from "lucide-react";
 import { speak } from "@/lib/speech";
 import { useGameStore } from "@/lib/store/gameStore";
-import { learnedKana, kanaRowProgress } from "@/lib/content/kana";
+import { learnedKana, kanaRowProgress } from "@/lib/content/ja/kana";
 import { useDrillSession } from "@/components/dojo/useDrillSession";
 import SessionHud from "@/components/dojo/SessionHud";
 import SessionSummary from "@/components/dojo/SessionSummary";

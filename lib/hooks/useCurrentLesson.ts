@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { unitsInOrder } from "@/lib/content/curriculum";
+import { unitsInOrder } from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
 

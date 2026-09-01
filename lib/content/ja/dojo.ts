@@ -1,7 +1,7 @@
 import type { Exercise, Lesson, SkillCategory, TeachCard } from "@/lib/types";
-import { allLessons, getLesson } from "@/lib/content/curriculum";
-import { learnedKana } from "@/lib/content/kana";
-import { learnedVocab } from "@/lib/content/vocab";
+import { allLessons, getLesson } from "@/lib/content/ja/curriculum";
+import { learnedKana } from "@/lib/content/ja/kana";
+import { learnedVocab } from "@/lib/content/ja/vocab";
 import { isDue, kanaItemId, vocabItemId, type SeenEntry } from "@/lib/srs";
 
 // Dojo drills. Endless kinds (trace/category) render their own components;

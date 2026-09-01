@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Lock } from "lucide-react";
-import { levels } from "@/lib/content/curriculum";
+import { levels } from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import { useCurrentLesson } from "@/lib/hooks/useCurrentLesson";
 import LessonNode, { NodeStatus, NodeVariant } from "@/components/LessonNode";

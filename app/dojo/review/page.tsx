@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
-import { buildReviewLesson, reviewDeck } from "@/lib/content/dojo";
+import { buildReviewLesson, reviewDeck } from "@/lib/content/ja/dojo";
 import type { Lesson, TeachCard } from "@/lib/types";
 import LessonPlayer from "@/components/LessonPlayer";
 import RecallRound from "@/components/teach/RecallRound";

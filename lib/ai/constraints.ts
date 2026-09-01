@@ -1,7 +1,7 @@
 import "server-only";
-import { learnedKana } from "@/lib/content/kana";
-import { learnedVocab } from "@/lib/content/vocab";
-import { getScenario } from "@/lib/content/scenarios";
+import { learnedKana } from "@/lib/content/ja/kana";
+import { learnedVocab } from "@/lib/content/ja/vocab";
+import { getScenario } from "@/lib/content/ja/scenarios";
 
 // Builds the vocabulary-constraint block appended to both tutors' system
 // prompts. The client sends only its completed-lesson ids; the allowed

@@ -1,8 +1,8 @@
 import type { Level, Lesson, Unit } from "@/lib/types";
-import { beginner } from "@/lib/content/levels/beginner";
-import { intermediate } from "@/lib/content/levels/intermediate";
-import { advanced } from "@/lib/content/levels/advanced";
-import { fluent } from "@/lib/content/levels/fluent";
+import { beginner } from "@/lib/content/ja/levels/beginner";
+import { intermediate } from "@/lib/content/ja/levels/intermediate";
+import { advanced } from "@/lib/content/ja/levels/advanced";
+import { fluent } from "@/lib/content/ja/levels/fluent";
 
 // The full curriculum, ordered from easiest to hardest.
 export const levels: Level[] = [beginner, intermediate, advanced, fluent];

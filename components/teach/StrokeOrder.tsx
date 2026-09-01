@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
-import { strokeData, STROKE_VIEWBOX } from "@/lib/content/strokes";
+import { strokeData, STROKE_VIEWBOX } from "@/lib/content/ja/strokes";
 
 // Animates a kana's strokes in order by drawing each path with a growing
 // dash. Strokes data is KanjiVG (CC BY-SA 3.0). When `guideOnly`, it just

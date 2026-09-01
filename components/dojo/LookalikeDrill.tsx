@@ -9,7 +9,7 @@ import {
   learnedLookalikePairs,
   kanaByChar,
   type LookalikePair,
-} from "@/lib/content/kana";
+} from "@/lib/content/ja/kana";
 import { useDrillSession } from "@/components/dojo/useDrillSession";
 import SessionHud from "@/components/dojo/SessionHud";
 import SessionSummary from "@/components/dojo/SessionSummary";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getDrillConfig, isDrillUnlocked } from "@/lib/content/dojo";
+import { getDrillConfig, isDrillUnlocked } from "@/lib/content/ja/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TraceDrill from "@/components/dojo/TraceDrill";
