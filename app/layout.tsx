@@ -3,6 +3,7 @@ import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/TopBar";
 import BottomNav from "@/components/BottomNav";
+import LanguageGate from "@/components/LanguageGate";
 
 const notoSansJp = Noto_Sans_JP({
   subsets: ["latin"],
@@ -26,7 +27,7 @@ export default function RootLayout({
       <body>
         <TopBar />
         <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-6">
-          {children}
+          <LanguageGate>{children}</LanguageGate>
         </main>
         <BottomNav />
       </body>
