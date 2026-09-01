@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Lang</string>
+    <string name="title_activity_main">Lang</string>
+    <string name="package_name">com.langapp.lang</string>
+    <string name="custom_url_scheme">com.langapp.lang</string>
+</resources>

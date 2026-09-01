@@ -7,6 +7,7 @@ import { speak, speechSupported, listenOnce } from "@/lib/speech";
 import { recordUntilSilence } from "@/lib/audio";
 import { useGameStore } from "@/lib/store/gameStore";
 import SpeakInput from "@/components/SpeakInput";
+import { API_BASE } from "@/lib/apiBase";
 
 interface VoiceLine {
   role: "user" | "assistant";
@@ -52,7 +53,7 @@ export default function VoiceChat({
     setLines((l) => [...l, { role: "user", text }]);
     setThinking(true);
     try {
-      const res = await fetch("/api/voice", {
+      const res = await fetch(`${API_BASE}/api/voice`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // history gives the tutor memory of the exchange; completedLessons
@@ -95,7 +96,7 @@ export default function VoiceChat({
     const form = new FormData();
     form.append("audio", blob, "audio");
     form.append("language", "ja");
-    const res = await fetch("/api/transcribe", { method: "POST", body: form });
+    const res = await fetch(`${API_BASE}/api/transcribe`, { method: "POST", body: form });
     const data = await res.json();
     if (data?.stubbed) return null; // no STT key — can't run hands-free
     return typeof data?.transcript === "string" ? data.transcript : "";

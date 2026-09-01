@@ -1,40 +1,15 @@
-"use client";
+import { dojoDrills } from "@/lib/content/ja/dojo";
+import { IS_CAPACITOR_BUILD } from "@/lib/capacitorBuild";
+import DrillPageClient from "./DrillPageClient";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getDrillConfig, isDrillUnlocked } from "@/lib/content/ja/dojo";
-import { useGameStore } from "@/lib/store/gameStore";
-import LessonPlayer from "@/components/LessonPlayer";
-import TraceDrill from "@/components/dojo/TraceDrill";
-import VowelSortDrill from "@/components/dojo/VowelSortDrill";
-import LookalikeDrill from "@/components/dojo/LookalikeDrill";
-import WordFlashDrill from "@/components/dojo/WordFlashDrill";
+// generateStaticParams can't live in a "use client" module (Next.js build
+// error), hence the split from the previous single client page — see
+// DrillPageClient.tsx for the actual logic, unchanged. See capacitorBuild.ts.
+export function generateStaticParams() {
+  if (!IS_CAPACITOR_BUILD) return [];
+  return dojoDrills.map((d) => ({ id: d.id }));
+}
 
 export default function DrillPage({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const completed = useGameStore((s) => s.completedLessons);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const drill = getDrillConfig(params.id);
-  const locked = mounted && drill ? !isDrillUnlocked(drill, completed) : false;
-
-  useEffect(() => {
-    if ((mounted && !drill) || locked) router.replace("/dojo");
-  }, [mounted, drill, locked, router]);
-
-  if (!drill || locked) return null;
-
-  switch (drill.kind) {
-    case "trace":
-      return <TraceDrill />;
-    case "vowel-sort":
-      return <VowelSortDrill />;
-    case "lookalike":
-      return <LookalikeDrill />;
-    case "word-flash":
-      return <WordFlashDrill />;
-    default:
-      return <LessonPlayer lessonId={params.id} mode="drill" />;
-  }
+  return <DrillPageClient id={params.id} />;
 }

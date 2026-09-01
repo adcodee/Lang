@@ -9,6 +9,7 @@ import {
   startRecording,
   type Recorder,
 } from "@/lib/audio";
+import { API_BASE } from "@/lib/apiBase";
 
 type Tier = "web-speech" | "cloud" | "typed";
 type Status = "idle" | "listening" | "recording" | "uploading" | "error";
@@ -96,7 +97,7 @@ export default function SpeakInput({
       form.append("audio", blob, "audio");
       form.append("language", "ja");
       if (hint) form.append("prompt", hint);
-      const res = await fetch("/api/transcribe", { method: "POST", body: form });
+      const res = await fetch(`${API_BASE}/api/transcribe`, { method: "POST", body: form });
       const data = await res.json();
       if (data?.stubbed || !data?.transcript) {
         // No cloud key (or nothing heard) — fall back to typed-romaji practice.

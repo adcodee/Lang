@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Send, Sparkles } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { ChatMessage } from "@/lib/types";
+import { API_BASE } from "@/lib/apiBase";
 
 const STARTER: ChatMessage = {
   role: "assistant",
@@ -32,7 +33,7 @@ export default function ChatPanel({
     setInput("");
     setLoading(true);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // completedLessons lets the server derive the allowed vocabulary —
