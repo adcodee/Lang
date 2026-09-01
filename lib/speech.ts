@@ -1,6 +1,7 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
+import { TextToSpeech } from "@capacitor-community/text-to-speech";
 
 // Thin wrappers around the browser Web Speech API used by the voice tutor.
 // These power the STT/TTS for the Grok voice flow when no real key is wired up,
@@ -15,19 +16,17 @@ import { Capacitor } from "@capacitor/core";
 // Capacitor.isNativePlatform() to a real native TTS engine call instead;
 // the web path (Vercel) is untouched.
 //
-// @capacitor-community/text-to-speech is imported dynamically, never at
-// module top level: its index.js runs an unguarded `if ('speechSynthesis'
-// in window)` "warm up" the instant it's imported, with no typeof-window
-// check — fine in a browser, but a hard `ReferenceError: window is not
-// defined` crash during Next's server-side prerendering the moment
-// anything imports this module, which broke the *normal* web build the
-// first time this was tried as a static import. A dynamic import()
-// inside the native-only branches below defers evaluation until actual
-// runtime, which only ever happens client-side.
-async function loadTextToSpeech() {
-  const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
-  return TextToSpeech;
-}
+// This is a plain static top-level import, deliberately — a dynamic
+// import() was tried first (to dodge this package's unguarded top-level
+// `window` reference, which otherwise crashes Next's SSR the instant
+// anything imports it) but that introduced a real on-device bug of its
+// own: forcing this plugin into its own webpack chunk gave it a
+// disconnected copy of @capacitor/core's plugin registry, so calls never
+// reached the real native bridge ("TextToSpeech.then() is not implemented
+// on android", even though the plugin registers fine natively — confirmed
+// via logcat). The SSR crash is fixed at the build-config level instead —
+// see next.config.js's webpack() aliasing this package to `false` on the
+// server bundle only, leaving the client bundle a single normal chunk.
 
 // Minimal typings for the (non-standard) SpeechRecognition API.
 interface SpeechRecognitionResultLike {
@@ -167,7 +166,6 @@ let nativeVoiceIndexCache: number | null | undefined; // undefined = not looked 
 async function pickNativeJapaneseVoiceIndex(): Promise<number | undefined> {
   if (nativeVoiceIndexCache !== undefined) return nativeVoiceIndexCache ?? undefined;
   try {
-    const TextToSpeech = await loadTextToSpeech();
     const { voices } = await TextToSpeech.getSupportedVoices();
     const idx = voices.findIndex((v) => v.lang?.toLowerCase().startsWith("ja"));
     nativeVoiceIndexCache = idx >= 0 ? idx : null;
@@ -199,13 +197,13 @@ export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
     // speak() resolves only once playback finishes (plugin's documented
     // behaviour) — no leading-pause hack needed here, that was specifically
     // a Web Speech API cold-start quirk.
+    //
     (async () => {
       try {
-        const [TextToSpeech, voice] = await Promise.all([
-          loadTextToSpeech(),
-          pickNativeJapaneseVoiceIndex(),
-        ]);
+        const voice = await pickNativeJapaneseVoiceIndex();
         await TextToSpeech.speak({ text, lang, voice, queueStrategy: 0 });
+      } catch (err) {
+        console.error("[speech] native speak() failed:", err);
       } finally {
         onEnd?.();
       }
