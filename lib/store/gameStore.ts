@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GameState, SkillCategory, SkillStats } from "@/lib/types";
 import { nextLevel } from "@/lib/srs";
+import { DEFAULT_LANGUAGE, type LanguageId } from "@/lib/languages";
 
 const MAX_HEARTS = 5;
 
@@ -14,6 +15,30 @@ function emptySkillStats(): SkillStats {
     writing: { correct: 0, total: 0, xp: 0 },
     listening: { correct: 0, total: 0, xp: 0 },
     punctuation: { correct: 0, total: 0, xp: 0 },
+  };
+}
+
+function emptyRevisionSkills(): Record<SkillCategory, number> {
+  return { reading: 0, speaking: 0, writing: 0, listening: 0, punctuation: 0 };
+}
+
+// A fresh, empty per-language slice. A function (not a shared constant) so
+// every caller gets its own arrays/objects — two languages must never be
+// able to mutate each other's nested state through a shared reference.
+function freshGameState(): GameState {
+  return {
+    xp: 0,
+    streak: 0,
+    lastActiveDay: null,
+    hearts: MAX_HEARTS,
+    completedLessons: [],
+    learnedLessons: [],
+    skillStats: emptySkillStats(),
+    revisionItems: [],
+    revisionSkills: emptyRevisionSkills(),
+    examsPassed: [],
+    seen: {},
+    reviewLog: [],
   };
 }
 
@@ -31,8 +56,62 @@ function dayDiff(a: string, b: string): number {
   return Math.round(ms / 86_400_000);
 }
 
+// Every language the store knows about, so byLang is always fully keyed
+// (never a partial map a lookup can fall through silently).
+const LANGUAGE_IDS: LanguageId[] = ["ja", "lg"];
+
+function freshByLang(): Record<LanguageId, GameState> {
+  return { ja: freshGameState(), lg: freshGameState() };
+}
+
+// Pull the plain per-language fields off the flat runtime store — used both
+// to persist the active language's live data into byLang, and by
+// switchLanguage to archive the outgoing language before loading the next.
+function extractGameState(s: GameState): GameState {
+  return {
+    xp: s.xp,
+    streak: s.streak,
+    lastActiveDay: s.lastActiveDay,
+    hearts: s.hearts,
+    completedLessons: s.completedLessons,
+    learnedLessons: s.learnedLessons,
+    skillStats: s.skillStats,
+    revisionItems: s.revisionItems,
+    revisionSkills: s.revisionSkills,
+    examsPassed: s.examsPassed,
+    seen: s.seen,
+    reviewLog: s.reviewLog,
+  };
+}
+
+// Deep-fill a possibly-partial/older-shape saved slice against fresh
+// defaults, so saves written before a skill existed (e.g. `reading`, added
+// 2026-07) or before a language existed at all load instead of crashing.
+function fillGameState(saved: Partial<GameState> | undefined): GameState {
+  const fresh = freshGameState();
+  const p = saved ?? {};
+  return {
+    ...fresh,
+    ...p,
+    skillStats: { ...fresh.skillStats, ...(p.skillStats ?? {}) },
+    revisionSkills: { ...fresh.revisionSkills, ...(p.revisionSkills ?? {}) },
+  };
+}
+
+// The shape actually written to localStorage: one active language plus a
+// full slice per language. Not the same shape as the runtime store (which
+// keeps the *active* language's fields flat, so every existing consumer of
+// useGameStore() keeps working unchanged — see switchLanguage).
+interface PersistedShape {
+  active: LanguageId;
+  byLang: Record<LanguageId, GameState>;
+}
+
 interface GameStore extends GameState {
   maxHearts: number;
+  active: LanguageId;
+  byLang: Record<LanguageId, GameState>;
+  switchLanguage: (id: LanguageId) => void;
   addXp: (amount: number) => void;
   recordAnswer: (skill: SkillCategory, correct: boolean, xp: number) => void;
   flagRevision: (skill: SkillCategory, itemId: string) => void;
@@ -49,33 +128,32 @@ interface GameStore extends GameState {
   reset: () => void;
 }
 
-function emptyRevisionSkills(): Record<SkillCategory, number> {
-  return { reading: 0, speaking: 0, writing: 0, listening: 0, punctuation: 0 };
-}
-
-const initialState: GameState = {
-  xp: 0,
-  streak: 0,
-  lastActiveDay: null,
-  hearts: MAX_HEARTS,
-  completedLessons: [],
-  learnedLessons: [],
-  skillStats: emptySkillStats(),
-  revisionItems: [],
-  revisionSkills: emptyRevisionSkills(),
-  examsPassed: [],
-  seen: {},
-  reviewLog: [],
-};
-
 // Keep the retention log bounded — enough history for trend-watching.
 const REVIEW_LOG_DAYS = 60;
 
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
-      ...initialState,
+      ...freshGameState(),
       maxHearts: MAX_HEARTS,
+      active: DEFAULT_LANGUAGE,
+      byLang: freshByLang(),
+
+      // Archive the outgoing language's live fields into byLang, then load
+      // the target language's saved (or fresh) slice into the flat fields
+      // every other action/component reads. Components never need to know
+      // this happened — they just keep reading useGameStore().xp etc.
+      switchLanguage: (id) => {
+        const s = get();
+        if (id === s.active) return;
+        const archived = { ...s.byLang, [s.active]: extractGameState(s) };
+        const next = archived[id] ?? freshGameState();
+        set({
+          ...next,
+          active: id,
+          byLang: archived,
+        });
+      },
 
       addXp: (amount) => set((s) => ({ xp: s.xp + amount })),
 
@@ -201,47 +279,52 @@ export const useGameStore = create<GameStore>()(
             : [...s.examsPassed, unitId],
         })),
 
+      // Reset only the active language's progress — switching to the other
+      // language and back must still find its own progress untouched.
       reset: () =>
-        set({
-          ...initialState,
-          skillStats: emptySkillStats(),
-          revisionSkills: emptyRevisionSkills(),
-        }),
+        set((s) => ({
+          ...freshGameState(),
+          byLang: { ...s.byLang, [s.active]: freshGameState() },
+        })),
     }),
     {
-      // Bump the key to wipe progress on a curriculum restructure: the old
-      // state (under stale lesson IDs / unit ordering) is no longer read, so
-      // the learner starts from the beginning. v3 = after inserting the
-      // Voiced & Combo Sounds unit + mandatory Dojo checkpoints.
+      // Same key as before the language split — deliberately NOT renamed.
+      // Renaming would abandon existing progress at the old key outright;
+      // `version` + `migrate` below reshape the data in place instead.
       name: "lang-game-state-v3",
-      // Only persist the serializable game fields.
-      partialize: (s) => ({
-        xp: s.xp,
-        streak: s.streak,
-        lastActiveDay: s.lastActiveDay,
-        hearts: s.hearts,
-        completedLessons: s.completedLessons,
-        learnedLessons: s.learnedLessons,
-        skillStats: s.skillStats,
-        revisionItems: s.revisionItems,
-        revisionSkills: s.revisionSkills,
-        examsPassed: s.examsPassed,
-        seen: s.seen,
-        reviewLog: s.reviewLog,
+      version: 1, // v0 (implicit, no `version` field): flat single-language GameState. v1: { active, byLang }.
+      // Only persist the serializable fields, reshaped per-language.
+      partialize: (s): PersistedShape => ({
+        active: s.active,
+        byLang: { ...s.byLang, [s.active]: extractGameState(s) },
       }),
-      // Saves written before a skill existed (e.g. `reading`, added 2026-07)
-      // lack its keys in skillStats/revisionSkills — deep-fill from the
-      // current defaults so old progress loads instead of crashing.
+      // v0 -> v1: the entire persisted value *was* a flat GameState (no
+      // `active`/`byLang` wrapper). Lift it into byLang.ja untouched, so
+      // existing Japanese progress survives the very first load under the
+      // new shape instead of silently starting from zero.
+      migrate: (persistedState, version) => {
+        if (version === 0) {
+          const old = persistedState as Partial<GameState> | undefined;
+          const migrated: PersistedShape = {
+            active: DEFAULT_LANGUAGE,
+            byLang: { ...freshByLang(), ja: fillGameState(old) },
+          };
+          return migrated;
+        }
+        return persistedState as PersistedShape;
+      },
       merge: (persisted, current) => {
-        const p = (persisted ?? {}) as Partial<GameState>;
+        const p = (persisted ?? {}) as Partial<PersistedShape>;
+        const active = p.active ?? DEFAULT_LANGUAGE;
+        const byLang = LANGUAGE_IDS.reduce((acc, id) => {
+          acc[id] = fillGameState(p.byLang?.[id]);
+          return acc;
+        }, {} as Record<LanguageId, GameState>);
         return {
           ...current,
-          ...p,
-          skillStats: { ...current.skillStats, ...(p.skillStats ?? {}) },
-          revisionSkills: {
-            ...current.revisionSkills,
-            ...(p.revisionSkills ?? {}),
-          },
+          ...byLang[active],
+          active,
+          byLang,
         };
       },
     }
