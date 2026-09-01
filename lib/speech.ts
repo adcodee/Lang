@@ -1,8 +1,33 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+
 // Thin wrappers around the browser Web Speech API used by the voice tutor.
 // These power the STT/TTS for the Grok voice flow when no real key is wired up,
 // and remain useful for capturing the learner's speech regardless.
+//
+// TTS specifically needs a second path for the packaged Android app: a
+// WebView's window.speechSynthesis exists and calls succeed (no error, onend
+// still fires) but produces no audible output at all on-device — there's no
+// system TTS voice bridged into the WebView the way a real Chrome tab gets
+// one. Confirmed via real on-device testing (lang-debug.apk on a Galaxy
+// A15), not just suspected. speak()/primeSpeech() below branch on
+// Capacitor.isNativePlatform() to a real native TTS engine call instead;
+// the web path (Vercel) is untouched.
+//
+// @capacitor-community/text-to-speech is imported dynamically, never at
+// module top level: its index.js runs an unguarded `if ('speechSynthesis'
+// in window)` "warm up" the instant it's imported, with no typeof-window
+// check — fine in a browser, but a hard `ReferenceError: window is not
+// defined` crash during Next's server-side prerendering the moment
+// anything imports this module, which broke the *normal* web build the
+// first time this was tried as a static import. A dynamic import()
+// inside the native-only branches below defers evaluation until actual
+// runtime, which only ever happens client-side.
+async function loadTextToSpeech() {
+  const { TextToSpeech } = await import("@capacitor-community/text-to-speech");
+  return TextToSpeech;
+}
 
 // Minimal typings for the (non-standard) SpeechRecognition API.
 interface SpeechRecognitionResultLike {
@@ -122,6 +147,7 @@ if (typeof window !== "undefined" && window.speechSynthesis) {
 // Warm the TTS engine + voice list within a user gesture (call on the first tap)
 // so the first real utterance plays promptly instead of cold-starting.
 export function primeSpeech() {
+  if (Capacitor.isNativePlatform()) return; // native TTS has no equivalent cold-start to warm
   if (typeof window === "undefined" || !window.speechSynthesis) return;
   refreshVoices();
   try {
@@ -131,6 +157,24 @@ export function primeSpeech() {
   } catch {
     /* ignore — warming up is best-effort */
   }
+}
+
+// Native voice list is a different shape/source (Android's TTS engine, via
+// the plugin) from window.speechSynthesis's — cached separately, fetched
+// once on first use rather than eagerly (unlike refreshVoices() above,
+// there's no native "voiceschanged" event to hook).
+let nativeVoiceIndexCache: number | null | undefined; // undefined = not looked up yet
+async function pickNativeJapaneseVoiceIndex(): Promise<number | undefined> {
+  if (nativeVoiceIndexCache !== undefined) return nativeVoiceIndexCache ?? undefined;
+  try {
+    const TextToSpeech = await loadTextToSpeech();
+    const { voices } = await TextToSpeech.getSupportedVoices();
+    const idx = voices.findIndex((v) => v.lang?.toLowerCase().startsWith("ja"));
+    nativeVoiceIndexCache = idx >= 0 ? idx : null;
+  } catch {
+    nativeVoiceIndexCache = null;
+  }
+  return nativeVoiceIndexCache ?? undefined;
 }
 
 function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
@@ -151,6 +195,24 @@ function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
 let pendingSpeak: number | null = null;
 
 export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
+  if (Capacitor.isNativePlatform()) {
+    // speak() resolves only once playback finishes (plugin's documented
+    // behaviour) — no leading-pause hack needed here, that was specifically
+    // a Web Speech API cold-start quirk.
+    (async () => {
+      try {
+        const [TextToSpeech, voice] = await Promise.all([
+          loadTextToSpeech(),
+          pickNativeJapaneseVoiceIndex(),
+        ]);
+        await TextToSpeech.speak({ text, lang, voice, queueStrategy: 0 });
+      } finally {
+        onEnd?.();
+      }
+    })();
+    return;
+  }
+
   if (typeof window === "undefined" || !window.speechSynthesis) {
     onEnd?.();
     return;
