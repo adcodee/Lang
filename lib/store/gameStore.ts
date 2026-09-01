@@ -111,7 +111,13 @@ interface GameStore extends GameState {
   maxHearts: number;
   active: LanguageId;
   byLang: Record<LanguageId, GameState>;
+  // Set by switchLanguage(), never by hydration/migration — LanguageGate
+  // uses this (not a diff on `active`) to show the switch transition only
+  // for a real user-initiated switch, not the initial load settling to
+  // whatever language was last saved.
+  pendingTransition: LanguageId | null;
   switchLanguage: (id: LanguageId) => void;
+  clearTransition: () => void;
   addXp: (amount: number) => void;
   recordAnswer: (skill: SkillCategory, correct: boolean, xp: number) => void;
   flagRevision: (skill: SkillCategory, itemId: string) => void;
@@ -138,6 +144,7 @@ export const useGameStore = create<GameStore>()(
       maxHearts: MAX_HEARTS,
       active: DEFAULT_LANGUAGE,
       byLang: freshByLang(),
+      pendingTransition: null,
 
       // Archive the outgoing language's live fields into byLang, then load
       // the target language's saved (or fresh) slice into the flat fields
@@ -152,8 +159,11 @@ export const useGameStore = create<GameStore>()(
           ...next,
           active: id,
           byLang: archived,
+          pendingTransition: id,
         });
       },
+
+      clearTransition: () => set({ pendingTransition: null }),
 
       addXp: (amount) => set((s) => ({ xp: s.xp + amount })),
 
