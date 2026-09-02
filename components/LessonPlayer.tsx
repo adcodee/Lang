@@ -18,7 +18,7 @@ import { answerLabel, exerciseSkill, isDiscriminationItem } from "@/lib/exercise
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
-const XP_PER_CORRECT = 5;
+const XP_PER_CORRECT = 2; // Patch 1.3: rank no longer gates on XP, so pacing can slow down
 const PASS_RATE = 0.8; // first-try accuracy needed to complete a lesson
 
 export type PlayerMode = "lesson" | "drill" | "review";

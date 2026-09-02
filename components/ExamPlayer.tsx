@@ -12,8 +12,8 @@ import { answerLabel } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
-const XP_PER_CORRECT = 5;
-const EXAM_BONUS = 50; // belt bonus on top of per-question XP
+const XP_PER_CORRECT = 2; // Patch 1.3: rank no longer gates on XP, so pacing can slow down
+const EXAM_BONUS = 80; // belt bonus on top of per-question XP — bigger payday than one padded test
 const START_HEARTS = 3;
 
 // The end-of-unit Dojo Examination: questions pooled from the whole unit,
