@@ -9,6 +9,7 @@ import TraceDrill from "@/components/dojo/TraceDrill";
 import VowelSortDrill from "@/components/dojo/VowelSortDrill";
 import LookalikeDrill from "@/components/dojo/LookalikeDrill";
 import WordFlashDrill from "@/components/dojo/WordFlashDrill";
+import QuickMatchDrill from "@/components/dojo/QuickMatchDrill";
 
 export default function DrillPageClient({ id }: { id: string }) {
   const router = useRouter();
@@ -35,14 +36,15 @@ export default function DrillPageClient({ id }: { id: string }) {
     case "word-flash":
       return <WordFlashDrill />;
     case "match":
-      // Quick Match's boards are randomly generated per visit (see
-      // matchBoards.ts) — unlike every other drill here, its content isn't
-      // deterministic, so rendering it on the server produces different
-      // boards than the client's own fresh randomness and breaks
-      // hydration (confirmed: caused a full "switch to client rendering"
-      // on every visit). Same mounted-gate convention as the lock check
-      // above, scoped to just this one non-deterministic kind.
-      return mounted ? <LessonPlayer lessonId={id} mode="drill" /> : null;
+      // 1.2: now an endless drill like the others (was routed through
+      // LessonPlayer with a fixed 3-board array). The mounted-gate hack
+      // this used to need is retired too — matchPool() returns [] until
+      // real post-hydration data is in (mirroring how Lookalike/Vowel
+      // Sort already behave), so QuickMatchDrill never calls
+      // Math.random() against an empty/pre-hydration pool the way the old
+      // vowel-fallback generator did, which is what actually caused the
+      // hydration mismatch, not randomness in general.
+      return <QuickMatchDrill />;
     default:
       return <LessonPlayer lessonId={id} mode="drill" />;
   }

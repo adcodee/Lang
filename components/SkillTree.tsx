@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Lock } from "lucide-react";
-import { levels } from "@/lib/content/ja/curriculum";
+import { levels, getUnitForLesson } from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
 import { useCurrentLesson } from "@/lib/hooks/useCurrentLesson";
 import LessonNode, { NodeStatus, NodeVariant } from "@/components/LessonNode";
@@ -55,6 +55,28 @@ export default function SkillTree() {
   // The single "current" node key comes from the shared hook (also drives the FAB).
   const currentLesson = useCurrentLesson();
   const currentKey = mounted ? currentLesson?.currentKey : undefined;
+
+  // On first load with real (post-hydration) progress, jump the level
+  // selector to wherever the learner's current lesson actually is —
+  // previously always defaulted to levels[0] regardless. Runs once.
+  const levelInitialized = useRef(false);
+  useEffect(() => {
+    if (!mounted || levelInitialized.current || !currentLesson) return;
+    levelInitialized.current = true;
+    const unit = getUnitForLesson(currentLesson.lessonId);
+    const level = unit && levels.find((lvl) => lvl.units.some((u) => u.id === unit.id));
+    if (level) setActiveLevelId(level.id);
+  }, [mounted, currentLesson]);
+
+  // Scroll to the current lesson's node once it's known, instead of always
+  // opening at the top of the tree. Only fires once per mount.
+  const scrolledToCurrent = useRef(false);
+  useEffect(() => {
+    if (!mounted || !currentKey || scrolledToCurrent.current) return;
+    scrolledToCurrent.current = true;
+    const el = document.querySelector(`[data-node-key="${CSS.escape(currentKey)}"]`);
+    el?.scrollIntoView({ block: "center" });
+  }, [mounted, currentKey]);
 
   function statusFor(
     unitIndex: number,
@@ -132,14 +154,20 @@ export default function SkillTree() {
                   let n = 0; // running node index for the zig-zag offset
                   return unit.lessons.flatMap((lesson) =>
                     nodesOf(lesson).map((variant) => {
+                      // Same key shape statusFor() already uses for
+                      // currentKey comparison ("single" counts as "test") —
+                      // has to match exactly for the scroll-to-current
+                      // querySelector above to find this node.
+                      const nodeKey = `${lesson.id}:${variant === "learn" ? "learn" : "test"}`;
                       const node = (
-                        <LessonNode
-                          key={`${lesson.id}:${variant}`}
-                          lesson={lesson}
-                          variant={variant}
-                          status={statusFor(unitIndex, lesson, variant)}
-                          offset={OFFSETS[n % OFFSETS.length]}
-                        />
+                        <div key={nodeKey} data-node-key={nodeKey}>
+                          <LessonNode
+                            lesson={lesson}
+                            variant={variant}
+                            status={statusFor(unitIndex, lesson, variant)}
+                            offset={OFFSETS[n % OFFSETS.length]}
+                          />
+                        </div>
                       );
                       n += 1;
                       return node;

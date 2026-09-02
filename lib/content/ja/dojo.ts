@@ -2,7 +2,6 @@ import type { Exercise, Lesson, SkillCategory, TeachCard } from "@/lib/types";
 import { allLessons, getLesson } from "@/lib/content/ja/curriculum";
 import { learnedKana } from "@/lib/content/ja/kana";
 import { learnedVocab } from "@/lib/content/ja/vocab";
-import { buildMutedMatchExercises } from "@/lib/content/ja/matchBoards";
 import { isDue, kanaItemId, vocabItemId, type SeenEntry } from "@/lib/srs";
 
 // Dojo drills. Endless kinds (trace/category) render their own components;
@@ -77,10 +76,9 @@ export const dojoDrills: DojoDrill[] = [
     skill: "reading",
     kind: "match",
     unlockAfter: "u1-vowels",
-    // No static `exercises` here — getDrill() below builds this drill's
-    // boards fresh each time from buildMutedMatchExercises(), growing with
-    // whatever kana the learner has actually been taught. See
-    // lib/content/ja/matchBoards.ts.
+    // No `exercises` here — this is an endless drill, its own component
+    // (QuickMatchDrill.tsx), routed directly in DrillPageClient.tsx rather
+    // than through getDrill()/LessonPlayer. See lib/content/ja/matchBoards.ts.
   },
   {
     id: "listen",
@@ -248,14 +246,12 @@ export function unlockLessonTitle(drill: DojoDrill): string {
 }
 
 // Lesson-shaped view for the fixed kinds, consumed by LessonPlayer.
-// "match" has no static `exercises` — its boards are generated fresh from
-// whatever the learner has actually been taught (see matchBoards.ts), so
-// every call site must pass the learner's real completedLessons.
+// "match" is an endless drill with its own component now (QuickMatchDrill),
+// not routed through here — see DrillPageClient.tsx.
 export function getDrill(id: string, completed: string[] = []): Lesson | undefined {
   const d = getDrillConfig(id);
-  if (!d) return undefined;
-  const exercises = id === "match" ? buildMutedMatchExercises(completed) : d.exercises;
-  if (!exercises) return undefined;
+  if (!d || !d.exercises) return undefined;
+  const exercises = d.exercises;
   return {
     id: d.id,
     title: d.title,

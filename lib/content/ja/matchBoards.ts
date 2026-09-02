@@ -1,5 +1,5 @@
 import type { Exercise } from "@/lib/types";
-import { kana, learnedKana, type Kana } from "@/lib/content/ja/kana";
+import { learnedKana, type Kana } from "@/lib/content/ja/kana";
 
 // The near-twin kana that Quick Match deliberately oversamples — same list
 // LookalikeDrill.tsx weights toward, exported from here so it's not
@@ -15,8 +15,6 @@ export const CONFUSION_PAIRS: [string, string][] = [
   ["あ", "お"],
 ];
 
-const VOWEL_CHARS = ["あ", "い", "う", "え", "お"];
-
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -26,56 +24,54 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// Three muted (no audio) match-pairs boards, sampled from whatever kana the
-// learner has actually been taught — grows with each row, and always
-// surfaces at least one genuine confusion pair (ぬ/め, ぬ/ね, etc.) per
-// session once both members are learned. Called fresh each time the drill
-// is opened, so re-entering surfaces a different random forced pair.
-export function buildMutedMatchExercises(completedLessonIds: string[]): Exercise[] {
-  const learned = learnedKana(completedLessonIds).filter((k) => k.char !== "ん");
-  const pool: Kana[] = learned.length >= 4 ? learned : kana.filter((k) => VOWEL_CHARS.includes(k.char));
-  const boardSize = Math.min(5, pool.length);
+// Every learned kana eligible for Quick Match (drops ん — no clean
+// single-vowel pairing). Empty before the vowels lesson is learned —
+// which is also true pre-hydration, since completedLessonIds starts empty
+// during SSR. Deliberately no "fall back to the 5 vowels" case here (1.1
+// had one, and it's what caused a real hydration bug: it meant a board
+// got randomly generated even against an empty/pre-hydration pool). By
+// the time a learner can actually open this drill they've already
+// completed u1-vowels, so the fallback was only ever masking the
+// pre-hydration state, not serving a real learner — QuickMatchDrill
+// treats an empty pool as a fixed "not unlocked yet" message instead,
+// same pattern as LookalikeDrill/VowelSortDrill, so no Math.random() call
+// ever happens before real post-hydration data is in.
+export function matchPool(completedLessonIds: string[]): Kana[] {
+  return learnedKana(completedLessonIds).filter((k) => k.char !== "ん");
+}
 
+// One muted (no audio) match-pairs board sampled from the given pool.
+// `forceConfusionPair`, when true and an eligible pair exists in the
+// pool, guarantees that pair appears together on this board — the caller
+// decides how often to ask for that (QuickMatchDrill: a per-round chance,
+// not "at least once per fixed batch" the way the old 3-board version did
+// — there's no fixed batch to guarantee within once the drill is endless).
+export function buildOneMutedBoard(pool: Kana[], forceConfusionPair: boolean): Exercise {
+  const boardSize = Math.min(5, pool.length);
   const eligiblePairs = CONFUSION_PAIRS.filter(
     ([a, b]) => pool.some((k) => k.char === a) && pool.some((k) => k.char === b)
   );
-  const forcedPair = eligiblePairs.length > 0 ? eligiblePairs[Math.floor(Math.random() * eligiblePairs.length)] : null;
-  const forcedBoardIndex = forcedPair ? Math.floor(Math.random() * 3) : -1;
+  const forcedPair =
+    forceConfusionPair && eligiblePairs.length > 0
+      ? eligiblePairs[Math.floor(Math.random() * eligiblePairs.length)]
+      : null;
 
-  const usageCounts = new Map<string, number>();
-  const boards: Kana[][] = [];
-
-  for (let i = 0; i < 3; i++) {
-    // A kana that appeared on every board so far is excluded from this
-    // board's candidates, unless that would leave too few to fill it —
-    // guarantees no kana lands on all 3 boards when the pool is big enough
-    // to actually offer variety.
-    const usedEveryPriorBoard = i > 0 ? pool.filter((k) => (usageCounts.get(k.char) ?? 0) === i) : [];
-    const candidates =
-      pool.length >= 8 && pool.length - usedEveryPriorBoard.length >= boardSize
-        ? pool.filter((k) => !usedEveryPriorBoard.includes(k))
-        : pool;
-
-    let board: Kana[];
-    if (i === forcedBoardIndex && forcedPair) {
-      const [a, b] = forcedPair;
-      const forced = pool.filter((k) => k.char === a || k.char === b);
-      const rest = shuffle(candidates.filter((k) => k.char !== a && k.char !== b)).slice(
-        0,
-        boardSize - forced.length
-      );
-      board = shuffle([...forced, ...rest]);
-    } else {
-      board = shuffle(candidates).slice(0, boardSize);
-    }
-
-    board.forEach((k) => usageCounts.set(k.char, (usageCounts.get(k.char) ?? 0) + 1));
-    boards.push(board);
+  let board: Kana[];
+  if (forcedPair) {
+    const [a, b] = forcedPair;
+    const forced = pool.filter((k) => k.char === a || k.char === b);
+    const rest = shuffle(pool.filter((k) => k.char !== a && k.char !== b)).slice(
+      0,
+      boardSize - forced.length
+    );
+    board = shuffle([...forced, ...rest]);
+  } else {
+    board = shuffle(pool).slice(0, boardSize);
   }
 
-  return boards.map((board) => ({
-    type: "match-pairs" as const,
+  return {
+    type: "match-pairs",
     prompt: "Match the kana to its sound",
     pairs: board.map((k) => ({ left: k.char, right: k.romaji })),
-  }));
+  };
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Volume2, Lightbulb } from "lucide-react";
+import { Volume2, Lightbulb, Lock } from "lucide-react";
 import { speak } from "@/lib/speech";
 import { useGameStore } from "@/lib/store/gameStore";
 import { learnedKana, kanaRowProgress } from "@/lib/content/ja/kana";
@@ -76,7 +76,16 @@ export default function VowelSortDrill() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [wrong, setWrong] = useState<string | null>(null); // char flashing red
   // Session-only, not persisted — voiced is this drill's default identity.
+  // Two-tier control (1.2): a short tap toggles muted for the *current*
+  // round only and immediately locks itself until that round ends
+  // (roundLocked) — one decision per round. A long-press sets a sticky
+  // lock that forces muted on across every subsequent round regardless
+  // of the per-round mechanic, until another long-press releases it.
   const [muted, setMuted] = useState(false);
+  const [roundLocked, setRoundLocked] = useState(false);
+  const [stickyMuted, setStickyMuted] = useState(false);
+  const longPressTimer = useRef<number | null>(null);
+  const longPressFired = useRef(false);
 
   const advance = useCallback(() => {
     setSelected(null);
@@ -84,8 +93,48 @@ export default function VowelSortDrill() {
     setAttempted(new Set());
     setFeedback(null);
     setWrong(null);
+    setRoundLocked(false);
     setRound((r) => r + 1);
   }, []);
+
+  function toggleMuted() {
+    if (roundLocked || stickyMuted) return; // one short-tap decision per round; sticky overrides entirely
+    setMuted((m) => !m);
+    setRoundLocked(true);
+  }
+
+  // Long-press (not the native `disabled` attribute — a disabled button
+  // would also block the long-press gesture meant to *release* the sticky
+  // lock, the same class of footgun fixed in CategorySort this patch)
+  // toggles the sticky lock; a short tap (press released before the
+  // threshold) falls through to the normal per-round toggle.
+  function startPress() {
+    longPressFired.current = false;
+    longPressTimer.current = window.setTimeout(() => {
+      longPressFired.current = true;
+      setStickyMuted((s) => {
+        const next = !s;
+        if (next) {
+          setMuted(true);
+          setRoundLocked(true);
+        }
+        return next;
+      });
+    }, 500);
+  }
+  function endPress() {
+    if (longPressTimer.current !== null) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (!longPressFired.current) toggleMuted();
+  }
+  function cancelPress() {
+    if (longPressTimer.current !== null) {
+      window.clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
 
   if (pool.length === 0) {
     return (
@@ -175,11 +224,20 @@ export default function VowelSortDrill() {
         </p>
         <button
           type="button"
-          onClick={() => setMuted((m) => !m)}
-          className="mt-2 rounded-full border-2 border-gray-200 px-3 py-1 text-xs font-bold text-muted hover:text-ink"
+          onPointerDown={startPress}
+          onPointerUp={endPress}
+          onPointerLeave={cancelPress}
+          onPointerCancel={cancelPress}
+          className={`mt-2 inline-flex items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-bold ${
+            roundLocked || stickyMuted
+              ? "border-gray-100 text-muted/50"
+              : "border-gray-200 text-muted hover:text-ink"
+          }`}
         >
+          {stickyMuted && <Lock className="h-3 w-3" />}
           {muted ? "Sound on" : "Muted"}
         </button>
+        <p className="mt-0.5 text-[10px] text-muted/70">Hold to lock muted across rounds</p>
       </div>
 
       <motion.div

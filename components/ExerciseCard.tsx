@@ -14,6 +14,8 @@ export default function ExerciseCard({
   checked,
   onChecked,
   revealAnswer = true,
+  onMatchPairsMiss,
+  onMatchPairsCorrect,
 }: {
   exercise: Exercise;
   checked: boolean; // once true, inputs lock until parent advances
@@ -21,6 +23,11 @@ export default function ExerciseCard({
   // When false (a retry is coming), a wrong pick shows red but the correct
   // option is NOT highlighted — otherwise the retry answers itself.
   revealAnswer?: boolean;
+  // match-pairs only: per-pair first-attempt outcome, for SRS flagging —
+  // see MatchPairs below for why this is separate from onChecked's single
+  // whole-board boolean.
+  onMatchPairsMiss?: (missed: string, confusedWith?: string) => void;
+  onMatchPairsCorrect?: (kana: string) => void;
 }) {
   switch (exercise.type) {
     case "translate-choice":
@@ -38,7 +45,13 @@ export default function ExerciseCard({
       );
     case "match-pairs":
       return (
-        <MatchPairs exercise={exercise} checked={checked} onChecked={onChecked} />
+        <MatchPairs
+          exercise={exercise}
+          checked={checked}
+          onChecked={onChecked}
+          onFirstTryMiss={onMatchPairsMiss}
+          onFirstTryCorrect={onMatchPairsCorrect}
+        />
       );
     case "build-sentence":
       return (
@@ -162,14 +175,20 @@ function TypeAnswer({
 // Scored per pair (first-try correct vs total), reported automatically via
 // onChecked the instant every pair is locked — there's no Check button for
 // this exercise type (see Frame's hideCheck).
-function MatchPairs({
+// Exported: QuickMatchDrill.tsx reuses this directly rather than
+// duplicating the interaction logic for its endless-drill version.
+export function MatchPairs({
   exercise,
   checked,
   onChecked,
+  onFirstTryMiss,
+  onFirstTryCorrect,
 }: {
   exercise: Extract<Exercise, { type: "match-pairs" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  onFirstTryMiss?: (missed: string, confusedWith?: string) => void;
+  onFirstTryCorrect?: (kana: string) => void;
 }) {
   const correctMap = useMemo(() => {
     const m: Record<string, string> = {};
@@ -225,7 +244,9 @@ function MatchPairs({
       return;
     }
     if (pending.side === side) {
-      setPending({ side, value }); // second tap on the same column replaces the pick
+      // Tapping the same tile again deselects it; a different tile on the
+      // same column replaces the pick.
+      setPending(pending.value === value ? null : { side, value });
       return;
     }
 
@@ -235,7 +256,18 @@ function MatchPairs({
 
     if (!attempted.current.has(leftVal)) {
       attempted.current.add(leftVal);
-      if (isCorrect) firstTryCorrect.current += 1;
+      if (isCorrect) {
+        firstTryCorrect.current += 1;
+        onFirstTryCorrect?.(leftVal);
+      } else {
+        // The kana whose sound was actually (mis)tapped — that's the real
+        // confusion, not just the one being asked about (e.g. asked for
+        // ぬ, tapped め's sound: both ぬ and め get flagged).
+        const confusedWith = Object.keys(correctMap).find(
+          (l) => l !== leftVal && correctMap[l] === rightVal
+        );
+        onFirstTryMiss?.(leftVal, confusedWith);
+      }
     }
 
     if (isCorrect) {
@@ -600,13 +632,21 @@ function CategorySort({
             <button
               key={cat}
               type="button"
-              disabled={checked || !selected}
+              // Deliberately not `disabled` — a disabled button blocks
+              // pointer events on its entire subtree in the browser,
+              // which was silently breaking the "tap a placed tile to
+              // return it to the tray" control nested inside (only
+              // worked when `selected` happened to be truthy, since that
+              // was the one condition that un-disabled this button).
+              // placeInto() below already guards the actual behaviour;
+              // this is now a purely visual disabled look.
+              aria-disabled={checked || !selected}
               onClick={() => placeInto(cat)}
               className={`flex min-h-[5rem] flex-col gap-2 rounded-2xl border-2 p-3 text-left transition ${
                 selected && !checked
                   ? "border-sky bg-sky/5"
                   : "border-gray-200 bg-gray-50"
-              }`}
+              } ${checked || !selected ? "cursor-default" : ""}`}
             >
               <span className="text-xs font-extrabold uppercase tracking-wide text-muted">
                 {cat}

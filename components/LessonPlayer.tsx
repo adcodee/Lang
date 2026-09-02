@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { getLesson, getUnitForLesson } from "@/lib/content/ja/curriculum";
 import { getDrill } from "@/lib/content/ja/dojo";
+import { augmentLesson } from "@/lib/content/ja/lessonExercises";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
 import { answerLabel, exerciseSkill, isDiscriminationItem } from "@/lib/exercise";
@@ -30,17 +31,41 @@ export default function LessonPlayer({
 }) {
   const router = useRouter();
   const completedLessons = useGameStore((s) => s.completedLessons);
+
+  // Phase E filler (see lessonExercises.ts) is only computed post-hydration
+  // — it calls Math.random(), so generating it unconditionally on the very
+  // first render would mismatch the SSR pass, the same hydration-bug class
+  // fixed for Quick Match in Phase D. Before mount, a curriculum lesson
+  // renders with just its hand-authored exercises (identical server and
+  // client); once mounted, the memo below recomputes once and appends
+  // filler — a normal post-hydration client update, not a mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Bumped by restart() so a retry regenerates fresh filler instead of
+  // replaying the exact same 10/20 items in the exact same order — at
+  // Phase E's depth that would make "fail once, then recite the answers
+  // back" the path of least resistance. Same shape as ExamPlayer's
+  // existing attemptKey.
+  const [attemptCycle, setAttemptCycle] = useState(0);
+
   // Lessons come from the curriculum tree; drills from the drill set (the
   // "match" drill builds its boards fresh from completedLessons — see
   // matchBoards.ts); the review drill passes a synthetic lesson directly.
-  const lesson = useMemo(
-    () =>
+  const lesson = useMemo(() => {
+    const base =
       lessonOverride ??
-      (mode === "lesson" ? getLesson(lessonId ?? "") : getDrill(lessonId ?? "", completedLessons)),
-    [lessonId, lessonOverride, mode, completedLessons]
-  );
+      (mode === "lesson" ? getLesson(lessonId ?? "") : getDrill(lessonId ?? "", completedLessons));
+    // Only real curriculum lessons (not drills, not the synthetic Review
+    // lesson) get generated filler.
+    if (!base || mode !== "lesson" || lessonOverride || !mounted) return base;
+    const exercises = augmentLesson(base);
+    return exercises === base.exercises ? base : { ...base, exercises };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId, lessonOverride, mode, completedLessons, mounted, attemptCycle]);
 
   const recordAnswer = useGameStore((s) => s.recordAnswer);
+  const recordSeen = useGameStore((s) => s.recordSeen);
   const flagRevision = useGameStore((s) => s.flagRevision);
   const clearRevision = useGameStore((s) => s.clearRevision);
   const completeLesson = useGameStore((s) => s.completeLesson);
@@ -78,8 +103,17 @@ export default function LessonPlayer({
   // Offer one retry on the first miss; reveal the answer on the second.
   const retryOffered = checked && !lastCorrect && attempt === 0;
 
+  // match-pairs never offers the generic whole-exercise retry (see below) —
+  // by the time onChecked fires, every pair is already visually solved
+  // (wrong pairs flash and recover in place, per 1.1), so the banner should
+  // read as a clean solve regardless of first-try misses. The *scoring*
+  // (recordAnswer/firstTryCount/discriminationMisses) still uses the real
+  // first-try-based `correct` below — only the banner's correctness is
+  // overridden, so accuracy stays honest while the UI doesn't contradict
+  // a board the learner can see is entirely green.
   function handleChecked(correct: boolean) {
-    setLastCorrect(correct);
+    const isMatchPairs = exercise.type === "match-pairs";
+    setLastCorrect(isMatchPairs ? true : correct);
     setChecked(true);
     if (attempt > 0) return; // retries don't change score or stats
 
@@ -93,9 +127,22 @@ export default function LessonPlayer({
     if (correct) {
       setFirstTryCount((c) => c + 1);
     } else {
-      if (mode === "lesson") flagRevision(skill, `${lesson!.id}#${step}`);
+      // match-pairs flags individual missed kana via handleMatchPairsMiss
+      // (recordSeen, below) instead — flagRevision replays one exact
+      // exercise, which doesn't make sense for "just one pair out of four."
+      if (mode === "lesson" && !isMatchPairs) flagRevision(skill, `${lesson!.id}#${step}`);
       if (isDiscriminationItem(exercise)) setDiscriminationMisses((c) => c + 1);
     }
+  }
+
+  // Per-pair SRS flagging for match-pairs — see the long comment on
+  // handleChecked above for why this bypasses flagRevision entirely.
+  function handleMatchPairsMiss(missed: string, confusedWith?: string) {
+    recordSeen(`kana:${missed}`, false);
+    if (confusedWith) recordSeen(`kana:${confusedWith}`, false);
+  }
+  function handleMatchPairsCorrect(kana: string) {
+    recordSeen(`kana:${kana}`, true);
   }
 
   function handleRetry() {
@@ -131,6 +178,7 @@ export default function LessonPlayer({
     setFirstTryCount(0);
     setDiscriminationMisses(0);
     setDone(false);
+    setAttemptCycle((c) => c + 1);
   }
 
   if (done) {
@@ -190,6 +238,8 @@ export default function LessonPlayer({
         // While a retry is pending, don't highlight the correct option — the
         // second attempt has to be recalled, not read off the screen.
         revealAnswer={!retryOffered}
+        onMatchPairsMiss={handleMatchPairsMiss}
+        onMatchPairsCorrect={handleMatchPairsCorrect}
       />
 
       {checked && (

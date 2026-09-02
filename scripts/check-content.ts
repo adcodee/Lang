@@ -12,17 +12,19 @@
 //      that would otherwise silently mean that word/kana never counts as
 //      "learned".
 //
-// What this does NOT check yet: whether a lesson's own exercises only use
-// characters/vocabulary already taught by an earlier lesson (the JP build
-// plan's "content rule"). That needs to parse displayed text against the
-// cumulative taught-kana/vocab set per lesson, which is real work with no
-// existing content failing it today — deliberately left for whenever it's
-// next actually needed (e.g. once Luganda has enough content to check),
-// rather than built speculatively now. Still checked by eye until then.
+//   3. Patch 1.2, Phase E: every lesson's generated filler (augmentLesson)
+//      only ever names kana/vocab terms this lesson or an earlier one
+//      actually teaches — the runtime version of the content rule above.
+//      Hand-authored exercises are still only checked by eye (parsing
+//      arbitrary prose for stray kana isn't worth building for ~180 items
+//      with no known violations); this covers the ~250-item generated
+//      portion, where scale makes an eyeball check unreliable.
 
-import { levels as jaLevels } from "../lib/content/ja/curriculum";
+import { levels as jaLevels, allLessons as jaAllLessons } from "../lib/content/ja/curriculum";
 import { kana as jaKana } from "../lib/content/ja/kana";
 import { vocab as jaVocab } from "../lib/content/ja/vocab";
+import { augmentLesson } from "../lib/content/ja/lessonExercises";
+import type { Exercise } from "../lib/types";
 
 interface Check {
   ok: boolean;
@@ -99,8 +101,64 @@ function checkLessonReferences(): Check[] {
   return checks;
 }
 
+function extractTerms(ex: Exercise): string[] {
+  switch (ex.type) {
+    case "translate-choice":
+      return [ex.display];
+    case "type-answer":
+      return [ex.display];
+    case "listen-choice":
+      return [ex.audio, ...ex.options];
+    case "match-pairs":
+      return ex.pairs.map((p) => p.left);
+    default:
+      return [];
+  }
+}
+
+function checkGeneratedContentRule(): Check[] {
+  const checks: Check[] = [];
+  const lessons = jaAllLessons();
+  const order = lessons.map((l) => l.id);
+  let violations = 0;
+  let generatedCount = 0;
+
+  for (const lesson of lessons) {
+    const idx = order.indexOf(lesson.id);
+    const allowedIds = new Set([...order.slice(0, idx), lesson.id]);
+    const allowedTerms = new Set([
+      ...jaKana.filter((k) => allowedIds.has(k.lessonId)).map((k) => k.char),
+      ...jaVocab.filter((v) => allowedIds.has(v.lessonId)).map((v) => v.word),
+    ]);
+
+    const originalCount = lesson.exercises.length;
+    const generated = augmentLesson(lesson).slice(originalCount);
+    generatedCount += generated.length;
+
+    for (const ex of generated) {
+      for (const term of extractTerms(ex)) {
+        if (!allowedTerms.has(term)) {
+          violations++;
+          checks.push({
+            ok: false,
+            message: `lesson "${lesson.id}" generated filler references "${term}", not yet taught by this point in the curriculum`,
+          });
+        }
+      }
+    }
+  }
+
+  if (violations === 0) {
+    checks.push({
+      ok: true,
+      message: `${generatedCount} generated filler exercise(s) across ${lessons.length} lessons all respect the content rule`,
+    });
+  }
+  return checks;
+}
+
 function main() {
-  const results = [...checkUniqueIds(), ...checkLessonReferences()];
+  const results = [...checkUniqueIds(), ...checkLessonReferences(), ...checkGeneratedContentRule()];
   const failures = results.filter((r) => !r.ok);
 
   for (const r of results) {
