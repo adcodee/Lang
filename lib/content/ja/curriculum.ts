@@ -60,3 +60,34 @@ export function getNextLesson(id: string): Lesson | undefined {
   if (idx === -1) return undefined;
   return all[idx + 1];
 }
+
+// Patch 1.2.2 (checkpoint lives): the most recent checkpoint strictly
+// before `lessonId`, or null if none has been passed yet (the span runs
+// back to the start of the course). Walks the global lesson order, not
+// per-unit lists — checkpoint spans already cross unit boundaries in the
+// real curriculum (e.g. u1b-checkpoint's span runs into u2-greetings-core).
+export function priorCheckpoint(lessonId: string): Lesson | null {
+  const all = allLessons();
+  const idx = all.findIndex((l) => l.id === lessonId);
+  if (idx === -1) return null;
+  for (let i = idx - 1; i >= 0; i--) {
+    if (all[i].checkpoint) return all[i];
+  }
+  return null;
+}
+
+// Every lesson from (exclusive) the most recent checkpoint before
+// `lessonId` through `lessonId` itself (inclusive) — the span reset when
+// the checkpoint-lives pool hits zero. If `lessonId` is itself an
+// unpassed checkpoint, it's included (it still needs to be cleared).
+export function lessonsSincePriorCheckpoint(lessonId: string): string[] {
+  const all = allLessons();
+  const idx = all.findIndex((l) => l.id === lessonId);
+  if (idx === -1) return [];
+  const span: string[] = [all[idx].id];
+  for (let i = idx - 1; i >= 0; i--) {
+    if (all[i].checkpoint) break;
+    span.unshift(all[i].id);
+  }
+  return span;
+}

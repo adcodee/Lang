@@ -237,7 +237,13 @@ export default function VowelSortDrill() {
           {stickyMuted && <Lock className="h-3 w-3" />}
           {muted ? "Sound on" : "Muted"}
         </button>
-        <p className="mt-0.5 text-[10px] text-muted/70">Hold to lock muted across rounds</p>
+        <p className="mt-0.5 text-[10px] text-muted/70">
+          {stickyMuted
+            ? "Locked muted — hold again to release"
+            : muted && roundLocked
+            ? "Muted for this round — unmutes automatically after"
+            : "Hold to lock muted across rounds"}
+        </p>
       </div>
 
       <motion.div

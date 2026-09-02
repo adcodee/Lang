@@ -15,24 +15,44 @@ type Stage = "srs" | "revision" | "empty" | null;
 // Merged review: spaced-repetition due items (recall) + wrong-answer exercises.
 export default function ReviewPage() {
   const router = useRouter();
-  const revisionItems = useGameStore((s) => s.revisionItems);
-  const completed = useGameStore((s) => s.completedLessons);
-  const seen = useGameStore((s) => s.seen);
   const registerActivity = useGameStore((s) => s.registerActivity);
   const logReview = useGameStore((s) => s.logReview);
 
-  // Snapshot the queue once on mount so recording answers doesn't reshuffle it.
+  // Snapshot the queue once so recording answers doesn't reshuffle it — but
+  // only once the persisted store has actually finished loading from
+  // localStorage. zustand's persist rehydrates asynchronously; a plain
+  // mount-once effect (or one keyed off a `hydrated` *React state* flip)
+  // can still read stale completed/seen values from a selector closure a
+  // render cycle behind the store's own internal hydration bookkeeping —
+  // reading straight from `useGameStore.getState()` inside the hydration
+  // callback itself sidesteps that: it's always current, not tied to
+  // whichever render happened to be in flight when hydration finished.
+  // Without this, a plain mount-once effect can freeze on the store's
+  // empty defaults (due=[], revisionItems=[]) forever, showing "All caught
+  // up" even with a real flagged item. `dojo/page.tsx`'s badge doesn't have
+  // this bug because it reads the store reactively on every render instead
+  // of snapshotting once.
   const frozen = useRef<{ due: TeachCard[]; revision: Lesson | null } | null>(null);
   const [stage, setStage] = useState<Stage>(null);
 
   useEffect(() => {
-    // reviewDeck pads a lone due item with non-due cards, so a single due
-    // item still gets reviewed (RecallRound needs 2+ for distractors).
-    const due = reviewDeck(completed, seen);
-    const revision = buildReviewLesson(revisionItems);
-    frozen.current = { due, revision };
-    setStage(due.length >= 2 ? "srs" : revision ? "revision" : "empty");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    function snapshotFromLiveStore() {
+      const live = useGameStore.getState();
+      // reviewDeck pads a lone due item with non-due cards, so a single due
+      // item still gets reviewed (RecallRound needs 2+ for distractors).
+      const due = reviewDeck(live.completedLessons, live.seen);
+      const revision = buildReviewLesson(live.revisionItems);
+      frozen.current = { due, revision };
+      setStage(due.length >= 2 ? "srs" : revision ? "revision" : "empty");
+    }
+    // `useGameStore.persist` is only attached once zustand's storage
+    // factory can actually see `window` — undefined during Next's SSR/
+    // static-generation pass, so every access is optional-chained.
+    if (useGameStore.persist?.hasHydrated()) {
+      snapshotFromLiveStore();
+      return;
+    }
+    return useGameStore.persist?.onFinishHydration(snapshotFromLiveStore);
   }, []);
 
   if (stage === null) return null;

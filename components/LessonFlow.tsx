@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -28,6 +28,16 @@ export default function LessonFlow({ id }: { id: string }) {
   const lesson = getLesson(id);
   const unit = getUnitForLesson(id);
   const hasTeach = Boolean(lesson?.teach?.length);
+  // A fresh `{ id }` object literal every render would give LessonComplete's
+  // revoke-on-fail effect (deps include `relearn`) a new reference every
+  // time, and since revokeLearned's `.filter()` always returns a new array
+  // even when nothing actually changed, that store update triggers this
+  // component to re-render (it selects learnedLessons), producing another
+  // new `relearn` object — an infinite loop, real and reproducible on any
+  // failed Test with a Learn part, not something 1.2.1/1.2.2 introduced but
+  // caught while verifying 1.2.2's own fail path. Memoized so the reference
+  // only actually changes when hasTeach/id do.
+  const relearn = useMemo(() => (hasTeach ? { id } : undefined), [hasTeach, id]);
   const part: "learn" | "test" = hasTeach
     ? searchParams.get("part") === "test"
       ? "test"
@@ -111,7 +121,7 @@ export default function LessonFlow({ id }: { id: string }) {
     <LessonPlayer
       lessonId={id}
       mode="lesson"
-      relearn={hasTeach ? { id } : undefined}
+      relearn={relearn}
     />
   );
 }

@@ -10,13 +10,33 @@ export default function NextLessonFAB() {
   const current = useCurrentLesson();
   const [visible, setVisible] = useState(false);
 
+  // Show the FAB only once the learner's current-lesson node has actually
+  // scrolled out of view — not a raw scroll-position threshold. That
+  // threshold assumed the home screen always opens at the top; 1.2's Phase
+  // F auto-scrolls straight to the current-lesson node on load, which for
+  // any returning learner lands well past a fixed pixel threshold before
+  // they've touched the screen, so the FAB used to show immediately, every
+  // time. SkillTree already tags that node with the same `data-node-key`
+  // it uses for the auto-scroll — reuse it here instead of a pixel guess.
   useEffect(() => {
-    function onScroll() {
-      setVisible(window.scrollY > 120);
+    if (!current) {
+      setVisible(false);
+      return;
     }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    const el = document.querySelector(
+      `[data-node-key="${CSS.escape(current.currentKey)}"]`
+    );
+    if (!el) {
+      setVisible(false);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [current]);
 
   if (!current) return null;
 

@@ -6,7 +6,10 @@ import type { GameState, SkillCategory, SkillStats } from "@/lib/types";
 import { nextLevel } from "@/lib/srs";
 import { DEFAULT_LANGUAGE, type LanguageId } from "@/lib/languages";
 
-const MAX_HEARTS = 5;
+// Checkpoint-lives (patch 1.2.2) — shared across every lesson test between
+// one checkpoint and the next. Unrelated to ExamPlayer's own local,
+// per-attempt hearts.
+const MAX_LIVES = 3;
 
 function emptySkillStats(): SkillStats {
   return {
@@ -30,7 +33,7 @@ function freshGameState(): GameState {
     xp: 0,
     streak: 0,
     lastActiveDay: null,
-    hearts: MAX_HEARTS,
+    lives: MAX_LIVES,
     completedLessons: [],
     learnedLessons: [],
     skillStats: emptySkillStats(),
@@ -72,7 +75,7 @@ function extractGameState(s: GameState): GameState {
     xp: s.xp,
     streak: s.streak,
     lastActiveDay: s.lastActiveDay,
-    hearts: s.hearts,
+    lives: s.lives,
     completedLessons: s.completedLessons,
     learnedLessons: s.learnedLessons,
     skillStats: s.skillStats,
@@ -108,7 +111,7 @@ interface PersistedShape {
 }
 
 interface GameStore extends GameState {
-  maxHearts: number;
+  maxLives: number;
   active: LanguageId;
   byLang: Record<LanguageId, GameState>;
   // Set by switchLanguage(), never by hydration/migration — LanguageGate
@@ -122,8 +125,12 @@ interface GameStore extends GameState {
   recordAnswer: (skill: SkillCategory, correct: boolean, xp: number) => void;
   flagRevision: (skill: SkillCategory, itemId: string) => void;
   clearRevision: () => void;
-  loseHeart: () => void;
-  refillHearts: () => void;
+  loseLife: () => void;
+  refillLives: () => void;
+  // Patch 1.2.2: bounce-back on running out of lives. Revokes both
+  // completion flags (Learn + Test) for every lesson in the span since the
+  // last passed checkpoint, forcing a real redo rather than a quick retry.
+  resetSpan: (lessonIds: string[]) => void;
   completeLesson: (lessonId: string, bonusXp: number) => void;
   markLearned: (lessonId: string) => void;
   revokeLearned: (lessonId: string) => void;
@@ -141,7 +148,7 @@ export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       ...freshGameState(),
-      maxHearts: MAX_HEARTS,
+      maxLives: MAX_LIVES,
       active: DEFAULT_LANGUAGE,
       byLang: freshByLang(),
       pendingTransition: null,
@@ -184,9 +191,23 @@ export const useGameStore = create<GameStore>()(
           };
         }),
 
-      loseHeart: () => set((s) => ({ hearts: Math.max(0, s.hearts - 1) })),
+      loseLife: () => set((s) => ({ lives: Math.max(0, s.lives - 1) })),
 
-      refillHearts: () => set({ hearts: MAX_HEARTS }),
+      refillLives: () => set({ lives: MAX_LIVES }),
+
+      // Bounce-back: strip both completion flags for the whole span since
+      // the last checkpoint, so it has to be redone (Learn included, not
+      // just a Test retry) — the corrective action the life system exists
+      // to encourage. XP/skillStats/SRS data from that span is left alone;
+      // only the two "you cleared this gate" flags are revoked.
+      resetSpan: (lessonIds) =>
+        set((s) => {
+          const ids = new Set(lessonIds);
+          return {
+            completedLessons: s.completedLessons.filter((id) => !ids.has(id)),
+            learnedLessons: s.learnedLessons.filter((id) => !ids.has(id)),
+          };
+        }),
 
       // Update the daily streak based on the last active day.
       registerActivity: () => {

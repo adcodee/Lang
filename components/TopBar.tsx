@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Flame, Star } from "lucide-react";
+import { Flame, Heart, Star } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { primeSpeech } from "@/lib/speech";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -10,6 +10,10 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export default function TopBar() {
   const xp = useGameStore((s) => s.xp);
   const streak = useGameStore((s) => s.streak);
+  // Checkpoint lives (patch 1.2.2) — a standing resource spanning many
+  // lessons, not scoped to one screen the way ExamPlayer's own separate
+  // per-attempt hearts are, so it lives in the always-visible TopBar.
+  const lives = useGameStore((s) => s.lives);
 
   // Avoid hydration mismatch: store values come from localStorage on the client.
   const [mounted, setMounted] = useState(false);
@@ -34,6 +38,7 @@ export default function TopBar() {
           <LanguageSwitcher />
           <Stat icon={<Star className="h-5 w-5 text-gold" fill="#c9a962" />} value={mounted ? xp : 0} label="XP" />
           <Stat icon={<Flame className="h-5 w-5 text-orange-500" fill="#c2703a" />} value={mounted ? streak : 0} label="day streak" />
+          <Stat icon={<Heart className="h-5 w-5 text-heart" fill="#c15a5a" />} value={mounted ? lives : 3} label="lives until next checkpoint" />
         </div>
       </div>
     </header>

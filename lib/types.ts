@@ -200,7 +200,10 @@ export interface GameState {
   xp: number;
   streak: number;
   lastActiveDay: string | null; // YYYY-MM-DD
-  hearts: number;
+  // Checkpoint-lives (patch 1.2.2): a shared pool spent on a lesson-test
+  // fail, refilled to maxLives on a checkpoint pass. Distinct from
+  // ExamPlayer's own local per-attempt hearts, which this never touches.
+  lives: number;
   completedLessons: string[];
   // Lessons whose Learn part (teach + recall) is done — gates the Test part.
   learnedLessons: string[];

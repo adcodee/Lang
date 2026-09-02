@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
-import { getLesson, getUnitForLesson } from "@/lib/content/ja/curriculum";
+import {
+  getLesson,
+  getUnitForLesson,
+  lessonsSincePriorCheckpoint,
+  priorCheckpoint,
+} from "@/lib/content/ja/curriculum";
 import { getDrill } from "@/lib/content/ja/dojo";
 import { augmentLesson } from "@/lib/content/ja/lessonExercises";
 import { useGameStore } from "@/lib/store/gameStore";
@@ -70,6 +75,10 @@ export default function LessonPlayer({
   const clearRevision = useGameStore((s) => s.clearRevision);
   const completeLesson = useGameStore((s) => s.completeLesson);
   const registerActivity = useGameStore((s) => s.registerActivity);
+  const lives = useGameStore((s) => s.lives);
+  const loseLife = useGameStore((s) => s.loseLife);
+  const refillLives = useGameStore((s) => s.refillLives);
+  const resetSpan = useGameStore((s) => s.resetSpan);
 
   const [step, setStep] = useState(0);
   const [attempt, setAttempt] = useState(0); // 0 = first try, 1 = retry
@@ -81,6 +90,11 @@ export default function LessonPlayer({
   // exactly the one mix-up a lesson exists to catch.
   const [discriminationMisses, setDiscriminationMisses] = useState(0);
   const [done, setDone] = useState(false);
+  // Patch 1.2.2: set only when a fail took the checkpoint-lives pool to 0 —
+  // swaps the normal fail screen for a dedicated bounce-back screen. Holds
+  // the checkpoint title being sent back to (null = the very start of the
+  // course, no checkpoint passed yet).
+  const [outOfLives, setOutOfLives] = useState<{ checkpointTitle: string | null } | null>(null);
 
   const backHref = mode === "lesson" ? "/" : "/dojo";
 
@@ -161,6 +175,21 @@ export default function LessonPlayer({
       // Only a passing lesson completes/unlocks; drills never gate.
       if (mode === "lesson" && passed) {
         completeLesson(lesson!.id, lesson!.xp);
+        // Patch 1.2.2: a checkpoint pass is the pool's only refill point.
+        if (lesson!.checkpoint) refillLives();
+      } else if (mode === "lesson" && !passed) {
+        // Patch 1.2.2: every lesson-test fail (checkpoints included, since
+        // they're just another lesson test here) spends one life from the
+        // pool shared since the last checkpoint. Exams have their own,
+        // separate per-attempt hearts and never touch this.
+        if (lives <= 1) {
+          const span = lessonsSincePriorCheckpoint(lesson!.id);
+          resetSpan(span);
+          refillLives();
+          setOutOfLives({ checkpointTitle: priorCheckpoint(lesson!.id)?.title ?? null });
+        } else {
+          loseLife();
+        }
       }
       if (mode === "review") {
         clearRevision();
@@ -182,6 +211,9 @@ export default function LessonPlayer({
   }
 
   if (done) {
+    if (outOfLives) {
+      return <OutOfLives checkpointTitle={outOfLives.checkpointTitle} />;
+    }
     if (mode === "lesson") {
       return (
         <LessonComplete
@@ -253,6 +285,45 @@ export default function LessonPlayer({
         />
       )}
     </div>
+  );
+}
+
+// Patch 1.2.2: shown instead of the normal fail screen when a lesson-test
+// fail took the checkpoint-lives pool to 0. The span since the last
+// checkpoint has already been reset and lives already refilled by the
+// caller — this screen is purely informational; "Continue" just routes
+// home, where useCurrentLesson() naturally resolves to the first lesson of
+// that span again now that its completion flags are cleared, so no special
+// "jump to checkpoint" navigation is needed here.
+function OutOfLives({ checkpointTitle }: { checkpointTitle: string | null }) {
+  const router = useRouter();
+  return (
+    <motion.div
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="card p-8 text-center"
+    >
+      <div className="text-6xl">💔</div>
+      <h1 className="mt-4 text-2xl font-extrabold text-ink">Out of lives</h1>
+      <p className="mt-2 text-muted">
+        {checkpointTitle ? (
+          <>
+            You&apos;re out of lives — back to{" "}
+            <span className="font-bold text-ink">{checkpointTitle}</span> to
+            go through it again.
+          </>
+        ) : (
+          <>You&apos;re out of lives — back to the start to go through it again.</>
+        )}{" "}
+        Lives are refilled to 3. Take the Learn part slower this time — it&apos;s
+        what keeps the Test from costing you a life.
+      </p>
+      <div className="mt-6 flex flex-col gap-3">
+        <button className="btn-brand" onClick={() => router.push("/")}>
+          Continue
+        </button>
+      </div>
+    </motion.div>
   );
 }
 
