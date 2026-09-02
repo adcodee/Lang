@@ -108,6 +108,8 @@ export const lookalikePairs: LookalikePair[] = [
   { a: "こ", b: "に", tellA: "two strokes only", tellB: "adds the left stem" },
   { a: "は", b: "ほ", tellA: "no line on top", tellB: "extra line on top" },
   { a: "ぬ", b: "め", tellA: "ends in a loop", tellB: "no end loop" },
+  { a: "ぬ", b: "ね", tellA: "open curling tail", tellB: "closed loop at the base" },
+  { a: "め", b: "ね", tellA: "no end loop", tellB: "closed loop at the base" },
   { a: "ね", b: "れ", tellA: "loops at the base", tellB: "kicks outward" },
   { a: "ね", b: "わ", tellA: "loops at the base", tellB: "curls inward" },
   { a: "れ", b: "わ", tellA: "kicks outward", tellB: "curls inward" },

@@ -8,7 +8,7 @@ import { getLesson, getUnitForLesson } from "@/lib/content/ja/curriculum";
 import { getDrill } from "@/lib/content/ja/dojo";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
-import { answerLabel, exerciseSkill } from "@/lib/exercise";
+import { answerLabel, exerciseSkill, isDiscriminationItem } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
@@ -29,13 +29,15 @@ export default function LessonPlayer({
   relearn?: { id: string }; // when set, failing re-locks the Learn part
 }) {
   const router = useRouter();
-  // Lessons come from the curriculum tree; drills from the drill set; the
-  // review drill passes a synthetic lesson directly.
+  const completedLessons = useGameStore((s) => s.completedLessons);
+  // Lessons come from the curriculum tree; drills from the drill set (the
+  // "match" drill builds its boards fresh from completedLessons — see
+  // matchBoards.ts); the review drill passes a synthetic lesson directly.
   const lesson = useMemo(
     () =>
       lessonOverride ??
-      (mode === "lesson" ? getLesson(lessonId ?? "") : getDrill(lessonId ?? "")),
-    [lessonId, lessonOverride, mode]
+      (mode === "lesson" ? getLesson(lessonId ?? "") : getDrill(lessonId ?? "", completedLessons)),
+    [lessonId, lessonOverride, mode, completedLessons]
   );
 
   const recordAnswer = useGameStore((s) => s.recordAnswer);
@@ -49,6 +51,10 @@ export default function LessonPlayer({
   const [checked, setChecked] = useState(false);
   const [lastCorrect, setLastCorrect] = useState(false);
   const [firstTryCount, setFirstTryCount] = useState(0); // scoring basis
+  // A first-try miss on a genuine confusion pair (ぬ/め etc.) blocks passing
+  // outright — see isDiscriminationItem. A passing rate can otherwise hide
+  // exactly the one mix-up a lesson exists to catch.
+  const [discriminationMisses, setDiscriminationMisses] = useState(0);
   const [done, setDone] = useState(false);
 
   const backHref = mode === "lesson" ? "/" : "/dojo";
@@ -86,8 +92,9 @@ export default function LessonPlayer({
     }
     if (correct) {
       setFirstTryCount((c) => c + 1);
-    } else if (mode === "lesson") {
-      flagRevision(skill, `${lesson!.id}#${step}`);
+    } else {
+      if (mode === "lesson") flagRevision(skill, `${lesson!.id}#${step}`);
+      if (isDiscriminationItem(exercise)) setDiscriminationMisses((c) => c + 1);
     }
   }
 
@@ -103,7 +110,7 @@ export default function LessonPlayer({
     if (step + 1 < total) {
       setStep((s) => s + 1);
     } else {
-      const passed = firstTryCount / total >= PASS_RATE;
+      const passed = firstTryCount / total >= PASS_RATE && discriminationMisses === 0;
       // Only a passing lesson completes/unlocks; drills never gate.
       if (mode === "lesson" && passed) {
         completeLesson(lesson!.id, lesson!.xp);
@@ -122,6 +129,7 @@ export default function LessonPlayer({
     setChecked(false);
     setLastCorrect(false);
     setFirstTryCount(0);
+    setDiscriminationMisses(0);
     setDone(false);
   }
 
@@ -133,7 +141,7 @@ export default function LessonPlayer({
           xp={lesson.xp}
           correct={firstTryCount}
           total={total}
-          passed={firstTryCount / total >= PASS_RATE}
+          passed={firstTryCount / total >= PASS_RATE && discriminationMisses === 0}
           onRetry={restart}
           relearn={relearn}
         />

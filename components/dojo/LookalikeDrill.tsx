@@ -10,6 +10,7 @@ import {
   kanaByChar,
   type LookalikePair,
 } from "@/lib/content/ja/kana";
+import { CONFUSION_PAIRS } from "@/lib/content/ja/matchBoards";
 import { useDrillSession } from "@/components/dojo/useDrillSession";
 import SessionHud from "@/components/dojo/SessionHud";
 import SessionSummary from "@/components/dojo/SessionSummary";
@@ -33,16 +34,33 @@ export default function LookalikeDrill() {
 
   const pool = useMemo(() => learnedLookalikePairs(completed), [completed]);
 
+  // The subset of the active pool that's also a deliberate CONFUSION_PAIRS
+  // twin (ぬ/め, ぬ/ね, etc.) — weighted toward below, same list Quick Match
+  // oversamples, so the two drills reinforce the same twins.
+  const confusionPool = useMemo(
+    () =>
+      pool.filter((p) =>
+        CONFUSION_PAIRS.some(
+          ([a, b]) => (p.a === a && p.b === b) || (p.a === b && p.b === a)
+        )
+      ),
+    [pool]
+  );
+
   const round = useMemo<Round | null>(() => {
     if (pool.length === 0) return null;
-    const pair = pool[Math.floor(Math.random() * pool.length)];
+    // 50% of the time, when a genuine confusion twin is available, ask about
+    // that instead of a uniform pick — otherwise a large pool dilutes the
+    // exact pairs (ぬ/め, ぬ/ね, め/ね) this drill most needs to drill.
+    const drawFrom = confusionPool.length > 0 && Math.random() < 0.5 ? confusionPool : pool;
+    const pair = drawFrom[Math.floor(Math.random() * drawFrom.length)];
     const target = Math.random() < 0.5 ? pair.a : pair.b;
     const options: [string, string] =
       Math.random() < 0.5 ? [pair.a, pair.b] : [pair.b, pair.a];
     return { pair, target, options };
     // Fresh round each advance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pool, roundNo]);
+  }, [pool, confusionPool, roundNo]);
 
   if (pool.length === 0) {
     return (

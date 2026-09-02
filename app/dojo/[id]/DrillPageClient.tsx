@@ -34,6 +34,15 @@ export default function DrillPageClient({ id }: { id: string }) {
       return <LookalikeDrill />;
     case "word-flash":
       return <WordFlashDrill />;
+    case "match":
+      // Quick Match's boards are randomly generated per visit (see
+      // matchBoards.ts) — unlike every other drill here, its content isn't
+      // deterministic, so rendering it on the server produces different
+      // boards than the client's own fresh randomness and breaks
+      // hydration (confirmed: caused a full "switch to client rendering"
+      // on every visit). Same mounted-gate convention as the lock check
+      // above, scoped to just this one non-deterministic kind.
+      return mounted ? <LessonPlayer lessonId={id} mode="drill" /> : null;
     default:
       return <LessonPlayer lessonId={id} mode="drill" />;
   }

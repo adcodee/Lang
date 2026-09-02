@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import type { Exercise } from "@/lib/types";
@@ -156,6 +156,12 @@ function TypeAnswer({
 }
 
 // --- match-pairs -----------------------------------------------------------
+// A real pair-matching drill, not "tap left then right then Check": either
+// column can start a pick, a correct pair locks in place immediately, a
+// wrong pair flashes and un-picks without failing the rest of the board.
+// Scored per pair (first-try correct vs total), reported automatically via
+// onChecked the instant every pair is locked — there's no Check button for
+// this exercise type (see Frame's hideCheck).
 function MatchPairs({
   exercise,
   checked,
@@ -165,66 +171,105 @@ function MatchPairs({
   checked: boolean;
   onChecked: (correct: boolean) => void;
 }) {
-  const lefts = exercise.pairs.map((p) => p.left);
-  // Shuffle the right column once on mount — and re-deal until no right sits
-  // beside its own left. Plain shuffling lands the fully-aligned (self-
-  // answering) order 1-in-6 times on a 3-pair board.
-  const rights = useMemo(() => {
-    const solution = exercise.pairs.map((p) => p.right);
-    if (solution.length < 2) return solution;
-    let dealt = shuffle(solution);
-    let guard = 0;
-    while (guard++ < 20 && dealt.some((r, i) => r === solution[i])) {
-      dealt = shuffle(solution);
-    }
-    return dealt;
-  }, [exercise]);
-
-  const [pickLeft, setPickLeft] = useState<string | null>(null);
-  const [matches, setMatches] = useState<Record<string, string>>({});
-
   const correctMap = useMemo(() => {
     const m: Record<string, string> = {};
     exercise.pairs.forEach((p) => (m[p.left] = p.right));
     return m;
   }, [exercise]);
 
-  const matchedRights = new Set(Object.values(matches));
-  const allMatched = Object.keys(matches).length === lefts.length;
+  // Shuffle both columns independently, re-dealing if any row's left/right
+  // happen to land on the same row as their real pair — a free answer.
+  const [lefts, rights] = useMemo(() => {
+    const solutionLefts = exercise.pairs.map((p) => p.left);
+    const solutionRights = exercise.pairs.map((p) => p.right);
+    if (solutionLefts.length < 2) return [solutionLefts, solutionRights];
+    let L = shuffle(solutionLefts);
+    let R = shuffle(solutionRights);
+    let guard = 0;
+    while (guard++ < 30 && L.some((l, i) => correctMap[l] === R[i])) {
+      L = shuffle(solutionLefts);
+      R = shuffle(solutionRights);
+    }
+    return [L, R];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exercise]);
 
-  function chooseRight(right: string) {
-    if (!pickLeft || checked) return;
-    setMatches((m) => ({ ...m, [pickLeft]: right }));
-    setPickLeft(null);
+  const pairCount = exercise.pairs.length;
+  const [locked, setLocked] = useState<Record<string, string>>({}); // left -> right, correct only
+  const [pending, setPending] = useState<{ side: "left" | "right"; value: string } | null>(null);
+  const [wrongFlash, setWrongFlash] = useState<{ left: string; right: string } | null>(null);
+  // Per-left-item "was the first ever attempt correct" — the per-pair score,
+  // not a re-render-driving state (retapping after a miss must not change it).
+  const attempted = useRef<Set<string>>(new Set());
+  const firstTryCorrect = useRef(0);
+
+  const lockedRights = new Set(Object.values(locked));
+  const allLocked = Object.keys(locked).length === pairCount;
+
+  // Fires exactly once, the instant the last pair locks — allLocked only
+  // ever transitions false -> true (locked never shrinks).
+  useEffect(() => {
+    if (allLocked && pairCount > 0) {
+      onChecked(firstTryCorrect.current === pairCount);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allLocked]);
+
+  function tap(side: "left" | "right", value: string) {
+    if (checked || wrongFlash) return;
+    if (side === "left" && locked[value]) return;
+    if (side === "right" && lockedRights.has(value)) return;
+
+    if (!pending) {
+      setPending({ side, value });
+      return;
+    }
+    if (pending.side === side) {
+      setPending({ side, value }); // second tap on the same column replaces the pick
+      return;
+    }
+
+    const leftVal = side === "left" ? value : pending.value;
+    const rightVal = side === "right" ? value : pending.value;
+    const isCorrect = correctMap[leftVal] === rightVal;
+
+    if (!attempted.current.has(leftVal)) {
+      attempted.current.add(leftVal);
+      if (isCorrect) firstTryCorrect.current += 1;
+    }
+
+    if (isCorrect) {
+      setLocked((m) => ({ ...m, [leftVal]: rightVal }));
+      setPending(null);
+    } else {
+      setWrongFlash({ left: leftVal, right: rightVal });
+      setPending(null);
+      window.setTimeout(() => setWrongFlash(null), 450);
+    }
   }
 
-  function leftClass(left: string): string {
-    if (matches[left]) return "choice choice-selected opacity-70";
-    return pickLeft === left ? "choice choice-selected" : "choice";
+  function tileClass(side: "left" | "right", value: string): string {
+    const isLocked = side === "left" ? Boolean(locked[value]) : lockedRights.has(value);
+    if (isLocked) return "choice choice-correct opacity-70";
+    if (wrongFlash && (side === "left" ? wrongFlash.left === value : wrongFlash.right === value)) {
+      return "choice choice-wrong";
+    }
+    if (pending?.side === side && pending.value === value) return "choice choice-selected";
+    return "choice";
   }
 
   return (
-    <Frame
-      prompt={exercise.prompt}
-      canCheck={allMatched}
-      checked={checked}
-      onCheck={() =>
-        onChecked(lefts.every((l) => matches[l] === correctMap[l]))
-      }
-    >
+    <Frame prompt={exercise.prompt} canCheck={false} checked={checked} onCheck={() => {}} hideCheck>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-3">
           {lefts.map((l) => (
             <button
               key={l}
-              disabled={checked || Boolean(matches[l])}
-              className={leftClass(l)}
-              onClick={() => setPickLeft(l)}
+              disabled={checked || Boolean(locked[l])}
+              className={tileClass("left", l)}
+              onClick={() => tap("left", l)}
             >
               {l}
-              {matches[l] && (
-                <span className="ml-2 text-sm text-muted">→ {matches[l]}</span>
-              )}
             </button>
           ))}
         </div>
@@ -232,9 +277,9 @@ function MatchPairs({
           {rights.map((r) => (
             <button
               key={r}
-              disabled={checked || matchedRights.has(r)}
-              className={`choice ${matchedRights.has(r) ? "opacity-40" : ""}`}
-              onClick={() => chooseRight(r)}
+              disabled={checked || lockedRights.has(r)}
+              className={tileClass("right", r)}
+              onClick={() => tap("right", r)}
             >
               {r}
             </button>
@@ -531,7 +576,11 @@ function CategorySort({
               className={tileClass(it.label, false)}
             >
               <div>{it.label}</div>
-              {it.romaji && (
+              {/* Hidden pre-check for single-kana labels — showing the
+                  romaji reading there gives away the exact thing a kana
+                  sort is meant to test. Word/phrase labels (length > 1)
+                  are unaffected; romaji always shows once checked. */}
+              {it.romaji && (checked || it.label.length !== 1) && (
                 <div className="text-xs font-normal text-muted">{it.romaji}</div>
               )}
             </button>
@@ -594,6 +643,7 @@ function Frame({
   canCheck,
   checked,
   onCheck,
+  hideCheck = false,
 }: {
   prompt: string;
   display?: string;
@@ -601,6 +651,9 @@ function Frame({
   canCheck: boolean;
   checked: boolean;
   onCheck: () => void;
+  // match-pairs grades itself per-pair and reports automatically — no
+  // Check button for that exercise type. Every other type is unaffected.
+  hideCheck?: boolean;
 }) {
   return (
     <div className="card p-6">
@@ -611,7 +664,7 @@ function Frame({
         </div>
       )}
       <div className={display ? "" : "mt-4"}>{children}</div>
-      {!checked && (
+      {!checked && !hideCheck && (
         <button
           disabled={!canCheck}
           onClick={onCheck}

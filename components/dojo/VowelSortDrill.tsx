@@ -75,6 +75,8 @@ export default function VowelSortDrill() {
   const [attempted, setAttempted] = useState<Set<string>>(new Set());
   const [feedback, setFeedback] = useState<string | null>(null);
   const [wrong, setWrong] = useState<string | null>(null); // char flashing red
+  // Session-only, not persisted — voiced is this drill's default identity.
+  const [muted, setMuted] = useState(false);
 
   const advance = useCallback(() => {
     setSelected(null);
@@ -110,7 +112,7 @@ export default function VowelSortDrill() {
     if (placed[char]) return;
     setSelected(char);
     setFeedback(null);
-    speak(char);
+    if (!muted) speak(char);
   }
 
   function placeInto(vowel: string) {
@@ -130,7 +132,7 @@ export default function VowelSortDrill() {
       setPlaced((p) => ({ ...p, [item.char]: vowel }));
       setSelected(null);
       setFeedback(`✓ ${item.char} is the “${item.vowel}” sound.`);
-      speak(item.char);
+      if (!muted) speak(item.char);
       // Round cleared?
       const nextPlacedCount = Object.keys(placed).length + 1;
       if (nextPlacedCount === board.length) {
@@ -143,12 +145,13 @@ export default function VowelSortDrill() {
         `${item.char} carries the “${item.vowel}” sound (like ${VOWEL_KANA[item.vowel]}), so it goes in the ${VOWEL_KANA[item.vowel]}-row.`
       );
       setSelected(null);
-      speak(item.char);
+      if (!muted) speak(item.char);
       window.setTimeout(() => setWrong((w) => (w === item.char ? null : w)), 600);
     }
   }
 
   function hint() {
+    if (muted) return;
     // "Listen to each sound first" — play the still-unplaced tray items in turn.
     const tray = board.filter((b) => !placed[b.char]);
     tray.forEach((it, i) => window.setTimeout(() => speak(it.char), i * 750));
@@ -163,11 +166,20 @@ export default function VowelSortDrill() {
       <div className="mb-3 text-center">
         <h2 className="text-lg font-extrabold text-ink">Vowel Row Sort</h2>
         <p className="text-sm text-muted">
-          Tap a kana to hear it, then drop it in its vowel column.
+          {muted
+            ? "Tap a kana, drop it in its vowel column — no audio"
+            : "Tap a kana to hear it, then drop it in its vowel column."}
         </p>
         <p className="mt-1 text-xs font-bold uppercase tracking-wide text-brand-dark">
           {rowProgress.unlocked}/{rowProgress.total} rows unlocked
         </p>
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          className="mt-2 rounded-full border-2 border-gray-200 px-3 py-1 text-xs font-bold text-muted hover:text-ink"
+        >
+          {muted ? "Sound on" : "Muted"}
+        </button>
       </div>
 
       <motion.div
@@ -194,7 +206,7 @@ export default function VowelSortDrill() {
                 }`}
               >
                 <span>{it.char}</span>
-                <Volume2 className="mt-0.5 h-3 w-3 text-muted" />
+                {!muted && <Volume2 className="mt-0.5 h-3 w-3 text-muted" />}
               </button>
             ))
           )}
@@ -246,12 +258,14 @@ export default function VowelSortDrill() {
           >
             {feedback}
           </p>
-          <button
-            onClick={hint}
-            className="flex shrink-0 items-center gap-1 rounded-full border-2 border-gray-200 px-3 py-1.5 text-xs font-bold text-muted hover:text-ink"
-          >
-            <Lightbulb className="h-3.5 w-3.5" /> Listen first
-          </button>
+          {!muted && (
+            <button
+              onClick={hint}
+              className="flex shrink-0 items-center gap-1 rounded-full border-2 border-gray-200 px-3 py-1.5 text-xs font-bold text-muted hover:text-ink"
+            >
+              <Lightbulb className="h-3.5 w-3.5" /> Listen first
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

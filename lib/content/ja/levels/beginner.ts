@@ -229,6 +229,22 @@ export const beginner: Level = {
             { type: "type-answer", prompt: "Type the romaji for this character", display: "に", answer: "ni" },
             { type: "listen-choice", prompt: "Listen and tap the kana you hear", audio: "ね", options: ["ね", "な", "の", "ぬ"], answer: "ね" },
             { type: "match-pairs", prompt: "Match each character to its sound", pairs: [{ left: "な", right: "na" }, { left: "に", right: "ni" }, { left: "の", right: "no" }] },
+            {
+              // Patch's original options (ね/め/れ) included め and れ —
+              // M-row and R-row kana not taught until later lessons, a
+              // content-rule violation (every lesson may only use
+              // characters already introduced). め vs ぬ is the real
+              // target confusion, but that item has to wait for u1-ma-row
+              // (below) where め is actually taught — swapped to な/の,
+              // this lesson's own kana, so ぬ/ね is still a genuine
+              // same-lesson discrimination test.
+              type: "translate-choice",
+              prompt: "Which one is nu?",
+              display: "❓",
+              options: ["ぬ", "ね", "な", "の"],
+              answer: "ぬ",
+              note: "ぬ ends in an open curling tail. ね closes the loop at the base.",
+            },
           ],
         },
         {
@@ -330,6 +346,18 @@ export const beginner: Level = {
             { type: "type-answer", prompt: "Type the romaji for this character", display: "み", answer: "mi" },
             { type: "listen-choice", prompt: "Listen and tap the kana you hear", audio: "め", options: ["め", "ま", "も", "む"], answer: "め" },
             { type: "match-pairs", prompt: "Match each character to its sound", pairs: [{ left: "ま", right: "ma" }, { left: "め", right: "me" }, { left: "も", right: "mo" }] },
+            {
+              // Patch's original options included わ (WA-row), not taught
+              // until after this lesson — same content-rule issue as
+              // u1-na-row's seed item. Swapped for ま, this lesson's own
+              // kana; ぬ/ね (N-row) are legitimately already taught by now.
+              type: "translate-choice",
+              prompt: "Which one is me?",
+              display: "❓",
+              options: ["め", "ぬ", "ね", "ま"],
+              answer: "め",
+              note: "め has no end loop. ぬ loops out. ね closes the loop at the base.",
+            },
           ],
         },
         {

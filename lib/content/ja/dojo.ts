@@ -2,6 +2,7 @@ import type { Exercise, Lesson, SkillCategory, TeachCard } from "@/lib/types";
 import { allLessons, getLesson } from "@/lib/content/ja/curriculum";
 import { learnedKana } from "@/lib/content/ja/kana";
 import { learnedVocab } from "@/lib/content/ja/vocab";
+import { buildMutedMatchExercises } from "@/lib/content/ja/matchBoards";
 import { isDue, kanaItemId, vocabItemId, type SeenEntry } from "@/lib/srs";
 
 // Dojo drills. Endless kinds (trace/category) render their own components;
@@ -71,34 +72,15 @@ export const dojoDrills: DojoDrill[] = [
   {
     id: "match",
     title: "Quick Match Pairs",
-    subtitle: "Kana ↔ sound",
+    subtitle: "Kana ↔ sound — no audio",
     icon: "⚡",
-    skill: "listening",
+    skill: "reading",
     kind: "match",
     unlockAfter: "u1-vowels",
-    // Content rule: this unlocks right after the vowels lesson, so it may only
-    // use vowel kana — no later rows or vocab.
-    exercises: [
-      {
-        type: "match-pairs",
-        prompt: "Match the kana to its sound",
-        pairs: [
-          { left: "あ", right: "a" },
-          { left: "い", right: "i" },
-          { left: "う", right: "u" },
-          { left: "え", right: "e" },
-        ],
-      },
-      {
-        type: "match-pairs",
-        prompt: "Match the kana to its sound",
-        pairs: [
-          { left: "お", right: "o" },
-          { left: "え", right: "e" },
-          { left: "あ", right: "a" },
-        ],
-      },
-    ],
+    // No static `exercises` here — getDrill() below builds this drill's
+    // boards fresh each time from buildMutedMatchExercises(), growing with
+    // whatever kana the learner has actually been taught. See
+    // lib/content/ja/matchBoards.ts.
   },
   {
     id: "listen",
@@ -266,9 +248,14 @@ export function unlockLessonTitle(drill: DojoDrill): string {
 }
 
 // Lesson-shaped view for the fixed kinds, consumed by LessonPlayer.
-export function getDrill(id: string): Lesson | undefined {
+// "match" has no static `exercises` — its boards are generated fresh from
+// whatever the learner has actually been taught (see matchBoards.ts), so
+// every call site must pass the learner's real completedLessons.
+export function getDrill(id: string, completed: string[] = []): Lesson | undefined {
   const d = getDrillConfig(id);
-  if (!d || !d.exercises) return undefined;
+  if (!d) return undefined;
+  const exercises = id === "match" ? buildMutedMatchExercises(completed) : d.exercises;
+  if (!exercises) return undefined;
   return {
     id: d.id,
     title: d.title,
@@ -276,7 +263,7 @@ export function getDrill(id: string): Lesson | undefined {
     icon: d.icon,
     skill: d.skill,
     xp: 0,
-    exercises: d.exercises,
+    exercises,
   };
 }
 
