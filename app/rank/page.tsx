@@ -4,29 +4,45 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/lib/store/gameStore";
 import { getRank } from "@/lib/rank";
-import { unitsInOrder } from "@/lib/content/ja/curriculum";
 import SkillStats from "@/components/SkillStats";
+
+const BAR_TICKS = 5; // matches the max bars-per-colour in BELT_AWARDS
 
 export default function RankPage() {
   const xp = useGameStore((s) => s.xp);
   const skillStats = useGameStore((s) => s.skillStats);
   const revisionCount = useGameStore((s) => s.revisionItems.length);
-  const belts = useGameStore((s) => s.examsPassed.length);
+  const examsPassed = useGameStore((s) => s.examsPassed);
+  const completedLessons = useGameStore((s) => s.completedLessons);
   const reviewLog = useGameStore((s) => s.reviewLog);
-  const totalUnits = unitsInOrder().length;
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const rank = getRank(mounted ? xp : 0, skillStats);
+  const rank = getRank(
+    mounted ? xp : 0,
+    skillStats,
+    mounted ? examsPassed : [],
+    mounted ? completedLessons : []
+  );
+  const belt = rank.belt;
 
   return (
     <div className="flex flex-col gap-6">
       <section className="dojo-header rounded-2xl p-6 text-center text-white">
         <div className="text-6xl">{rank.emoji}</div>
         <h1 className="mt-3 text-2xl font-extrabold">{rank.title}</h1>
-        <p className="mt-1 text-sm text-white/80">
-          {mounted ? xp : 0} XP total · 🥋 {mounted ? belts : 0}/{totalUnits} belts
+        <p className="mt-1 flex items-center justify-center gap-2 text-sm text-white/80">
+          <span>
+            {belt.emoji} {belt.label} · {belt.jp}
+          </span>
+          {belt.bars > 0 && (
+            <span className="tracking-tight" aria-hidden="true">
+              {"|".repeat(belt.bars)}
+              {"·".repeat(Math.max(0, BAR_TICKS - belt.bars))}
+            </span>
+          )}
         </p>
+        <p className="mt-1 text-xs text-white/70">{mounted ? xp : 0} XP total</p>
 
         <div className="mx-auto mt-4 max-w-xs">
           <div className="h-3 overflow-hidden rounded-full bg-white/25">
@@ -35,11 +51,7 @@ export default function RankPage() {
               style={{ width: `${Math.round(rank.progress * 100)}%` }}
             />
           </div>
-          <p className="mt-2 text-xs text-white/80">
-            {rank.xpForNext === null
-              ? "Max rank reached — legendary."
-              : `${rank.xpForNext - rank.xpInto} XP to the next rank`}
-          </p>
+          <p className="mt-2 text-xs text-white/80">{rank.progressLabel}</p>
         </div>
 
         {mounted && !rank.balanced && (

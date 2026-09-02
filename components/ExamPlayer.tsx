@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { X, Heart } from "lucide-react";
 import { buildExam } from "@/lib/content/ja/exam";
 import { getNextUnit, getUnit, isUnitUnlocked } from "@/lib/content/ja/curriculum";
+import { awardForUnit } from "@/lib/belts";
 import { useGameStore } from "@/lib/store/gameStore";
 import { answerLabel } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
@@ -178,6 +179,7 @@ function ExamPassed({
 }) {
   const router = useRouter();
   const next = getNextUnit(unitId);
+  const award = awardForUnit(unitId);
 
   return (
     <motion.div
@@ -185,10 +187,17 @@ function ExamPassed({
       animate={{ scale: 1, opacity: 1 }}
       className="card p-8 text-center"
     >
-      <div className="text-6xl">🥋</div>
+      <div className="text-6xl">{award?.emoji ?? "🥋"}</div>
       <h1 className="mt-4 text-2xl font-extrabold text-brand-dark">
-        Belt earned!
+        {award
+          ? award.kind === "color"
+            ? `${award.label} earned!`
+            : `Bar earned — ${award.label}.`
+          : "Belt earned!"}
       </h1>
+      {award && (
+        <p className="mt-1 text-sm text-muted">{award.jp}</p>
+      )}
       <p className="mt-2 text-muted">
         You passed the <span className="font-bold">{title}</span> exam{" "}
         <span className="font-bold text-ink">
