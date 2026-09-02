@@ -1,7 +1,7 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { TextToSpeech } from "@capacitor-community/text-to-speech";
+import { TextToSpeech, QueueStrategy } from "@capacitor-community/text-to-speech";
 
 // Thin wrappers around the browser Web Speech API used by the voice tutor.
 // These power the STT/TTS for the Grok voice flow when no real key is wired up,
@@ -192,16 +192,44 @@ function pickJapaneseVoice(): SpeechSynthesisVoice | undefined {
 // the cancel; a pending-speak handle keeps rapid calls from double-speaking.
 let pendingSpeak: number | null = null;
 
+// Bumped on every native speak() call; a call whose generation has moved on
+// by the time its post-stop delay elapses was superseded by a later tap and
+// must not also play — see the native branch below.
+let nativeSpeakGen = 0;
+
 export function speak(text: string, lang = "ja-JP", onEnd?: () => void) {
   if (Capacitor.isNativePlatform()) {
-    // speak() resolves only once playback finishes (plugin's documented
-    // behaviour) — no leading-pause hack needed here, that was specifically
-    // a Web Speech API cold-start quirk.
-    //
+    // Turns out this engine has the SAME clipped-first-phoneme quirk as the
+    // Web Speech API above (confirmed on-device, Galaxy A15: が/ば/か coming
+    // out wrong) — the plugin's own Android source calls tts.stop() then
+    // tts.speak() back to back with zero gap whenever queueStrategy is Flush
+    // (our default), which is exactly the "cancel immediately before speak"
+    // pattern that clips the onset elsewhere. が/ば/か are all plosives
+    // (/g/,/b/,/k/) — a plosive's identity is its release burst, so clipping
+    // the onset is what breaks all three, not a voiced/unvoiced thing (か is
+    // already unvoiced). Vowels/nasals/fricatives (あ/な/さ) survive it,
+    // which is why only some sounds showed the bug. Same fix as web: stop
+    // explicitly, give the engine a beat, then speak a lead-pause-padded
+    // utterance with queueStrategy Add so the plugin doesn't re-issue its own
+    // zero-gap stop() — and a generation guard (mirrors pendingSpeak below)
+    // so two taps inside that beat don't both end up playing.
+    const gen = ++nativeSpeakGen;
     (async () => {
       try {
         const voice = await pickNativeJapaneseVoiceIndex();
-        await TextToSpeech.speak({ text, lang, voice, queueStrategy: 0 });
+        try {
+          await TextToSpeech.stop();
+        } catch {
+          /* ignore — best-effort settle before speaking */
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 90));
+        if (gen !== nativeSpeakGen) return; // superseded by a later call
+        await TextToSpeech.speak({
+          text: `、${text}`,
+          lang,
+          voice,
+          queueStrategy: QueueStrategy.Add,
+        });
       } catch (err) {
         console.error("[speech] native speak() failed:", err);
       } finally {
