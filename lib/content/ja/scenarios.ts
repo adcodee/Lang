@@ -35,7 +35,7 @@ export const scenarios: Scenario[] = [
     },
     // The Phase-3 milestone exchange, driven one step per turn.
     brief:
-      "Roleplay meeting for the first time. Drive this exact four-step exchange, ONE step per turn, waiting for the learner between steps: (1) exchange greetings, (2) ask their name and give yours (you are ゆき), (3) say はじめまして / よろしく, (4) say goodbye. If the learner jumps ahead or stalls, gently bring them to the current step.",
+      "Roleplay meeting for the first time. Drive this exact three-step exchange, ONE step per turn, waiting for the learner between steps: (1) exchange greetings (こんにちは), (2) ask their name and give yours (you are ゆき), (3) the intro script in order — はじめまして, then name です, then よろしく. Do not treat はじめまして and よろしく as the same line: はじめまして is first-meeting only; よろしく is 'I look forward to this'. STOP after the intro. Do not ask for goodbye — that word has not been taught. If the learner jumps ahead or stalls, gently bring them to the current step.",
   },
   {
     id: "food",

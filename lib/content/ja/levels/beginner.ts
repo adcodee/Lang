@@ -255,7 +255,7 @@ export const beginner: Level = {
           skill: "reading",
           xp: 20,
           teach: [
-            { char: "は", romaji: "ha", mnemonic: "は looks like an 'H' shape — 'ha'.", example: { word: "はな", romaji: "hana", meaning: "flower / nose" } },
+            { char: "は", romaji: "ha", mnemonic: "は looks like an 'H' shape — 'ha'.", example: { word: "はな", romaji: "hana", meaning: "flower" } },
             { char: "ひ", romaji: "hi", mnemonic: "ひ is a wide smile — 'hi'.", example: { word: "ひと", romaji: "hito", meaning: "person" } },
             { char: "ふ", romaji: "fu", mnemonic: "ふ is scattered like Mt. Fuji — 'fu'.", example: { word: "ふね", romaji: "fune", meaning: "boat" } },
             { char: "へ", romaji: "he", mnemonic: "へ is a gentle hill — 'he'.", example: { word: "へそ", romaji: "heso", meaning: "navel" } },
@@ -744,7 +744,7 @@ export const beginner: Level = {
               romaji: "bo",
               mnemonic: "ほ + ゛ = ぼ. ho → bo.",
               mnemonicEmoji: "゛",
-              example: { word: "ぼく", romaji: "boku", meaning: "I / me (casual, male)" },
+              example: { word: "ぼうし", romaji: "boushi", meaning: "hat" },
               contrast: {
                 a: { word: "ほ", romaji: "ho", meaning: "plain" },
                 b: { word: "ぼ", romaji: "bo", meaning: "voiced ゛" },
@@ -1169,8 +1169,12 @@ export const beginner: Level = {
                 answer: "お",
                 note: "お and う are both vowels from Unit 1.",
               },
-              context: "Morning greeting — to friends, family or colleagues.",
-              polite: { term: "おはようございます", reading: "ohayou gozaimasu" },
+              context: "Casual morning greeting — friends and family. Colleagues and strangers get the polite form.",
+              polite: {
+                term: "おはようございます",
+                reading: "ohayou gozaimasu",
+                note: "Use this with colleagues, customers, and people you don't know well.",
+              },
               trace: "お",
             },
             {
@@ -1279,7 +1283,7 @@ export const beginner: Level = {
               kind: "phrase",
               term: "はじめまして",
               reading: "hajimemashite",
-              meaning: "Nice to meet you",
+              meaning: "Nice to meet you (first time)",
               parts: [
                 { kana: "は", reading: "ha", note: "Here は is a normal 'ha' — not the 'wa' particle." },
                 { kana: "じ", reading: "ji" },
@@ -1294,32 +1298,81 @@ export const beginner: Level = {
                 answer: "ha",
                 note: "Only sentence-final topic-particle は becomes 'wa'. Here it's a normal 'ha'.",
               },
-              context: "Said when meeting someone new — usually paired with よろしく.",
+              uses: [
+                {
+                  situation: "The first time you meet someone",
+                  english: "Nice to meet you",
+                  example: "はじめまして。",
+                },
+              ],
+              context: "First meetings only — not to someone you already know. Then you give your name and say よろしく.",
+            },
+            {
+              kind: "phrase",
+              term: "わたし",
+              reading: "watashi",
+              meaning: "I",
+              parts: [
+                { kana: "わ", reading: "wa" },
+                { kana: "た", reading: "ta" },
+                { kana: "し", reading: "shi" },
+              ],
+              uses: [
+                {
+                  situation: "Polite 'I'",
+                  english: "I",
+                  example: "わたしは たなか です。",
+                },
+              ],
+              context: "Default 'I' in polite speech. わたしは X です = 'I am X'.",
             },
             {
               kind: "phrase",
               term: "です",
               reading: "desu",
-              meaning: "am / is (polite)",
+              meaning: "polite sentence ending",
               parts: [
                 { kana: "で", reading: "de" },
                 { kana: "す", reading: "su", note: "The 'u' is often barely voiced → 'des'." },
               ],
-              context: "Attach to a noun: わたしは たなか です = 'I am Tanaka'.",
+              uses: [
+                {
+                  situation: "After a name or noun",
+                  english: "…is / am (polite closer)",
+                  example: "たなか です。",
+                },
+              ],
+              context: "Ends a polite sentence. Not the English verb 'to be' on its own — attach it: わたしは たなか です.",
             },
             {
               kind: "phrase",
               term: "よろしく",
               reading: "yoroshiku",
-              meaning: "Please be kind to me",
+              meaning: "I look forward to this",
               parts: [
                 { kana: "よ", reading: "yo" },
                 { kana: "ろ", reading: "ro" },
                 { kana: "し", reading: "shi" },
                 { kana: "く", reading: "ku" },
               ],
-              context: "Often follows your name when introducing yourself.",
-              polite: { term: "よろしくおねがいします", reading: "yoroshiku onegaishimasu" },
+              uses: [
+                {
+                  situation: "After you introduce yourself",
+                  english: "I look forward to this / to working with you",
+                  example: "たなか です。よろしく。",
+                },
+                {
+                  situation: "Closing a request (polite form)",
+                  english: "Please / thanks in advance",
+                  example: "よろしくおねがいします。",
+                },
+              ],
+              context: "Not 'please treat me well'. Script: はじめまして → たなか です → よろしく. はじめまして looks back (first meeting); よろしく looks forward.",
+              polite: {
+                term: "よろしくおねがいします",
+                reading: "yoroshiku onegaishimasu",
+                note: "Introductions, and also the 'please / thanks in advance' you put after asking someone to do something.",
+              },
               trace: "く",
             },
             {
@@ -1334,39 +1387,51 @@ export const beginner: Level = {
                 { kana: "せ", reading: "se" },
                 { kana: "ん", reading: "n" },
               ],
-              context: "Works for both 'excuse me' (getting attention) and 'sorry'.",
+              uses: [
+                {
+                  situation: "Getting someone's attention",
+                  english: "Excuse me",
+                  example: "すみません。",
+                },
+                {
+                  situation: "A small apology",
+                  english: "Sorry",
+                  example: "すみません。",
+                },
+              ],
+              context: "Two jobs this lesson: stop someone, or apologise. Thanking someone who just helped you can wait.",
             },
           ],
           exercises: [
             {
               type: "translate-choice",
-              prompt: "Select the meaning",
+              prompt: "When do you say this?",
               display: "はじめまして",
               options: [
-                "Nice to meet you",
-                "See you later",
-                "I'm sorry",
-                "Excuse me",
+                "The first time you meet someone",
+                "Every time you see a friend",
+                "When you say goodbye",
+                "When you apologise",
               ],
-              answer: "Nice to meet you",
-              note: "はじめまして (hajimemashite) opens a first meeting.",
+              answer: "The first time you meet someone",
+              note: "はじめまして opens a first meeting only — then name, then よろしく.",
             },
             {
               type: "build-sentence",
-              prompt: "Build: 'I am Tanaka' (watashi wa Tanaka desu)",
+              prompt: "Build the intro: 'I am Tanaka' (watashi wa Tanaka desu)",
               display: "I am Tanaka",
               tiles: ["わたし", "は", "たなか", "です"],
               answer: ["わたし", "は", "たなか", "です"],
-              note: "わたしは X です = 'I am X'. Polite and simple.",
+              note: "わたしは X です = 'I am X'. Next you say よろしく.",
             },
             {
               type: "match-pairs",
-              prompt: "Match the phrase to its meaning",
+              prompt: "Match the phrase to the job it does",
               pairs: [
-                { left: "よろしく", right: "Please be kind to me" },
+                { left: "よろしく", right: "I look forward to this" },
                 { left: "すみません", right: "Excuse me / Sorry" },
               ],
-              note: "よろしく often follows your introduction.",
+              note: "Script: はじめまして → たなか です → よろしく.",
             },
           ],
         },
@@ -1392,9 +1457,9 @@ export const beginner: Level = {
               prompt: "Match the phrase to its meaning",
               pairs: [
                 { left: "おはよう", right: "good morning" },
-                { left: "すみません", right: "excuse me" },
-                { left: "よろしく", right: "please treat me well" },
-                { left: "はじめまして", right: "nice to meet you" },
+                { left: "すみません", right: "excuse me / sorry" },
+                { left: "よろしく", right: "I look forward to this" },
+                { left: "はじめまして", right: "nice to meet you (first time)" },
               ],
             },
             {
@@ -1443,9 +1508,9 @@ export const beginner: Level = {
               type: "listen-choice",
               prompt: "What did you hear?",
               audio: "はじめまして",
-              options: ["Nice to meet you", "Goodbye", "Thank you", "Excuse me"],
-              answer: "Nice to meet you",
-              note: "はじめまして opens a first meeting.",
+              options: ["Nice to meet you (first time)", "Goodbye", "Thank you", "Excuse me"],
+              answer: "Nice to meet you (first time)",
+              note: "はじめまして opens a first meeting only — then you say よろしく.",
             },
           ],
         },
@@ -1532,11 +1597,15 @@ export const beginner: Level = {
           xp: 25,
           teach: [
             { kind: "phrase", term: "いち", reading: "ichi", meaning: "one (1)" },
-            { kind: "phrase", term: "に", reading: "ni", meaning: "two (2)" },
+            { kind: "phrase", term: "に", reading: "ni", meaning: "two (2)", note: "The number. The particle に is a different job, later." },
             { kind: "phrase", term: "さん", reading: "san", meaning: "three (3)" },
-            { kind: "phrase", term: "よん", reading: "yon", meaning: "four (4)", note: "Also read し (shi)." },
+            { kind: "phrase", term: "よん", reading: "yon", meaning: "four (4)", note: "Use よん for now. し (shi) shows up in dates later — not this lesson." },
             { kind: "phrase", term: "ご", reading: "go", meaning: "five (5)" },
-            { kind: "phrase", term: "じゅう", reading: "juu", meaning: "ten (10)", note: "6–10: ろく なな はち きゅう じゅう." },
+            { kind: "phrase", term: "ろく", reading: "roku", meaning: "six (6)" },
+            { kind: "phrase", term: "なな", reading: "nana", meaning: "seven (7)", note: "Use なな for now. しち shows up in dates later." },
+            { kind: "phrase", term: "はち", reading: "hachi", meaning: "eight (8)" },
+            { kind: "phrase", term: "きゅう", reading: "kyuu", meaning: "nine (9)", note: "Use きゅう for now. く shows up in dates later." },
+            { kind: "phrase", term: "じゅう", reading: "juu", meaning: "ten (10)" },
           ],
           exercises: [
             {
@@ -1592,7 +1661,7 @@ export const beginner: Level = {
           skill: "writing",
           xp: 30,
           teach: [
-            { kind: "phrase", term: "〜さい", reading: "sai", meaning: "~ years old", note: "わたしは ごさい です = 'I am 5 years old'." },
+            { kind: "phrase", term: "〜さい", reading: "sai", meaning: "~ years old", note: "わたしは ごさい です = 'I am 5 years old'. Some ages change sound (いっさい, はっさい) — later; this lesson is the pattern." },
             { kind: "phrase", term: "なんさいですか", reading: "nansai desu ka", meaning: "How old are you?" },
             { kind: "phrase", term: "いまなんじですか", reading: "ima nanji desu ka", meaning: "What time is it now?" },
           ],
@@ -1715,22 +1784,74 @@ export const beginner: Level = {
           skill: "writing",
           xp: 25,
           teach: [
-            { kind: "phrase", term: "おかあさん", reading: "okaasan", meaning: "mother" },
-            { kind: "phrase", term: "おとうさん", reading: "otousan", meaning: "father" },
-            { kind: "phrase", term: "あに", reading: "ani", meaning: "older brother" },
-            { kind: "phrase", term: "いもうと", reading: "imouto", meaning: "younger sister" },
+            {
+              kind: "phrase",
+              term: "おかあさん",
+              reading: "okaasan",
+              meaning: "mother (calling her / someone else's)",
+              uses: [
+                {
+                  situation: "Calling her, or talking about someone else's mother",
+                  english: "Mum / mother",
+                  example: "おかあさん。",
+                },
+              ],
+              context: "Address form — what you call her, or how you talk about another person's family. Your own mother to a stranger is はは, later.",
+            },
+            {
+              kind: "phrase",
+              term: "おとうさん",
+              reading: "otousan",
+              meaning: "father (calling him / someone else's)",
+              uses: [
+                {
+                  situation: "Calling him, or talking about someone else's father",
+                  english: "Dad / father",
+                  example: "おとうさん。",
+                },
+              ],
+              context: "Same system as おかあさん. Your own father to a stranger is ちち, later.",
+            },
+            {
+              kind: "phrase",
+              term: "おにいさん",
+              reading: "oniisan",
+              meaning: "older brother (calling him / someone else's)",
+              uses: [
+                {
+                  situation: "Calling him, or talking about someone else's older brother",
+                  english: "Older brother",
+                  example: "おにいさん。",
+                },
+              ],
+              context: "Same さん address set. Your own older brother to a stranger is あに, later — don't mix them yet.",
+            },
+            {
+              kind: "phrase",
+              term: "いもうとさん",
+              reading: "imoutosan",
+              meaning: "younger sister (someone else's)",
+              uses: [
+                {
+                  situation: "Talking about someone else's younger sister",
+                  english: "Younger sister",
+                  example: "いもうとさん。",
+                },
+              ],
+              context: "Same address set. Your own younger sister to a stranger is いもうと, later.",
+            },
           ],
           exercises: [
             {
               type: "match-pairs",
               prompt: "Match the word to its meaning",
               pairs: [
-                { left: "おかあさん", right: "mother" },
-                { left: "おとうさん", right: "father" },
-                { left: "あに", right: "older brother" },
-                { left: "いもうと", right: "younger sister" },
+                { left: "おかあさん", right: "mother (address)" },
+                { left: "おとうさん", right: "father (address)" },
+                { left: "おにいさん", right: "older brother (address)" },
+                { left: "いもうとさん", right: "younger sister (address)" },
               ],
-              note: "Family words often start with お as politeness.",
+              note: "This lesson is the さん set — calling people, or someone else's family. Humble own-family words come later.",
             },
           ],
         },
@@ -1742,7 +1863,20 @@ export const beginner: Level = {
           skill: "writing",
           xp: 30,
           teach: [
-            { kind: "phrase", term: "せんせい", reading: "sensei", meaning: "teacher" },
+            {
+              kind: "phrase",
+              term: "せんせい",
+              reading: "sensei",
+              meaning: "teacher",
+              uses: [
+                {
+                  situation: "The person who teaches you",
+                  english: "Teacher",
+                  example: "せんせい。",
+                },
+              ],
+              context: "Also a title after a name later (たなかせんせい), and used for doctors. This lesson: the teacher.",
+            },
             { kind: "phrase", term: "ほん", reading: "hon", meaning: "book" },
             { kind: "phrase", term: "くるま", reading: "kuruma", meaning: "car" },
             { kind: "phrase", term: "でんわ", reading: "denwa", meaning: "phone" },
@@ -1786,10 +1920,10 @@ export const beginner: Level = {
             {
               type: "listen-choice",
               prompt: "Listen and tap the word you hear",
-              audio: "あに",
-              options: ["あに", "いもうと", "おとうさん", "おかあさん"],
-              answer: "あに",
-              note: "あに = your own older brother.",
+              audio: "おにいさん",
+              options: ["おにいさん", "いもうとさん", "おとうさん", "おかあさん"],
+              answer: "おにいさん",
+              note: "おにいさん = older brother you call, or someone else's.",
             },
             {
               type: "category-sort",
@@ -1797,7 +1931,7 @@ export const beginner: Level = {
               categories: ["ひと (people)", "もの (things)"],
               items: [
                 { label: "せんせい", romaji: "sensei", category: "ひと (people)" },
-                { label: "いもうと", romaji: "imouto", category: "ひと (people)" },
+                { label: "いもうとさん", romaji: "imoutosan", category: "ひと (people)" },
                 { label: "ほん", romaji: "hon", category: "もの (things)" },
                 { label: "でんわ", romaji: "denwa", category: "もの (things)" },
               ],
@@ -1826,7 +1960,20 @@ export const beginner: Level = {
           skill: "writing",
           xp: 30,
           teach: [
-            { kind: "phrase", term: "ごはん", reading: "gohan", meaning: "rice / meal" },
+            {
+              kind: "phrase",
+              term: "ごはん",
+              reading: "gohan",
+              meaning: "rice / a meal",
+              uses: [
+                {
+                  situation: "The cooked staple, or the meal itself",
+                  english: "Rice / a meal",
+                  example: "ごはん。",
+                },
+              ],
+              context: "Both 'rice' and 'a meal' — あさごはん is breakfast. Uncooked rice is こめ, already in Unit 1.",
+            },
             { kind: "phrase", term: "さかな", reading: "sakana", meaning: "fish" },
             { kind: "phrase", term: "りんご", reading: "ringo", meaning: "apple" },
             { kind: "phrase", term: "やさい", reading: "yasai", meaning: "vegetable" },
@@ -1902,8 +2049,35 @@ export const beginner: Level = {
           teach: [
             { kind: "phrase", term: "おおきい", reading: "ookii", meaning: "big" },
             { kind: "phrase", term: "ちいさい", reading: "chiisai", meaning: "small" },
-            { kind: "phrase", term: "あつい", reading: "atsui", meaning: "hot" },
-            { kind: "phrase", term: "さむい", reading: "samui", meaning: "cold", note: "Most basic adjectives end in い." },
+            {
+              kind: "phrase",
+              term: "あつい",
+              reading: "atsui",
+              meaning: "hot (weather)",
+              uses: [
+                {
+                  situation: "The air / the day",
+                  english: "Hot (weather)",
+                  example: "あつい です。",
+                },
+              ],
+              context: "This lesson: hot weather. A hot drink or hot object can wait — same word in kana, different job.",
+            },
+            {
+              kind: "phrase",
+              term: "さむい",
+              reading: "samui",
+              meaning: "cold (weather)",
+              note: "Most basic adjectives end in い.",
+              uses: [
+                {
+                  situation: "The air / the day",
+                  english: "Cold (weather)",
+                  example: "さむい です。",
+                },
+              ],
+              context: "Weather and air only. A cold drink is つめたい, later — don't say さむいビール.",
+            },
           ],
           exercises: [
             {
@@ -1912,8 +2086,8 @@ export const beginner: Level = {
               pairs: [
                 { left: "おおきい", right: "big" },
                 { left: "ちいさい", right: "small" },
-                { left: "あつい", right: "hot" },
-                { left: "さむい", right: "cold" },
+                { left: "あつい", right: "hot (weather)" },
+                { left: "さむい", right: "cold (weather)" },
               ],
               note: "Most basic adjectives end in い.",
             },
@@ -1923,7 +2097,7 @@ export const beginner: Level = {
               display: "This book is big",
               tiles: ["この", "ほん", "は", "おおきい", "です"],
               answer: ["この", "ほん", "は", "おおきい", "です"],
-              note: "この X は ... です = 'This X is ...'.",
+              note: "この = 'this' (near you). この X は ... です = 'This X is ...'.",
             },
           ],
         },
@@ -1942,10 +2116,10 @@ export const beginner: Level = {
               items: [
                 { label: "おおきい", romaji: "ookii (big)", category: "size" },
                 { label: "ちいさい", romaji: "chiisai (small)", category: "size" },
-                { label: "あつい", romaji: "atsui (hot)", category: "temperature" },
-                { label: "さむい", romaji: "samui (cold)", category: "temperature" },
+                { label: "あつい", romaji: "atsui (hot weather)", category: "temperature" },
+                { label: "さむい", romaji: "samui (cold weather)", category: "temperature" },
               ],
-              note: "あつい can mean hot weather or a hot object.",
+              note: "This pair is weather. A cold drink is つめたい, not さむい.",
             },
           ],
         },
@@ -1962,7 +2136,20 @@ export const beginner: Level = {
             { kind: "phrase", term: "いい", reading: "ii", meaning: "good" },
             { kind: "phrase", term: "わるい", reading: "warui", meaning: "bad" },
             { kind: "phrase", term: "あたらしい", reading: "atarashii", meaning: "new" },
-            { kind: "phrase", term: "ふるい", reading: "furui", meaning: "old" },
+            {
+              kind: "phrase",
+              term: "ふるい",
+              reading: "furui",
+              meaning: "old (things)",
+              uses: [
+                {
+                  situation: "Objects, not people",
+                  english: "Old (a book, a house)",
+                  example: "ふるい ほん。",
+                },
+              ],
+              context: "An old book or house. People are not ふるい.",
+            },
           ],
           exercises: [
             {
@@ -1977,7 +2164,7 @@ export const beginner: Level = {
                 { label: "わるい", romaji: "warui (bad)", category: "negative" },
                 { label: "ふるい", romaji: "furui (old)", category: "negative" },
               ],
-              note: "Context matters — 'old' isn't always negative!",
+              note: "ふるい is old things, not people — and not always a bad thing.",
             },
             {
               type: "type-answer",
@@ -2003,7 +2190,7 @@ export const beginner: Level = {
               prompt: "Match the adjective to its meaning",
               pairs: [
                 { left: "おおきい", right: "big" },
-                { left: "さむい", right: "cold" },
+                { left: "さむい", right: "cold (weather)" },
                 { left: "あたらしい", right: "new" },
                 { left: "まずい", right: "bad-tasting" },
               ],

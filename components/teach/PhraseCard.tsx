@@ -156,20 +156,40 @@ export default function PhraseCard({
         </section>
       )}
 
-      {/* Context / register */}
-      {(card.context || card.polite) && (
+      {/* Situations, context, register */}
+      {(card.uses?.length || card.context || card.polite) && (
         <section className="rounded-2xl border-2 border-gray-100 p-4 text-sm text-sumi">
-          {card.context && <p>💬 {card.context}</p>}
+          {card.uses && card.uses.length > 0 && (
+            <ul className="flex flex-col gap-3">
+              {card.uses.map((use) => (
+                <li key={use.situation}>
+                  <p className="text-xs font-extrabold uppercase tracking-wide text-muted">
+                    {use.situation}
+                  </p>
+                  <p className="font-bold text-ink">{use.english}</p>
+                  {use.example && (
+                    <p className="mt-0.5 font-jp text-base text-sumi">{use.example}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {card.context && (
+            <p className={card.uses?.length ? "mt-3" : undefined}>💬 {card.context}</p>
+          )}
           {card.polite && (
-            <div className="mt-2 flex items-center justify-between">
+            <div className="mt-2 flex items-center justify-between gap-2">
               <div>
                 <span className="text-xs text-muted">More polite:</span>{" "}
                 <span className="font-jp font-bold">{card.polite.term}</span>{" "}
                 <span className="text-xs text-muted">({card.polite.reading})</span>
+                {card.polite.note && (
+                  <p className="mt-1 text-xs text-muted">{card.polite.note}</p>
+                )}
               </div>
               <button
                 onClick={() => speak(card.polite!.term)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-sky text-white"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky text-white"
                 aria-label="Hear the polite form"
               >
                 <Volume2 className="h-4 w-4" />

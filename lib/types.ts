@@ -132,6 +132,14 @@ export interface PhraseCheck {
   note?: string; // explanation shown after answering
 }
 
+// One taught situation for a phrase. Keep to 1–2 per first teach; tests and
+// vocab.gloss should match these, not a fake one-line English equivalent.
+export interface PhraseUse {
+  situation: string; // "After you introduce yourself"
+  english: string; // "I look forward to this"
+  example?: string; // the Japanese line it sits in
+}
+
 // A word/phrase intro (greetings, nouns, adjectives) — hear it, read it, say
 // it, and (optionally) break it down interactively. No stroke order for the
 // whole word; a single tricky kana can offer a trace hook.
@@ -139,12 +147,13 @@ export interface PhraseTeachCard {
   kind: "phrase";
   term: string; // こんにちは
   reading: string; // konnichiwa
-  meaning: string; // Hello (daytime)
+  meaning: string; // Hello (daytime) — primary use, not a dictionary dump
   note?: string; // short usage tip
   parts?: PhrasePart[]; // interactive kana-by-kana breakdown
   check?: PhraseCheck; // 1-tap active recall
   context?: string; // when/where you'd say it
-  polite?: { term: string; reading: string }; // casual → polite variant
+  uses?: PhraseUse[]; // 1–2 taught situations; omit on thin cards
+  polite?: { term: string; reading: string; note?: string }; // variant + when
   trace?: string; // one kana to trace (only if strokeData has it)
 }
 

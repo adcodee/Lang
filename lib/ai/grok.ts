@@ -93,8 +93,8 @@ function safeParse(text: string): { reply?: string; romaji?: string } | null {
 const STUB_TURNS: VoiceTurn[] = [
   { reply: "こんにちは！おげんきですか？(Hello! How are you?)", romaji: "Konnichiwa! O-genki desu ka?", stubbed: true },
   { reply: "いいですね。なまえは なんですか？(Nice. What's your name?)", romaji: "Ii desu ne. Namae wa nan desu ka?", stubbed: true },
-  { reply: "はじめまして！(Nice to meet you!)", romaji: "Hajimemashite!", stubbed: true },
-  { reply: "じょうずです！またはなしましょう。(Great! Let's talk again.)", romaji: "Jouzu desu! Mata hanashimashou.", stubbed: true },
+  { reply: "はじめまして。ゆき です。よろしく。(Nice to meet you. I'm Yuki — I look forward to this.)", romaji: "Hajimemashite. Yuki desu. Yoroshiku.", stubbed: true },
+  { reply: "ありがとう。(Thank you.)", romaji: "Arigatou.", stubbed: true },
 ];
 
 function stubVoiceTurn(transcript: string): VoiceTurn {
