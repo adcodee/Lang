@@ -49,11 +49,10 @@ export default function PracticePage() {
 
   return (
     <div>
-      <div className="card mb-4 p-6 text-center">
-        <h1 className="text-2xl font-extrabold text-ink">Conversation practice</h1>
-        <p className="mt-1 text-muted">
-          Hold a real conversation with your AI tutor — it sticks to the
-          Japanese you&apos;ve learned and corrects you gently.
+      <div className="mb-6 text-center">
+        <h1 className="font-display text-2xl font-bold text-ink">会話</h1>
+        <p className="mt-1 text-sm text-muted">
+          Talk with the tutor using only Japanese you&apos;ve learned.
         </p>
       </div>
 
@@ -122,8 +121,9 @@ export default function PracticePage() {
       )}
 
       <p className="mt-4 text-center text-xs text-muted">
-        Text tutoring is powered by Claude; voice practice by Grok. Without API
-        keys the app runs in Demo mode with sample responses.
+        The tutor (text and voice) is powered by Grok; tap End practice for a
+        Claude coaching debrief. Without API keys the app runs in Demo mode
+        with sample responses.
       </p>
     </div>
   );

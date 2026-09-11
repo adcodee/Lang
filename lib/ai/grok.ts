@@ -1,14 +1,15 @@
 import "server-only";
+import type { ChatMessage } from "@/lib/types";
+import type { TutorTurn } from "@/lib/ai/schema";
 
-// Grok (xAI) powers the VOICE tutor: speaking/listening practice.
-// The browser handles speech-to-text (SpeechRecognition) and text-to-speech
-// (SpeechSynthesis); this adapter produces the assistant's *text* turn that the
-// browser then speaks aloud. With XAI_API_KEY set we call Grok's
-// OpenAI-compatible chat endpoint; otherwise we return a deterministic stub.
+// Grok runs EVERY mid-chat tutor turn — text and voice alike, same contract
+// on both channels. It's the speaking partner: one Japanese reply, a quiet
+// correction if needed, one next question. The coaching debrief is Claude's
+// job (see claude.ts). With XAI_API_KEY set we call Grok's OpenAI-compatible
+// chat endpoint; otherwise we return a deterministic stub.
 
-export interface VoiceTurn {
-  reply: string; // text the browser will speak back (Japanese + English)
-  romaji?: string; // pronunciation hint
+export interface GrokResult {
+  text: string;
   stubbed: boolean;
 }
 
@@ -16,29 +17,13 @@ export function grokConfigured(): boolean {
   return Boolean(process.env.XAI_API_KEY);
 }
 
-const SYSTEM_PROMPT = `You are a friendly Japanese speaking partner for a beginner.
-Keep replies to ONE short, easy spoken sentence in Japanese, then its English.
-Respond ONLY with compact JSON: {"reply":"<Japanese + English>","romaji":"<romaji of the Japanese>"}`;
-
 // Cap the conversation memory sent upstream — enough to hold a short
 // scripted exchange without growing unbounded.
 const MAX_HISTORY = 12;
 
-export interface VoiceHistoryLine {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export async function voiceTurn(
-  transcript: string,
-  // Prior turns — without them the tutor is amnesiac and can't hold the
-  // greeting → name → nice-to-meet-you → goodbye exchange.
-  history: VoiceHistoryLine[] = [],
-  // Vocabulary-constraint + scenario block (see lib/ai/constraints.ts).
-  context?: string
-): Promise<VoiceTurn> {
+export async function grokTurn(system: string, messages: ChatMessage[]): Promise<GrokResult> {
   if (!grokConfigured()) {
-    return stubVoiceTurn(transcript);
+    return { text: stubTurnJson(messages), stubbed: true };
   }
 
   try {
@@ -51,57 +36,68 @@ export async function voiceTurn(
       body: JSON.stringify({
         model: process.env.XAI_MODEL || "grok-2-latest",
         messages: [
-          {
-            role: "system",
-            content: context ? `${SYSTEM_PROMPT}\n${context}` : SYSTEM_PROMPT,
-          },
-          ...history.slice(-MAX_HISTORY),
-          { role: "user", content: transcript },
+          { role: "system", content: system },
+          ...messages.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: m.content })),
         ],
-        temperature: 0.7,
+        temperature: 0.5,
       }),
     });
 
     if (!res.ok) throw new Error(`xAI responded ${res.status}`);
     const data = await res.json();
     const text: string = data?.choices?.[0]?.message?.content ?? "";
-    const parsed = safeParse(text);
-    return {
-      reply: parsed?.reply || text,
-      romaji: parsed?.romaji,
-      stubbed: false,
-    };
+    return { text, stubbed: false };
   } catch (err) {
-    console.error("Grok request failed, using stub:", err);
-    return stubVoiceTurn(transcript);
-  }
-}
-
-function safeParse(text: string): { reply?: string; romaji?: string } | null {
-  try {
-    const start = text.indexOf("{");
-    const end = text.lastIndexOf("}");
-    if (start === -1 || end === -1) return null;
-    return JSON.parse(text.slice(start, end + 1));
-  } catch {
-    return null;
+    console.error("Grok turn request failed, using stub:", err);
+    return { text: stubTurnJson(messages), stubbed: true };
   }
 }
 
 // --- Deterministic offline stub -------------------------------------------
+// Rotates through a few clean TutorTurn shapes (one with a flagged miss) so
+// Demo mode still exercises the "Did you mean" line and the hole log.
 
-const STUB_TURNS: VoiceTurn[] = [
-  { reply: "こんにちは！おげんきですか？(Hello! How are you?)", romaji: "Konnichiwa! O-genki desu ka?", stubbed: true },
-  { reply: "いいですね。なまえは なんですか？(Nice. What's your name?)", romaji: "Ii desu ne. Namae wa nan desu ka?", stubbed: true },
-  { reply: "はじめまして。ゆき です。よろしく。(Nice to meet you. I'm Yuki — I look forward to this.)", romaji: "Hajimemashite. Yuki desu. Yoroshiku.", stubbed: true },
-  { reply: "ありがとう。(Thank you.)", romaji: "Arigatou.", stubbed: true },
+const STUB_TURNS: TutorTurn[] = [
+  {
+    spoken_ja: "こんにちは！おげんきですか？",
+    romaji: "Konnichiwa! O-genki desu ka?",
+    ask_next_ja: "",
+    did_you_mean: "",
+    issue: "ok",
+    avoid: "",
+    holeLessonId: "",
+  },
+  {
+    spoken_ja: "そうですか。",
+    romaji: "Sou desu ka.",
+    ask_next_ja: "なまえは なんですか？",
+    did_you_mean: "わたしは がくせいです。",
+    issue: "particle",
+    avoid: "わたし がくせいです。",
+    holeLessonId: "u2-self-intro",
+  },
+  {
+    spoken_ja: "はじめまして。ゆき です。よろしく。",
+    romaji: "Hajimemashite. Yuki desu. Yoroshiku.",
+    ask_next_ja: "",
+    did_you_mean: "",
+    issue: "ok",
+    avoid: "",
+    holeLessonId: "",
+  },
+  {
+    spoken_ja: "ありがとう。",
+    romaji: "Arigatou.",
+    ask_next_ja: "",
+    did_you_mean: "",
+    issue: "ok",
+    avoid: "",
+    holeLessonId: "",
+  },
 ];
 
-function stubVoiceTurn(transcript: string): VoiceTurn {
-  // Pick a reply based on transcript length so repeated turns vary.
-  const idx = Math.min(
-    STUB_TURNS.length - 1,
-    Math.floor(transcript.trim().length / 6) % STUB_TURNS.length
-  );
-  return STUB_TURNS[idx];
+function stubTurnJson(messages: ChatMessage[]): string {
+  const userTurns = messages.filter((m) => m.role === "user").length;
+  const pick = STUB_TURNS[userTurns % STUB_TURNS.length];
+  return JSON.stringify(pick);
 }

@@ -193,7 +193,6 @@ export interface Level {
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  correction?: string; // grammar correction surfaced by Claude
 }
 
 // Per-skill performance, accumulated across every answered exercise.

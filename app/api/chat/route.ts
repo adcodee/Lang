@@ -1,32 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTextFeedback } from "@/lib/ai/claude";
-import { buildTutorContext } from "@/lib/ai/constraints";
-import type { ChatMessage } from "@/lib/types";
+import { runTutorTurn } from "@/lib/ai/tutor";
+import { sanitizeMessages, sanitizeCompletedLessons, sanitizeScenario } from "@/lib/ai/sanitize";
 
-// Text tutor endpoint (Claude). Accepts the conversation so far plus the
-// learner's completed lessons (from which the allowed vocabulary is derived
-// server-side) and returns the assistant reply plus any grammar correction.
+// Text tutor turn endpoint (Grok, per Patch 1.4's locked routing). Accepts
+// the conversation so far plus the learner's completed lessons (from which
+// the allowed vocabulary is derived server-side) and returns a TutorTurn.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const messages: ChatMessage[] = Array.isArray(body?.messages)
-      ? body.messages
-      : [];
+    const messages = sanitizeMessages(body?.messages);
     if (messages.length === 0) {
-      return NextResponse.json(
-        { error: "messages array is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "messages array is required" }, { status: 400 });
     }
-    const completed: string[] = Array.isArray(body?.completedLessons)
-      ? body.completedLessons.filter((id: unknown) => typeof id === "string")
-      : [];
-    const scenario: string | undefined =
-      typeof body?.scenario === "string" ? body.scenario : undefined;
+    const completedLessons = sanitizeCompletedLessons(body?.completedLessons);
+    const scenarioId = sanitizeScenario(body?.scenario);
 
-    const context = buildTutorContext(completed, scenario);
-    const feedback = await getTextFeedback(messages, context);
-    return NextResponse.json(feedback);
+    const { data, stubbed } = await runTutorTurn({
+      channel: "text",
+      messages,
+      completedLessons,
+      scenarioId,
+    });
+    return NextResponse.json({ ...data, stubbed });
   } catch (err) {
     console.error("/api/chat error", err);
     return NextResponse.json({ error: "internal error" }, { status: 500 });
