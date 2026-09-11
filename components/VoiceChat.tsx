@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, Radio, Square, Flag } from "lucide-react";
 import { DemoBadge } from "@/components/ChatPanel";
-import { CorrectionMark } from "@/components/ui/JaMark";
 import { speak, speechSupported, listenOnce } from "@/lib/speech";
 import { recordUntilSilence } from "@/lib/audio";
 import { useGameStore } from "@/lib/store/gameStore";
@@ -300,10 +299,7 @@ export default function VoiceChat({
                   )}
                   {l.didYouMean && (
                     <div className="mt-2 rounded-xl bg-gold/15 px-3 py-2 text-sm text-ink">
-                      <span className="inline-flex items-start gap-1.5">
-                        <CorrectionMark className="mt-0.5 h-4 w-4" />
-                        Did you mean: {l.didYouMean}
-                      </span>
+                      ✏️ Did you mean: {l.didYouMean}
                     </div>
                   )}
                   {l.role === "assistant" && (

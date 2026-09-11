@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle2, RotateCcw } from "lucide-react";
-import { CorrectionMark } from "@/components/ui/JaMark";
 import type { TutorDebrief } from "@/lib/ai/schema";
 
 // The end-of-session coach card (Patch 1.4). Renders once, after the
@@ -25,7 +24,7 @@ export default function DebriefCard({
       {debrief.notes.map((n, i) => (
         <div key={i} className="rounded-2xl border-2 border-gray-100 bg-white px-4 py-3">
           <div className="flex items-start gap-1.5 text-sm">
-            <CorrectionMark className="mt-0.5 h-4 w-4 shrink-0" />
+            <span aria-hidden>✏️</span>
             <div>
               <div>
                 <span className="text-muted line-through">{n.avoid}</span>

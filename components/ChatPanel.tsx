@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { Send, Sparkles, Flag } from "lucide-react";
-import { CorrectionMark } from "@/components/ui/JaMark";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { ChatMessage } from "@/lib/types";
 import type { TutorDebrief, TutorHole } from "@/lib/ai/schema";
@@ -180,10 +179,7 @@ export default function ChatPanel({
                   )}
                   {l.didYouMean && (
                     <div className="mt-2 rounded-xl bg-gold/15 px-3 py-2 text-sm text-ink">
-                      <span className="inline-flex items-start gap-1.5">
-                        <CorrectionMark className="mt-0.5 h-4 w-4" />
-                        Did you mean: {l.didYouMean}
-                      </span>
+                      ✏️ Did you mean: {l.didYouMean}
                     </div>
                   )}
                 </div>
