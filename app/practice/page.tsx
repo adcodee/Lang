@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Mic, Lock } from "lucide-react";
 import ChatPanel from "@/components/ChatPanel";
 import VoiceChat from "@/components/VoiceChat";
+import PhrasebookDrawer from "@/components/drawer/PhrasebookDrawer";
 import { scenarios, isScenarioUnlocked } from "@/lib/content/ja/scenarios";
 import { getLesson } from "@/lib/content/ja/curriculum";
 import { useGameStore } from "@/lib/store/gameStore";
@@ -125,6 +126,9 @@ export default function PracticePage() {
         Claude coaching debrief. Without API keys the app runs in Demo mode
         with sample responses.
       </p>
+
+      {/* Lookup only — never mount this on Dojo/Test/Exam/checkpoint screens */}
+      <PhrasebookDrawer />
     </div>
   );
 }
