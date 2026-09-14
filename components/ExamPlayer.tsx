@@ -4,21 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { X, Heart } from "lucide-react";
-import { buildExam } from "@/lib/content/ja/exam";
-import { getNextUnit, getUnit, isUnitUnlocked } from "@/lib/content/ja/curriculum";
+import { buildExamFor as buildExam, getNextUnit, getUnit, isUnitUnlocked } from "@/lib/content/lookup";
 import { awardForUnit } from "@/lib/belts";
 import { useGameStore } from "@/lib/store/gameStore";
 import { answerLabel } from "@/lib/exercise";
 import ExerciseCard from "@/components/ExerciseCard";
 import FeedbackBanner from "@/components/FeedbackBanner";
 
-const XP_PER_CORRECT = 2; // Patch 1.3: rank no longer gates on XP, so pacing can slow down
-const EXAM_BONUS = 80; // belt bonus on top of per-question XP — bigger payday than one padded test
+const XP_PER_CORRECT = 2;
+const EXAM_BONUS = 80;
 const START_HEARTS = 3;
 
-// The end-of-unit Dojo Examination: questions pooled from the whole unit,
-// defended by 3 hearts. No per-question retry; lose all hearts = fail. Survive
-// to the end = pass (belt + bonus XP). Per-answer recordAnswer feeds Rank.
 export default function ExamPlayer({ unitId }: { unitId: string }) {
   const router = useRouter();
   const recordAnswer = useGameStore((s) => s.recordAnswer);
@@ -27,9 +23,6 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
   const examsPassed = useGameStore((s) => s.examsPassed);
   const completed = useGameStore((s) => s.completedLessons);
 
-  // Deep-link guard: the exam route is public, so mirror the SkillTree's
-  // "available" condition — unit unlocked and every lesson completed —
-  // otherwise /exam/<later-unit> would let the learner skip the progression.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const unit = getUnit(unitId);
@@ -45,7 +38,6 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
   const [attemptKey, setAttemptKey] = useState(0);
   const exam = useMemo(
     () => buildExam(unitId),
-    // Rebuild (reshuffle) each attempt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [unitId, attemptKey]
   );
@@ -57,7 +49,7 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
   const [correct, setCorrect] = useState(0);
   const [done, setDone] = useState<null | "pass" | "fail">(null);
 
-  if (blocked) return null; // redirecting to the map
+  if (blocked) return null;
 
   if (!exam) {
     return (
@@ -83,7 +75,6 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
 
   function handleContinue() {
     setChecked(false);
-    // Out of hearts → fail immediately.
     if (!lastCorrect && hearts <= 0) {
       setDone("fail");
       registerActivity();
@@ -92,7 +83,6 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
     if (step + 1 < total) {
       setStep((s) => s + 1);
     } else {
-      // Survived to the end with a heart to spare → pass.
       passExam(exam!.unitId, EXAM_BONUS);
       registerActivity();
       setDone("pass");
@@ -187,12 +177,12 @@ function ExamPassed({
       animate={{ scale: 1, opacity: 1 }}
       className="card p-8 text-center"
     >
-      <div className="text-6xl">{award?.emoji ?? "🥋"}</div>
+      <div className="text-6xl">{award?.emoji ?? "\u{1F94B}" }</div>
       <h1 className="mt-4 text-2xl font-extrabold text-brand-dark">
         {award
           ? award.kind === "color"
             ? `${award.label} earned!`
-            : `Bar earned — ${award.label}.`
+            : `Bar earned \u2014 ${award.label}.`
           : "Belt earned!"}
       </h1>
       {award && (
@@ -211,7 +201,7 @@ function ExamPassed({
       </p>
       {next && (
         <p className="mt-1 text-sm text-brand-dark">
-          🔓 {next.title} is now unlocked.
+          \u{1F513} {next.title} is now unlocked.
         </p>
       )}
       <div className="mt-6 flex flex-col gap-3">
@@ -242,7 +232,7 @@ function ExamFailed({
       animate={{ scale: 1, opacity: 1 }}
       className="card p-8 text-center"
     >
-      <div className="text-6xl">💔</div>
+      <div className="text-6xl">\u{1F494}</div>
       <h1 className="mt-4 text-2xl font-extrabold text-ink">Out of hearts</h1>
       <p className="mt-2 text-muted">
         You got {correct}/{total} before running out. Train the weak spots in the
