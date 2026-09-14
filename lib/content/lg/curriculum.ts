@@ -4,6 +4,7 @@ import { intermediate } from "@/lib/content/lg/levels/intermediate";
 import { advanced } from "@/lib/content/lg/levels/advanced";
 import { fluent } from "@/lib/content/lg/levels/fluent";
 
+// Unit 0 lives in levels/beginner.ts. Do not import this file without that module.
 export const levels: Level[] = [beginner, intermediate, advanced, fluent];
 
 export function unitsInOrder(): Unit[] {
