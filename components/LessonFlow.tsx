@@ -76,7 +76,7 @@ export default function LessonFlow({ id }: { id: string }) {
           Learn complete!
         </h1>
         <p className="mt-2 text-muted">
-          You&apos;ve unlocked the test for{" "}
+          You've unlocked the test for{" "}
           <span className="font-bold text-ink">{lesson.title}</span>.
         </p>
         <div className="mt-6 flex flex-col gap-3">
@@ -97,6 +97,7 @@ export default function LessonFlow({ id }: { id: string }) {
   return (
     <LessonPlayer
       lessonId={id}
+      lesson={lesson}
       mode="lesson"
       relearn={relearn}
     />
