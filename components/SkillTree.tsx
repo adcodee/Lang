@@ -2,27 +2,29 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Lock } from "lucide-react";
-import { levels, getUnitForLesson } from "@/lib/content/ja/curriculum";
+import { levelsFor, getUnitForLesson } from "@/lib/content/lookup";
 import { useGameStore } from "@/lib/store/gameStore";
 import { useCurrentLesson } from "@/lib/hooks/useCurrentLesson";
 import LessonNode, { NodeStatus, NodeVariant } from "@/components/LessonNode";
 import ExamNode, { ExamStatus } from "@/components/ExamNode";
 import type { Lesson, Unit } from "@/lib/types";
 
-// Gentle zig-zag pattern for the path of nodes within a unit.
 const OFFSETS = [0, 1, 0, -1, 0, 1, 0, -1];
 
 export default function SkillTree() {
   const completed = useGameStore((s) => s.completedLessons);
   const examsPassed = useGameStore((s) => s.examsPassed);
+  const activeLang = useGameStore((s) => s.active);
+  const levels = levelsFor(activeLang);
   const [mounted, setMounted] = useState(false);
-  // Default to the first level that has authored content.
   const [activeLevelId, setActiveLevelId] = useState(levels[0].id);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setActiveLevelId(levels[0].id);
+  }, [activeLang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const learned = useGameStore((s) => s.learnedLessons);
 
-  // Before hydration, treat nothing as completed — matches initial store.
   const completedSet = useMemo(
     () => new Set(mounted ? completed : []),
     [mounted, completed]
@@ -39,12 +41,10 @@ export default function SkillTree() {
   const activeLevel = levels.find((l) => l.id === activeLevelId) ?? levels[0];
   const units = activeLevel.units;
 
-  // A lesson expands to Learn + Test nodes when it teaches; else just a Test.
   const hasTeach = (l: Lesson) => Boolean(l.teach?.length);
   const nodesOf = (l: Lesson): NodeVariant[] =>
     hasTeach(l) ? ["learn", "test"] : ["single"];
 
-  // A unit is unlocked if it's first, or the previous unit's exam is passed.
   function unitUnlocked(index: number): boolean {
     return index === 0 || examsPassedSet.has(units[index - 1].id);
   }
@@ -52,13 +52,9 @@ export default function SkillTree() {
     return unit.lessons.every((l) => completedSet.has(l.id));
   }
 
-  // The single "current" node key comes from the shared hook (also drives the FAB).
   const currentLesson = useCurrentLesson();
   const currentKey = mounted ? currentLesson?.currentKey : undefined;
 
-  // On first load with real (post-hydration) progress, jump the level
-  // selector to wherever the learner's current lesson actually is —
-  // previously always defaulted to levels[0] regardless. Runs once.
   const levelInitialized = useRef(false);
   useEffect(() => {
     if (!mounted || levelInitialized.current || !currentLesson) return;
@@ -68,8 +64,6 @@ export default function SkillTree() {
     if (level) setActiveLevelId(level.id);
   }, [mounted, currentLesson]);
 
-  // Scroll to the current lesson's node once it's known, instead of always
-  // opening at the top of the tree. Only fires once per mount.
   const scrolledToCurrent = useRef(false);
   useEffect(() => {
     if (!mounted || !currentKey || scrolledToCurrent.current) return;
@@ -89,7 +83,6 @@ export default function SkillTree() {
       if (learnedSet.has(lesson.id)) return "completed";
       return key === currentKey ? "current" : "locked";
     }
-    // test / single
     if (variant === "test" && !learnedSet.has(lesson.id)) return "locked";
     if (completedSet.has(lesson.id)) return "completed";
     return key === currentKey ? "current" : "locked";
@@ -103,7 +96,6 @@ export default function SkillTree() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Level selector */}
       <div className="flex flex-wrap justify-center gap-2">
         {levels.map((lvl) => {
           const isActive = lvl.id === activeLevelId;
@@ -124,7 +116,6 @@ export default function SkillTree() {
         })}
       </div>
 
-      {/* Active level */}
       <div className="text-center">
         <h2 className="text-xl font-extrabold text-ink">{activeLevel.title}</h2>
         <p className="text-sm text-muted">{activeLevel.blurb}</p>
@@ -151,13 +142,9 @@ export default function SkillTree() {
               </div>
               <div className="flex flex-col items-center gap-10">
                 {(() => {
-                  let n = 0; // running node index for the zig-zag offset
+                  let n = 0;
                   return unit.lessons.flatMap((lesson) =>
                     nodesOf(lesson).map((variant) => {
-                      // Same key shape statusFor() already uses for
-                      // currentKey comparison ("single" counts as "test") —
-                      // has to match exactly for the scroll-to-current
-                      // querySelector above to find this node.
                       const nodeKey = `${lesson.id}:${variant === "learn" ? "learn" : "test"}`;
                       const node = (
                         <div key={nodeKey} data-node-key={nodeKey}>
