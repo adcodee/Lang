@@ -98,6 +98,14 @@ export type Exercise =
   | SpeakPhraseExercise
   | CategorySortExercise;
 
+// Side-by-side pair used on both kana cards (kita/kitte) and phrase cards
+// (kola/koola). Shared so Luganda length teaching does not invent a third shape.
+export interface TeachContrast {
+  label?: string;
+  a: { word: string; romaji: string; meaning: string };
+  b: { word: string; romaji: string; meaning: string };
+}
+
 // One character's intro shown in the Teach phase before the exercises.
 export interface KanaTeachCard {
   kind?: "kana"; // default; omitted on existing content
@@ -109,11 +117,7 @@ export interface KanaTeachCard {
   // A pair heard/seen side by side: what a diacritic does (か↔が), what a
   // silent mark does to a word (きて↔きって), or a lookalike to tell apart
   // (は↔ほ). `label` overrides the default caption.
-  contrast?: {
-    label?: string;
-    a: { word: string; romaji: string; meaning: string };
-    b: { word: string; romaji: string; meaning: string };
-  };
+  contrast?: TeachContrast;
 }
 
 // One segment of a phrase's interactive breakdown.
@@ -155,6 +159,7 @@ export interface PhraseTeachCard {
   uses?: PhraseUse[]; // 1–2 taught situations; omit on thin cards
   polite?: { term: string; reading: string; note?: string }; // variant + when
   trace?: string; // one kana to trace (only if strokeData has it)
+  contrast?: TeachContrast; // length / doubling pairs (Luganda Unit 0)
 }
 
 export type TeachCard = KanaTeachCard | PhraseTeachCard;
