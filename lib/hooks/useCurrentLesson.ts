@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { unitsInOrder } from "@/lib/content/ja/curriculum";
+import { unitsInOrder } from "@/lib/content/lookup";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { Lesson } from "@/lib/types";
 
@@ -12,15 +12,14 @@ export interface CurrentLesson {
   lesson: Lesson;
 }
 
-// Returns the next unfinished lesson (and its URL) for the current user, or
-// null if the full curriculum is complete.
 export function useCurrentLesson(): CurrentLesson | null {
   const completed = useGameStore((s) => s.completedLessons);
   const learned = useGameStore((s) => s.learnedLessons);
   const examsPassed = useGameStore((s) => s.examsPassed);
+  const active = useGameStore((s) => s.active);
 
   return useMemo(() => {
-    const units = unitsInOrder();
+    const units = unitsInOrder(active);
     const completedSet = new Set(completed);
     const learnedSet = new Set(learned);
     const examsPassedSet = new Set(examsPassed);
@@ -55,5 +54,5 @@ export function useCurrentLesson(): CurrentLesson | null {
     }
 
     return null;
-  }, [completed, learned, examsPassed]);
+  }, [completed, learned, examsPassed, active]);
 }

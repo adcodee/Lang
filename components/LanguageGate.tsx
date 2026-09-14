@@ -5,13 +5,9 @@ import { useGameStore } from "@/lib/store/gameStore";
 import ComingSoonCourse from "@/components/ComingSoonCourse";
 import CourseTransition from "@/components/CourseTransition";
 
-// Every route today (skill tree, lesson, dojo, exam, rank, practice) is
-// wired directly to lib/content/ja/* — there is no per-language content
-// pack switch yet (see the Luganda build plan's "Split content roots"
-// step, not started). Until a language has its own content root, gate it
-// here instead of rendering JP-only pages under the wrong course. Japanese
-// (the default) is always exempt.
-const CONTENT_READY: Record<string, boolean> = { ja: true, lg: false };
+// Luganda Unit 0 is live. Dojo / practice / AI tutor are still Japanese
+// packs — those routes will show JA content until they are split.
+const CONTENT_READY: Record<string, boolean> = { ja: true, lg: true };
 
 const TRANSITION_MS = 700;
 
