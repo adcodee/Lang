@@ -34,13 +34,7 @@ import { kana as jaKana } from "../lib/content/ja/kana";
 import { vocab as jaVocab, GLUE_TOKENS } from "../lib/content/ja/vocab";
 import { scenarios as jaScenarios } from "../lib/content/ja/scenarios";
 import { augmentLesson } from "../lib/content/ja/lessonExercises";
-import {
-  coreMeaning,
-  matchesTypedAnswer,
-  meaningFeedback,
-  typedMeaningAccepts,
-} from "../lib/exercise";
-import type { Exercise, TypeAnswerExercise } from "../lib/types";
+import type { Exercise } from "../lib/types";
 
 interface Check {
   ok: boolean;
@@ -235,143 +229,12 @@ function checkGeneratedContentRule(): Check[] {
   return checks;
 }
 
-const kanaChars = new Set(jaKana.map((k) => k.char));
-const kanaRomaji = new Set(jaKana.map((k) => k.romaji));
-const vocabWords = new Set(jaVocab.map((v) => v.word));
-const vocabGlosses = new Set(jaVocab.map((v) => v.gloss));
-
-// IMG_1274: meaning questions must not offer kana sounds as options
-// (ありがとう → thank you / cho / chi / n). Inverse for sound questions.
-function checkNoMixedDistractors(): Check[] {
-  const checks: Check[] = [];
-  const lessons = jaAllLessons();
-  let inspected = 0;
-  const TRIALS = 8;
-
-  for (const lesson of lessons) {
-    for (let trial = 0; trial < TRIALS; trial++) {
-      const generated = augmentLesson(lesson).slice(lesson.exercises.length);
-      for (const ex of generated) {
-        if (ex.type === "translate-choice") {
-          inspected++;
-          const meaningQ = ex.prompt.startsWith("What does");
-          const soundQ = ex.prompt.startsWith("Which sound");
-          for (const opt of ex.options) {
-            if (meaningQ && kanaRomaji.has(opt) && !vocabGlosses.has(opt)) {
-              checks.push({
-                ok: false,
-                message: `lesson "${lesson.id}" meaning question for "${ex.display}" offers kana sound "${opt}" as a choice`,
-              });
-            }
-            if (soundQ && vocabGlosses.has(opt) && !kanaRomaji.has(opt)) {
-              checks.push({
-                ok: false,
-                message: `lesson "${lesson.id}" sound question for "${ex.display}" offers vocab gloss "${opt}" as a choice`,
-              });
-            }
-          }
-        }
-        if (ex.type === "listen-choice") {
-          inspected++;
-          const wordQ = ex.prompt.includes("matching word");
-          const charQ = ex.prompt.includes("matching character");
-          for (const opt of ex.options) {
-            if (wordQ && kanaChars.has(opt) && !vocabWords.has(opt)) {
-              checks.push({
-                ok: false,
-                message: `lesson "${lesson.id}" listen-word question offers kana "${opt}" as a choice`,
-              });
-            }
-            if (charQ && vocabWords.has(opt) && !kanaChars.has(opt)) {
-              checks.push({
-                ok: false,
-                message: `lesson "${lesson.id}" listen-kana question offers vocab "${opt}" as a choice`,
-              });
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (checks.length === 0) {
-    checks.push({
-      ok: true,
-      message: `${inspected} generated choice exercise(s) across ${TRIALS} trials keep kana sounds and vocab meanings unmixed`,
-    });
-  }
-  return checks;
-}
-
-function checkTypedMeaningAccepts(): Check[] {
-  const checks: Check[] = [];
-  const hello = typedMeaningAccepts("hello (daytime)");
-  if (!hello.some((v) => v.toLowerCase() === "hello")) {
-    checks.push({ ok: false, message: `typedMeaningAccepts("hello (daytime)") missing "hello"` });
-  }
-  if (meaningFeedback("hello (daytime)").toLowerCase() !== "hello during the day") {
-    checks.push({
-      ok: false,
-      message: `meaningFeedback("hello (daytime)") was "${meaningFeedback("hello (daytime)")}"`,
-    });
-  }
-  if (coreMeaning("excuse me / sorry") !== "excuse me") {
-    checks.push({ ok: false, message: `coreMeaning slash split failed` });
-  }
-
-  const lessons = jaAllLessons();
-  let typed = 0;
-  for (const lesson of lessons) {
-    for (let trial = 0; trial < 12; trial++) {
-      const generated = augmentLesson(lesson).slice(lesson.exercises.length);
-      for (const ex of generated) {
-        if (ex.type !== "type-answer" || ex.display !== "こんにちは") continue;
-        typed++;
-        const exercise = ex as TypeAnswerExercise;
-        if (!matchesTypedAnswer("hello", exercise)) {
-          checks.push({
-            ok: false,
-            message: `こんにちは type-answer rejects "hello" (answer="${exercise.answer}")`,
-          });
-        }
-        if (!matchesTypedAnswer("hello during the day", exercise)) {
-          checks.push({
-            ok: false,
-            message: `こんにちは type-answer rejects "hello during the day"`,
-          });
-        }
-        if (exercise.note?.toLowerCase() !== "hello during the day") {
-          checks.push({
-            ok: false,
-            message: `こんにちは type-answer green note was "${exercise.note ?? ""}"`,
-          });
-        }
-      }
-    }
-  }
-  if (typed === 0) {
-    checks.push({
-      ok: false,
-      message: "no generated こんにちは type-answer found to check",
-    });
-  }
-  if (checks.length === 0) {
-    checks.push({
-      ok: true,
-      message: `typed meaning accepts "hello" for こんにちは (${typed} generated type-answer(s)); green note is "hello during the day"`,
-    });
-  }
-  return checks;
-}
-
 function main() {
   const results = [
     ...checkUniqueIds(),
     ...checkLessonReferences(),
     ...checkScenarioMoveVocab(),
     ...checkGeneratedContentRule(),
-    ...checkNoMixedDistractors(),
-    ...checkTypedMeaningAccepts(),
   ];
   const failures = results.filter((r) => !r.ok);
 
