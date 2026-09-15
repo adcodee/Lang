@@ -7,7 +7,7 @@ import {
   getLesson,
   getUnitForLesson,
   isUnitUnlocked,
-} from "@/lib/content/ja/curriculum";
+} from "@/lib/content/lookup";
 import { useGameStore } from "@/lib/store/gameStore";
 import LessonPlayer from "@/components/LessonPlayer";
 import TeachPhase from "@/components/teach/TeachPhase";
@@ -120,6 +120,7 @@ export default function LessonFlow({ id }: { id: string }) {
   return (
     <LessonPlayer
       lessonId={id}
+      lesson={lesson}
       mode="lesson"
       relearn={relearn}
     />
