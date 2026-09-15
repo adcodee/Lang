@@ -22,6 +22,7 @@ export const vocab: Vocab[] = [
   { word: "わたし", gloss: "I (polite)", category: "あいさつ (greetings)", lessonId: "u2-self-intro" },
   { word: "よろしく", gloss: "I look forward to this (after an intro)", category: "あいさつ (greetings)", lessonId: "u2-self-intro" },
   { word: "すみません", gloss: "excuse me / sorry", category: "あいさつ (greetings)", lessonId: "u2-self-intro" },
+  { word: "おなまえは", gloss: "what's your name?", category: "あいさつ (greetings)", lessonId: "u2-self-intro" },
   // u3-numbers-1-10 — numbers
   { word: "いち", gloss: "one (1)", category: "かず (numbers)", lessonId: "u3-numbers-1-10" },
   { word: "に", gloss: "two (2)", category: "かず (numbers)", lessonId: "u3-numbers-1-10" },
@@ -67,3 +68,15 @@ export const vocab: Vocab[] = [
 export function learnedVocab(completed: string[]): Vocab[] {
   return vocab.filter((v) => completed.includes(v.lessonId));
 }
+
+// Closed-class particles/copula/punctuation the tutor may use freely without
+// it counting as "untaught vocabulary." One list — lib/ai/constraints.ts's
+// prompt text, lib/ai/prompt.ts's turn constitution, and
+// scripts/check-content.ts's scenario-vocab check all read this same array,
+// instead of three separately-typed copies drifting apart
+// (Lang-tutor-1.4.1-plan.md, Phase F). Lives here, not in lib/ai/constraints.ts,
+// specifically so build-time scripts (no Next.js "server-only" aliasing) can
+// import it without pulling that module in.
+export const GLUE_TOKENS = [
+  "です", "ます", "か", "は", "も", "と", "が", "の", "を", "に", "で", "よ", "ね", "。",
+] as const;

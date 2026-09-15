@@ -59,8 +59,8 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
 
 const STUB_TURNS: TutorTurn[] = [
   {
-    spoken_ja: "こんにちは！おげんきですか？",
-    romaji: "Konnichiwa! O-genki desu ka?",
+    spoken_ja: "こんにちは！おなまえは？",
+    romaji: "Konnichiwa! Onamae wa?",
     ask_next_ja: "",
     did_you_mean: "",
     issue: "ok",
@@ -68,12 +68,12 @@ const STUB_TURNS: TutorTurn[] = [
     holeLessonId: "",
   },
   {
-    spoken_ja: "そうですか。",
-    romaji: "Sou desu ka.",
-    ask_next_ja: "なまえは なんですか？",
-    did_you_mean: "わたしは がくせいです。",
+    spoken_ja: "はじめまして。",
+    romaji: "Hajimemashite.",
+    ask_next_ja: "",
+    did_you_mean: "わたしは Adule です。",
     issue: "particle",
-    avoid: "わたし がくせいです。",
+    avoid: "わたし Adule です。",
     holeLessonId: "u2-self-intro",
   },
   {

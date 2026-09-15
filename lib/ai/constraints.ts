@@ -1,6 +1,6 @@
 import "server-only";
 import { learnedKana } from "@/lib/content/ja/kana";
-import { learnedVocab } from "@/lib/content/ja/vocab";
+import { learnedVocab, GLUE_TOKENS } from "@/lib/content/ja/vocab";
 import { getScenario } from "@/lib/content/ja/scenarios";
 import { lessonCatalog, catalogBlock } from "@/lib/ai/lessonTags";
 
@@ -43,7 +43,7 @@ Words/phrases they know: ${vocabList || "(none yet)"}
 
 Rules:
 - Your Japanese output must use ONLY the kana and words above. Do not introduce new vocabulary, kanji, or katakana.
-- Exception: minimal grammar glue is allowed (です, か, は, も, と, が) — but no other unlisted words.
+- Exception: minimal grammar glue is allowed (${GLUE_TOKENS.join(", ")}) — but no other unlisted words.
 - Romaji and short English glosses in parentheses are always allowed as scaffolding.
 - ONE short exchange per turn: say one thing, ask at most one thing, then wait.
 - If the learner uses words beyond their list, respond warmly but steer back to language they know.

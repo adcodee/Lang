@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check:content": "tsx scripts/check-content.ts"
+    "check:content": "tsx scripts/check-content.ts",
+    "check:moves": "tsx scripts/check-moves.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
