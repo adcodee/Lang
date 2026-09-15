@@ -8,9 +8,14 @@ import type { TutorTurn } from "@/lib/ai/schema";
 // job (see claude.ts). With XAI_API_KEY set we call Grok's OpenAI-compatible
 // chat endpoint; otherwise we return a deterministic stub.
 
+// Patch 1.4.1 Phase E (Lang-tutor-1.4.1-plan.md): usage is undefined when
+// stubbed — no real call happened, nothing was spent. tutor.ts logs this;
+// this file only surfaces what the API actually reported.
 export interface GrokResult {
   text: string;
   stubbed: boolean;
+  model?: string;
+  usage?: { promptTokens: number; completionTokens: number };
 }
 
 export function grokConfigured(): boolean {
@@ -26,6 +31,7 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
     return { text: stubTurnJson(messages), stubbed: true };
   }
 
+  const model = process.env.XAI_MODEL || "grok-2-latest";
   try {
     const res = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
@@ -34,7 +40,7 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
         Authorization: `Bearer ${process.env.XAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: process.env.XAI_MODEL || "grok-2-latest",
+        model,
         messages: [
           { role: "system", content: system },
           ...messages.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: m.content })),
@@ -46,7 +52,13 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
     if (!res.ok) throw new Error(`xAI responded ${res.status}`);
     const data = await res.json();
     const text: string = data?.choices?.[0]?.message?.content ?? "";
-    return { text, stubbed: false };
+    const usage = data?.usage
+      ? {
+          promptTokens: Number(data.usage.prompt_tokens) || 0,
+          completionTokens: Number(data.usage.completion_tokens) || 0,
+        }
+      : undefined;
+    return { text, stubbed: false, model, usage };
   } catch (err) {
     console.error("Grok turn request failed, using stub:", err);
     return { text: stubTurnJson(messages), stubbed: true };

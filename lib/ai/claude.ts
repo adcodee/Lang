@@ -7,9 +7,13 @@ import type { TutorDebrief } from "@/lib/ai/schema";
 // otherwise we return a deterministic stub so the UI is fully demoable
 // offline.
 
+// Patch 1.4.1 Phase E (Lang-tutor-1.4.1-plan.md) — see grok.ts's matching
+// comment: usage undefined means stubbed, nothing was spent.
 export interface ClaudeResult {
   text: string;
   stubbed: boolean;
+  model?: string;
+  usage?: { promptTokens: number; completionTokens: number };
 }
 
 export function claudeConfigured(): boolean {
@@ -44,7 +48,13 @@ export async function claudeDebrief(system: string, transcript: string): Promise
       .join("\n")
       .trim();
 
-    return { text, stubbed: false };
+    const usage = response.usage
+      ? {
+          promptTokens: response.usage.input_tokens,
+          completionTokens: response.usage.output_tokens,
+        }
+      : undefined;
+    return { text, stubbed: false, model, usage };
   } catch (err) {
     console.error("Claude debrief request failed, using stub:", err);
     return { text: stubDebriefJson(), stubbed: true };

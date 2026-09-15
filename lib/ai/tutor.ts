@@ -49,6 +49,44 @@ export interface TutorResult<T> {
   stubbed: boolean;
 }
 
+// Patch 1.4.1 Phase E (Lang-tutor-1.4.1-plan.md): the real turn cap this
+// patch owns, separate from lib/ai/grok.ts's MAX_HISTORY (what Grok sees
+// per call) and lib/ai/sanitize.ts's MAX_MESSAGES (what the route accepts
+// at all). Crossing it only sets suggestEnd — a UI nudge, never a hard
+// stop — but it's what turns "a session could run forever" into a known
+// worst case for per-session Grok call-count, which is the number that
+// actually drives cost (see the plan's §12/pricing discussion).
+//
+// 10, not the plan's suggested 20 — caught by actually testing this
+// end-to-end rather than trusting that number blindly. `args.messages`
+// here is already sanitize.ts's MAX_MESSAGES=20 (both roles, strictly
+// alternating user/assistant by construction — the tutor replies exactly
+// once per learner send). A 20-message window can hold at most 10
+// learner turns, so a threshold of 20 learner turns can never fire — it
+// would be silent dead code. 10 is the number that's actually reachable,
+// and it's still a correct proxy for "long session": once a real
+// conversation exceeds 20 total messages, the visible window is always
+// saturated at exactly 10 user turns, so this still fires exactly once,
+// the first time the session runs long — it just needed the right number.
+const MAX_TURNS_PER_SCENE = 10;
+
+// Both providers return token counts already; nothing captured them
+// before this. No dashboard, just one structured line per real (non-
+// stubbed) call — enough to price a session off measured numbers instead
+// of estimates once there's real traffic to look at.
+function logUsage(
+  provider: "grok" | "claude",
+  channel: "text" | "voice",
+  scenarioId: string | undefined,
+  model: string | undefined,
+  usage: { promptTokens: number; completionTokens: number } | undefined
+) {
+  if (!usage) return; // stubbed — no real call happened, nothing was spent
+  console.log(
+    `[tutor-usage] provider=${provider} model=${model ?? "(unknown)"} channel=${channel} scenario=${scenarioId ?? "(none)"} promptTokens=${usage.promptTokens} completionTokens=${usage.completionTokens}`
+  );
+}
+
 // Patch 1.4.1 Phase C (Lang-tutor-1.4.1-plan.md). Resolves which move map
 // governs this request: the scenario's own map if it has one (meet), or —
 // for `free` — the sticky-resolved map of whichever OTHER unlocked, mapped
@@ -99,7 +137,8 @@ export async function runTutorTurn(args: RunTurnArgs): Promise<TutorResult<Tutor
     : "";
   const system = turnSystemPrompt(context, moveBlock);
 
-  const { text, stubbed } = await grokTurn(system, args.messages);
+  const { text, stubbed, model, usage } = await grokTurn(system, args.messages);
+  logUsage("grok", args.channel, args.scenarioId, model, usage);
   const parsed = parseTutorTurn(text, catalogIds, validLinkTargets) ?? emptyTutorTurn();
 
   // Grok's own link judgment wins if it set one; the keyword backstop only
@@ -119,7 +158,7 @@ export async function runTutorTurn(args: RunTurnArgs): Promise<TutorResult<Tutor
     moves_filled: matched ? [...matched.movesFilledEver] : [],
     moves_open: matched ? matched.movesOpen : [],
     link,
-    suggestEnd: computeSuggestEnd(args.messages),
+    suggestEnd: computeSuggestEnd(args.messages, MAX_TURNS_PER_SCENE),
   };
   return { data, stubbed };
 }
@@ -136,7 +175,8 @@ export async function runTutorDebrief(args: RunDebriefArgs): Promise<TutorResult
   const system = `${debriefSystemPrompt(context, moveBlock)}\n\n${holesBlock(args.holes)}`;
   const transcript = formatTranscript(args.messages, args.channel);
 
-  const { text, stubbed } = await claudeDebrief(system, transcript);
+  const { text, stubbed, model, usage } = await claudeDebrief(system, transcript);
+  logUsage("claude", args.channel, args.scenarioId, model, usage);
   const parsed = parseTutorDebrief(text, catalogIds) ?? emptyTutorDebrief();
 
   // Scenario-specific filter: MOVE_IDS validates against the whole app's
