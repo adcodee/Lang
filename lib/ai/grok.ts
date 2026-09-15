@@ -57,6 +57,9 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
 // Rotates through a few clean TutorTurn shapes (one with a flagged miss) so
 // Demo mode still exercises the "Did you mean" line and the hole log.
 
+// moves_filled/moves_open/suggestEnd left empty/false here on purpose —
+// tutor.ts overwrites them from the matcher unconditionally even in stub
+// mode, same as a real Grok response (see schema.ts's TutorTurn doc comment).
 const STUB_TURNS: TutorTurn[] = [
   {
     spoken_ja: "こんにちは！おなまえは？",
@@ -66,6 +69,11 @@ const STUB_TURNS: TutorTurn[] = [
     issue: "ok",
     avoid: "",
     holeLessonId: "",
+    moves_filled: [],
+    moves_open: [],
+    spans: [],
+    link: "",
+    suggestEnd: false,
   },
   {
     spoken_ja: "はじめまして。",
@@ -75,6 +83,18 @@ const STUB_TURNS: TutorTurn[] = [
     issue: "particle",
     avoid: "わたし Adule です。",
     holeLessonId: "u2-self-intro",
+    moves_filled: [],
+    moves_open: [],
+    spans: [
+      {
+        avoid: "わたし Adule です。",
+        prefer: "わたしは Adule です。",
+        issue: "particle",
+        holeLessonId: "u2-self-intro",
+      },
+    ],
+    link: "",
+    suggestEnd: false,
   },
   {
     spoken_ja: "はじめまして。ゆき です。よろしく。",
@@ -84,6 +104,11 @@ const STUB_TURNS: TutorTurn[] = [
     issue: "ok",
     avoid: "",
     holeLessonId: "",
+    moves_filled: [],
+    moves_open: [],
+    spans: [],
+    link: "",
+    suggestEnd: false,
   },
   {
     spoken_ja: "ありがとう。",
@@ -93,6 +118,11 @@ const STUB_TURNS: TutorTurn[] = [
     issue: "ok",
     avoid: "",
     holeLessonId: "",
+    moves_filled: [],
+    moves_open: [],
+    spans: [],
+    link: "",
+    suggestEnd: false,
   },
 ];
 

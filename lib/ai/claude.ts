@@ -58,6 +58,8 @@ function stubDebriefJson(): string {
     went_well: "Demo mode — connect an Anthropic key to get real coaching after each session.",
     notes: [],
     redo: [],
+    coverage: [],
+    alts: [],
   };
   return JSON.stringify(stub);
 }

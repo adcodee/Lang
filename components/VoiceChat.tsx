@@ -226,6 +226,8 @@ export default function VoiceChat({
         went_well: "Couldn't reach the coach — try End practice again.",
         notes: [],
         redo: [],
+        coverage: [],
+        alts: [],
       });
     } finally {
       setDebriefing(false);

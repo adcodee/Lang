@@ -14,6 +14,10 @@ import type { ChatMessage } from "@/lib/types";
 /** A move is a conversational job a turn can do, not a script step. */
 export type MoveId = "greet" | "give_name" | "ask_name" | "close" | "repair";
 
+// Runtime-checkable twin of MoveId — a union type alone can't be validated
+// against untrusted JSON (Claude's debrief `coverage` entries) at runtime.
+export const MOVE_IDS: readonly MoveId[] = ["greet", "give_name", "ask_name", "close", "repair"];
+
 export interface MoveSpec {
   id: MoveId;
   // "said": the learner must produce it. "heard": either side producing it
