@@ -36,6 +36,19 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
   // to the same stub used for "no key configured." grok-4.6 is the
   // current flagship model per xAI's own docs (docs.x.ai/developers/models).
   const model = process.env.XAI_MODEL || "grok-4.6";
+  // grok-4.6 always reasons — xAI's docs say it can't be fully disabled —
+  // but reasoning_effort controls how much. A real call logged in xAI's
+  // console (2026-09-19) showed 1303 reasoning tokens against a 63-token
+  // answer for this exact prompt, and a ~23s response time — the reasoning
+  // is what's slow, not the network. "low" is the smallest, safest change
+  // to test: HYPOTHESIS, not a confirmed fix yet (xAI's own docs show
+  // inconsistent JSON shapes for this across their SDK examples, and this
+  // machine has no key to verify against the real API) — check the xAI
+  // console log for the next real call: if reasoningTokens drops
+  // substantially and latency improves, this worked; if unchanged, xAI's
+  // legacy /v1/chat/completions endpoint likely wants a different shape
+  // (e.g. nested reasoning: {effort: ...}) and this field is being ignored.
+  const reasoningEffort = process.env.XAI_REASONING_EFFORT || "low";
   try {
     const res = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
@@ -50,6 +63,7 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
           ...messages.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: m.content })),
         ],
         temperature: 0.5,
+        reasoning_effort: reasoningEffort,
       }),
     });
 
