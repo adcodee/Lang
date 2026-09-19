@@ -31,19 +31,20 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
     return { text: stubTurnJson(messages), stubbed: true };
   }
 
-  // "grok-2-latest" (the old default) was fully retired by xAI on
-  // 2026-05-15; "grok-4.6" (the flagship, tried next) always reasons and
-  // was measured at ~23s/call for this prompt (scripts/bench-grok-models.ts,
-  // 2026-09-19) — too slow for a reply-every-turn partner. Benchmarked
-  // against grok-4.5/4.3/grok-4.20-0309-non-reasoning/grok-build-0.1 with
-  // the real production prompt: grok-4.20-0309-non-reasoning won clearly —
-  // 0 reasoning tokens, ~1.3-1.5s, cost on par with or cheaper than the
-  // reasoning models, and identical accuracy on the same test turns
-  // (matching did_you_mean/issue/holeLessonId/spans). grok-build-0.1 is a
-  // dedicated coding/agentic model, not a fit for conversation — still
-  // reasoned heavily despite rejecting the effort param, and was the
-  // slowest of everything tested.
-  const model = process.env.XAI_MODEL || "grok-4.20-0309-non-reasoning";
+  // "grok-2-latest" (an earlier default) was fully retired by xAI on
+  // 2026-05-15. "grok-4.6" (the flagship) always reasons, ~23s/call for
+  // this prompt — too slow. "grok-4.20-0309-non-reasoning" was faster
+  // still (~1.3-1.5s) and passed the benchmark's two fixed test turns, but
+  // failed on-device in a real conversation: asked "お名前は？" (what's
+  // your name?), it returned did_you_mean="わたしは ゆき です。" (I am
+  // Yuki) as the "correction" — confusing its own next line with the
+  // separate "what you should have said" field the prompt asks for. A
+  // model with zero deliberation is exactly the wrong tradeoff for an
+  // instruction that requires keeping two distinct jobs straight. grok-4.3
+  // (owner's pick, 2026-09-19): still a reasoning model — "still pretty
+  // fast and thinks first" — cheapest reasoning candidate benchmarked
+  // (~2.7x cheaper than grok-4.6), ~7.2s avg, correct on every test run.
+  const model = process.env.XAI_MODEL || "grok-4.3";
   // reasoning_effort only makes sense on a model that reasons at all —
   // the current default doesn't and rejects the field outright with a 400.
   // Try it anyway (someone may override XAI_MODEL back to a reasoning
