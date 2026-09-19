@@ -30,7 +30,12 @@ export async function claudeDebrief(system: string, transcript: string): Promise
     const Anthropic = (await import("@anthropic-ai/sdk")).default;
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-    const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
+    // "claude-opus-4-8" (the old default here and in .env.example) is not a
+    // real Anthropic model id — every real call was failing with a "model
+    // not found" error, caught below, silently degrading to the stub. That
+    // looks identical to "no key configured" from the outside, which is
+    // exactly why it went unnoticed. claude-opus-5 is the current model.
+    const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
     const response = await client.messages.create({
       model,
       max_tokens: 600,
