@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "check:content": "tsx scripts/check-content.ts",
-    "check:moves": "tsx scripts/check-moves.ts"
+    "check:moves": "tsx scripts/check-moves.ts",
+    "bench:grok": "tsx scripts/bench-grok-models.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
