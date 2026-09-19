@@ -32,25 +32,28 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
   }
 
   // "grok-2-latest" (the old default) was fully retired by xAI on
-  // 2026-05-15 — every real call 404'd, caught below, silently degrading
-  // to the same stub used for "no key configured." grok-4.6 is the
-  // current flagship model per xAI's own docs (docs.x.ai/developers/models).
-  const model = process.env.XAI_MODEL || "grok-4.6";
-  // grok-4.6 always reasons — xAI's docs say it can't be fully disabled —
-  // but reasoning_effort controls how much. A real call logged in xAI's
-  // console (2026-09-19) showed 1303 reasoning tokens against a 63-token
-  // answer for this exact prompt, and a ~23s response time — the reasoning
-  // is what's slow, not the network. "low" is the smallest, safest change
-  // to test: HYPOTHESIS, not a confirmed fix yet (xAI's own docs show
-  // inconsistent JSON shapes for this across their SDK examples, and this
-  // machine has no key to verify against the real API) — check the xAI
-  // console log for the next real call: if reasoningTokens drops
-  // substantially and latency improves, this worked; if unchanged, xAI's
-  // legacy /v1/chat/completions endpoint likely wants a different shape
-  // (e.g. nested reasoning: {effort: ...}) and this field is being ignored.
+  // 2026-05-15; "grok-4.6" (the flagship, tried next) always reasons and
+  // was measured at ~23s/call for this prompt (scripts/bench-grok-models.ts,
+  // 2026-09-19) — too slow for a reply-every-turn partner. Benchmarked
+  // against grok-4.5/4.3/grok-4.20-0309-non-reasoning/grok-build-0.1 with
+  // the real production prompt: grok-4.20-0309-non-reasoning won clearly —
+  // 0 reasoning tokens, ~1.3-1.5s, cost on par with or cheaper than the
+  // reasoning models, and identical accuracy on the same test turns
+  // (matching did_you_mean/issue/holeLessonId/spans). grok-build-0.1 is a
+  // dedicated coding/agentic model, not a fit for conversation — still
+  // reasoned heavily despite rejecting the effort param, and was the
+  // slowest of everything tested.
+  const model = process.env.XAI_MODEL || "grok-4.20-0309-non-reasoning";
+  // reasoning_effort only makes sense on a model that reasons at all —
+  // the current default doesn't and rejects the field outright with a 400.
+  // Try it anyway (someone may override XAI_MODEL back to a reasoning
+  // model) and retry once without it on that specific rejection, instead
+  // of assuming per-model — same fix already proven in
+  // scripts/bench-grok-models.ts against the real API.
   const reasoningEffort = process.env.XAI_REASONING_EFFORT || "low";
-  try {
-    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+
+  async function callXai(withReasoningEffort: boolean) {
+    return fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,10 +66,21 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
           ...messages.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: m.content })),
         ],
         temperature: 0.5,
-        reasoning_effort: reasoningEffort,
+        ...(withReasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
       }),
     });
+  }
 
+  try {
+    let res = await callXai(true);
+    if (!res.ok && res.status === 400) {
+      const probeText = await res.text();
+      if (/reasoningEffort|reasoning_effort/i.test(probeText)) {
+        res = await callXai(false);
+      } else {
+        throw new Error(`xAI responded ${res.status}: ${probeText.slice(0, 200)}`);
+      }
+    }
     if (!res.ok) throw new Error(`xAI responded ${res.status}`);
     const data = await res.json();
     const text: string = data?.choices?.[0]?.message?.content ?? "";
