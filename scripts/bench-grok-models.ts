@@ -105,27 +105,46 @@ interface RunResult {
   usage?: Record<string, unknown>;
   content?: string;
   validJson?: boolean;
+  usedReasoningEffort?: boolean;
+}
+
+async function callXai(model: string, learnerText: string, withReasoningEffort: boolean) {
+  return fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.XAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: learnerText },
+      ],
+      temperature: 0.5,
+      ...(withReasoningEffort ? { reasoning_effort: REASONING_EFFORT } : {}),
+    }),
+  });
 }
 
 async function runOne(model: string, learnerText: string): Promise<RunResult> {
   const start = Date.now();
   try {
-    const res = await fetch("https://api.x.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.XAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: learnerText },
-        ],
-        temperature: 0.5,
-        reasoning_effort: REASONING_EFFORT,
-      }),
-    });
+    let usedReasoningEffort = true;
+    let res = await callXai(model, learnerText, true);
+    // Genuinely non-reasoning models reject the param outright rather than
+    // ignoring it — retry once without it so those candidates still get a
+    // real measurement instead of just failing.
+    if (!res.ok && res.status === 400) {
+      const probeText = await res.text();
+      if (/reasoningEffort|reasoning_effort/i.test(probeText)) {
+        usedReasoningEffort = false;
+        res = await callXai(model, learnerText, false);
+      } else {
+        const latencyMs = Date.now() - start;
+        return { model, ok: false, latencyMs, httpStatus: res.status, error: probeText.slice(0, 300) };
+      }
+    }
     const latencyMs = Date.now() - start;
     if (!res.ok) {
       const bodyText = await res.text();
@@ -140,7 +159,7 @@ async function runOne(model: string, learnerText: string): Promise<RunResult> {
     } catch {
       validJson = false;
     }
-    return { model, ok: true, latencyMs, usage: data?.usage, content, validJson };
+    return { model, ok: true, latencyMs, usage: data?.usage, content, validJson, usedReasoningEffort };
   } catch (err) {
     return { model, ok: false, latencyMs: Date.now() - start, error: String(err) };
   }
@@ -163,7 +182,7 @@ async function main() {
         console.log(`  Learner: "${turn}" -> FAILED (http ${r.httpStatus ?? "n/a"}) in ${r.latencyMs}ms: ${r.error}`);
         continue;
       }
-      console.log(`  Learner: "${turn}" -> ${r.latencyMs}ms, validJson=${r.validJson}`);
+      console.log(`  Learner: "${turn}" -> ${r.latencyMs}ms, validJson=${r.validJson}, reasoningEffortApplied=${r.usedReasoningEffort}`);
       console.log(`    usage: ${JSON.stringify(r.usage)}`);
       console.log(`    content: ${r.content}`);
     }
