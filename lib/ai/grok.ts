@@ -31,7 +31,11 @@ export async function grokTurn(system: string, messages: ChatMessage[]): Promise
     return { text: stubTurnJson(messages), stubbed: true };
   }
 
-  const model = process.env.XAI_MODEL || "grok-2-latest";
+  // "grok-2-latest" (the old default) was fully retired by xAI on
+  // 2026-05-15 — every real call 404'd, caught below, silently degrading
+  // to the same stub used for "no key configured." grok-4.6 is the
+  // current flagship model per xAI's own docs (docs.x.ai/developers/models).
+  const model = process.env.XAI_MODEL || "grok-4.6";
   try {
     const res = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
