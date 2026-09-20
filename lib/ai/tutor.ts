@@ -139,7 +139,16 @@ export async function runTutorTurn(args: RunTurnArgs): Promise<TutorResult<Tutor
 
   const { text, stubbed, model, usage } = await grokTurn(system, args.messages);
   logUsage("grok", args.channel, args.scenarioId, model, usage);
-  const parsed = parseTutorTurn(text, catalogIds, validLinkTargets) ?? emptyTutorTurn();
+  const rawTurnParse = parseTutorTurn(text, catalogIds, validLinkTargets);
+  if (!rawTurnParse && !stubbed) {
+    // A real (non-stubbed) call whose response text didn't parse — this is
+    // otherwise invisible: no exception was thrown, so grok.ts's own
+    // try/catch never fires and never logs. Same reasoning as the
+    // temperature/reasoning_effort bugs this patch already fixed: a
+    // silent fallback that looks identical to success from outside.
+    console.error("Grok turn response failed to parse, using empty turn. Raw text:", text.slice(0, 500));
+  }
+  const parsed = rawTurnParse ?? emptyTutorTurn();
 
   // Grok's own link judgment wins if it set one; the keyword backstop only
   // ever ADDS a link Grok didn't set (see matchLinkKeyword's doc comment).
@@ -177,7 +186,16 @@ export async function runTutorDebrief(args: RunDebriefArgs): Promise<TutorResult
 
   const { text, stubbed, model, usage } = await claudeDebrief(system, transcript);
   logUsage("claude", args.channel, args.scenarioId, model, usage);
-  const parsed = parseTutorDebrief(text, catalogIds) ?? emptyTutorDebrief();
+  const rawDebriefParse = parseTutorDebrief(text, catalogIds);
+  if (!rawDebriefParse && !stubbed) {
+    // Same reasoning as the turn-side log above: a real call whose response
+    // didn't parse throws nothing, so claude.ts's try/catch never logs it —
+    // this was invisible until now (2026-09-20: went_well came back the
+    // literal emptyTutorDebrief() placeholder text with a real, non-stubbed
+    // call, and there was no way to see why from outside).
+    console.error("Claude debrief response failed to parse, using empty debrief. Raw text:", text.slice(0, 800));
+  }
+  const parsed = rawDebriefParse ?? emptyTutorDebrief();
 
   // Scenario-specific filter: MOVE_IDS validates against the whole app's
   // move vocabulary, but coverage should only ever name moves that are
