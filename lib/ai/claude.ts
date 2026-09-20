@@ -36,16 +36,32 @@ export async function claudeDebrief(system: string, transcript: string): Promise
     // looks identical to "no key configured" from the outside, which is
     // exactly why it went unnoticed. claude-opus-5 is the current model.
     const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
-    const response = await client.messages.create({
+
+    // The debrief reviews a finished conversation rather than holding one,
+    // so the whole transcript goes in as a single user turn — this avoids
+    // the Messages API's strict user/assistant alternation entirely.
+    const baseParams = {
       model,
       max_tokens: 600,
-      temperature: 0.3,
       system,
-      // The debrief reviews a finished conversation rather than holding one,
-      // so the whole transcript goes in as a single user turn — this avoids
-      // the Messages API's strict user/assistant alternation entirely.
-      messages: [{ role: "user", content: transcript }],
-    });
+      messages: [{ role: "user" as const, content: transcript }],
+    };
+
+    // claude-opus-5 rejects `temperature` outright ("`temperature` is
+    // deprecated for this model" — a real 400 caught via Vercel runtime
+    // logs, 2026-09-20). Try with it first (older models may still want
+    // it) and retry once without it on that specific rejection, same
+    // pattern already proven for Grok's reasoning_effort incompatibility.
+    let response;
+    try {
+      response = await client.messages.create({ ...baseParams, temperature: 0.3 });
+    } catch (err) {
+      if (err instanceof Error && /temperature/i.test(err.message)) {
+        response = await client.messages.create(baseParams);
+      } else {
+        throw err;
+      }
+    }
 
     const text = response.content
       .filter((b): b is { type: "text"; text: string } => b.type === "text")
