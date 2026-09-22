@@ -105,10 +105,16 @@ export const scenarios: Scenario[] = [
       role: "assistant",
       content: "こんにちは！(Hello!) — You've just met someone new. Greet them!",
     },
-    // Still the live instruction Grok follows (Phase C hasn't wired the map
-    // into the prompt yet). Kept as-is on purpose — see the file-header note.
+    // Rewritten 2026-09-22: the old brief told Grok to "give yours" in step
+    // 2 AND restate "name です" again as part of a step-3 "intro script",
+    // duplicating the tutor's own name across two separate turns (owner
+    // caught this live: ゆき introduced herself once after being asked,
+    // then again right after the learner's よろしく). meetMoveMap's
+    // give_name/close moves (now wired into the prompt via turnMoveBlock,
+    // see resolveMoveMap in tutor.ts) already track this properly — the
+    // brief just hadn't been updated to stop duplicating it in free text.
     brief:
-      "Roleplay meeting for the first time. Drive this exact three-step exchange, ONE step per turn, waiting for the learner between steps: (1) exchange greetings (こんにちは), (2) ask their name and give yours (you are ゆき), (3) the intro script in order — はじめまして, then name です, then よろしく. Do not treat はじめまして and よろしく as the same line: はじめまして is first-meeting only; よろしく is 'I look forward to this'. STOP after the intro. Do not ask for goodbye — that word has not been taught. If the learner jumps ahead or stalls, gently bring them to the current step.",
+      "Roleplay meeting for the first time. You are ゆき. (1) Exchange greetings (こんにちは / はじめまして). (2) When asked your name, give it exactly once — わたしは ゆき です — and do not restate your own name again this scene. (3) Once the learner has given their name and said よろしく, close by saying よろしく back only — no name, no re-introduction. Do not treat はじめまして and よろしく as the same line: はじめまして is first-meeting only; よろしく is 'I look forward to this'. STOP after the close. Do not ask for goodbye — that word has not been taught. If the learner jumps ahead or stalls, gently bring them to whichever move is still open (see OPEN MOVES).",
     map: meetMoveMap,
   },
   {
