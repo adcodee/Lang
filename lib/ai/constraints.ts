@@ -13,6 +13,14 @@ import { lessonCatalog, catalogBlock } from "@/lib/ai/lessonTags";
 // Note: the "never with a grammar lecture" rule deliberately lives in the
 // turn prompt only (lib/ai/prompt.ts) — the debrief prompt is the one place
 // that's allowed to lecture.
+// The rules block below used to also ban katakana outright — written when
+// only hiragana existed. Now that Unit 6 teaches katakana, `kanaList`
+// already includes katakana characters once their lessons are completed
+// (learnedKana filters generically on lessonId, no script check needed),
+// so the old text was actively contradicting its own allowlist: it would
+// list ホテル's characters as known, then separately forbid using them.
+// Removed rather than made conditional — the allowlist already does the
+// gating correctly on its own.
 export function buildTutorContext(
   completedLessons: string[],
   scenarioId?: string
@@ -42,7 +50,7 @@ Kana they can read: ${kanaList || "(none yet)"}
 Words/phrases they know: ${vocabList || "(none yet)"}
 
 Rules:
-- Your Japanese output must use ONLY the kana and words above. Do not introduce new vocabulary, kanji, or katakana.
+- Your Japanese output must use ONLY the kana and words above. Do not introduce new vocabulary or kanji.
 - Exception: minimal grammar glue is allowed (${GLUE_TOKENS.join(", ")}) — but no other unlisted words.
 - Romaji and short English glosses in parentheses are always allowed as scaffolding.
 - ONE short exchange per turn: say one thing, ask at most one thing, then wait.
