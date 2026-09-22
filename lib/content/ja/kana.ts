@@ -8,6 +8,14 @@ export interface Kana {
   romaji: string;
   row: string; // category label, e.g. "Vowels", "K-row"
   lessonId: string; // lesson that teaches it
+  // Unit 6 (katakana): default hiragana, omitted on existing content — same
+  // "default, omitted on existing content" convention as KanaTeachCard's
+  // `kind` field. Katakana rows use a "Katakana "-prefixed `row` label (not
+  // just a bare same-named row) on purpose: kanaRowProgress() counts
+  // distinct `row` values in a Set to drive the Vowel Sort drill's "N/M
+  // rows unlocked" hint — a same-named row would silently merge hiragana's
+  // and katakana's progress into one count.
+  script?: "hiragana" | "katakana";
 }
 
 export const kana: Kana[] = [
@@ -83,6 +91,75 @@ export const kana: Kana[] = [
   { char: "ちょ", romaji: "cho", row: "Yōon", lessonId: "u1b-yoon" },
   { char: "じゃ", romaji: "ja", row: "Yōon", lessonId: "u1b-yoon" },
   { char: "りょ", romaji: "ryo", row: "Yōon", lessonId: "u1b-yoon" },
+  // Katakana (Unit 6) — same 46 sounds as hiragana above, new shapes. ー
+  // (chōonpu, long vowel) is teach-only like っ, already taught in
+  // u1b-sokuon, and correspondingly not registered here.
+  { char: "ア", romaji: "a", row: "Katakana Vowels", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "イ", romaji: "i", row: "Katakana Vowels", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "ウ", romaji: "u", row: "Katakana Vowels", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "エ", romaji: "e", row: "Katakana Vowels", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "オ", romaji: "o", row: "Katakana Vowels", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "カ", romaji: "ka", row: "Katakana K-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "キ", romaji: "ki", row: "Katakana K-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "ク", romaji: "ku", row: "Katakana K-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "ケ", romaji: "ke", row: "Katakana K-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "コ", romaji: "ko", row: "Katakana K-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "サ", romaji: "sa", row: "Katakana S-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "シ", romaji: "shi", row: "Katakana S-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "ス", romaji: "su", row: "Katakana S-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "セ", romaji: "se", row: "Katakana S-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "ソ", romaji: "so", row: "Katakana S-row", lessonId: "u6-katakana-vowels-k-s", script: "katakana" },
+  { char: "タ", romaji: "ta", row: "Katakana T-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "チ", romaji: "chi", row: "Katakana T-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ツ", romaji: "tsu", row: "Katakana T-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "テ", romaji: "te", row: "Katakana T-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ト", romaji: "to", row: "Katakana T-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ナ", romaji: "na", row: "Katakana N-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ニ", romaji: "ni", row: "Katakana N-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ヌ", romaji: "nu", row: "Katakana N-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ネ", romaji: "ne", row: "Katakana N-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ノ", romaji: "no", row: "Katakana N-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ハ", romaji: "ha", row: "Katakana H-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ヒ", romaji: "hi", row: "Katakana H-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "フ", romaji: "fu", row: "Katakana H-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ヘ", romaji: "he", row: "Katakana H-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "ホ", romaji: "ho", row: "Katakana H-row", lessonId: "u6-katakana-t-n-h", script: "katakana" },
+  { char: "マ", romaji: "ma", row: "Katakana M-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ミ", romaji: "mi", row: "Katakana M-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ム", romaji: "mu", row: "Katakana M-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "メ", romaji: "me", row: "Katakana M-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "モ", romaji: "mo", row: "Katakana M-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ヤ", romaji: "ya", row: "Katakana Y-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ユ", romaji: "yu", row: "Katakana Y-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ヨ", romaji: "yo", row: "Katakana Y-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ラ", romaji: "ra", row: "Katakana R-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "リ", romaji: "ri", row: "Katakana R-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ル", romaji: "ru", row: "Katakana R-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "レ", romaji: "re", row: "Katakana R-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ロ", romaji: "ro", row: "Katakana R-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ワ", romaji: "wa", row: "Katakana W-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ヲ", romaji: "wo", row: "Katakana W-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  { char: "ン", romaji: "n", row: "Katakana W-row", lessonId: "u6-katakana-m-y-r-w", script: "katakana" },
+  // Voiced/combo — same partial-coverage pattern as u1b (representative
+  // cards only; the "add the mark to the shape you already know" rule
+  // generalizes past what's registered). P-row is the one complete row,
+  // same as hiragana's ぱぴぷぺぽ — it's the whole closed handakuten set.
+  { char: "ガ", romaji: "ga", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ゴ", romaji: "go", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ザ", romaji: "za", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ジ", romaji: "ji", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ダ", romaji: "da", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ド", romaji: "do", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "バ", romaji: "ba", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ボ", romaji: "bo", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "パ", romaji: "pa", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ピ", romaji: "pi", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "プ", romaji: "pu", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ペ", romaji: "pe", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ポ", romaji: "po", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "キャ", romaji: "kya", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "シュ", romaji: "shu", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "チョ", romaji: "cho", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
 ];
 
 // Kana the learner has unlocked (its introducing lesson is completed).
@@ -118,6 +195,13 @@ export const lookalikePairs: LookalikePair[] = [
   { a: "び", b: "ぴ", tellA: "dashes ゛= b", tellB: "circle ゜= p" },
   { a: "ぼ", b: "ぽ", tellA: "dashes ゛= b", tellB: "circle ゜= p" },
   { a: "ぱ", b: "ぽ", tellA: "no line on top (は)", tellB: "extra line on top (ほ)" },
+  // Katakana (Unit 6) — the lookalike traps hiragana never had: these
+  // don't correspond to any hiragana pair (きゃ/さ etc. above are all
+  // hiragana↔hiragana), so a learner who's fine with し/つ can still get
+  // caught by シ/ツ — the stroke directions are effectively swapped.
+  { a: "シ", b: "ツ", tellA: "bottom stroke sweeps up-and-right", tellB: "bottom stroke sweeps down-and-left" },
+  { a: "ソ", b: "ン", tellA: "top stroke steep, starts high", tellB: "top stroke short & near-horizontal, sits low" },
+  { a: "ノ", b: "メ", tellA: "single stroke only", tellB: "adds a second crossing stroke" },
 ];
 
 // Pairs where both kana are already learned — the drill's active pool.
