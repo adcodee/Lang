@@ -23,18 +23,33 @@ export interface BeltAward {
 }
 
 // Ordered by curriculum progression — walked in order by currentBelt() below.
+//
+// Patch 1.8: the beginner course grew. Katakana (u6) moved in from
+// intermediate, particles (u7) and polite verb forms (u8) were authored, and
+// five scenario units are still to come — fourteen units in total, against a
+// five-bars-per-colour ladder. So bars are awarded at MILESTONES, not one per
+// unit, and the White -> Brown colour change now marks the true end of the
+// beginner course rather than the end of Unit 5 (owner's call, 2026-09-27).
+//
+// Units deliberately awarding nothing (u3, u4, u6, u7) still unlock the next
+// unit and still pay exam XP — they just don't move the belt. ExamPlayer
+// renders those as "Unit cleared" rather than claiming a belt.
 export const BELT_AWARDS: BeltAward[] = [
   { unitId: "u1-hiragana", levelId: "beginner", kind: "bar", color: "white", bars: 1, label: "White belt · 1 bar", jp: "白帯 一本", emoji: "🤍" },
   { unitId: "u1b-sounds", levelId: "beginner", kind: "bar", color: "white", bars: 2, label: "White belt · 2 bars", jp: "白帯 二本", emoji: "🤍" },
   { unitId: "u2-greetings", levelId: "beginner", kind: "bar", color: "white", bars: 3, label: "White belt · 3 bars", jp: "白帯 三本", emoji: "🤍" },
-  { unitId: "u3-numbers", levelId: "beginner", kind: "bar", color: "white", bars: 4, label: "White belt · 4 bars", jp: "白帯 四本", emoji: "🤍" },
-  { unitId: "u4-nouns", levelId: "beginner", kind: "bar", color: "white", bars: 5, label: "White belt · 5 bars", jp: "白帯 五本", emoji: "🤍" },
-  { unitId: "u5-adjectives", levelId: "beginner", kind: "color", color: "brown", bars: 0, label: "Brown belt", jp: "茶帯", emoji: "🤎" },
+  // u3-numbers, u4-nouns — no belt movement (see the milestone note above).
+  { unitId: "u5-adjectives", levelId: "beginner", kind: "bar", color: "white", bars: 4, label: "White belt · 4 bars", jp: "白帯 四本", emoji: "🤍" },
+  // u6-katakana, u7-particles — no belt movement.
+  { unitId: "u8-verb-forms", levelId: "beginner", kind: "bar", color: "white", bars: 5, label: "White belt · 5 bars", jp: "白帯 五本", emoji: "🤍" },
+  // The White -> Brown promotion belongs to the LAST beginner unit. The five
+  // scenario units (konbini, restaurant, train station, directions, hotel) are
+  // not authored yet — when the last of them ships, add:
+  //   { unitId: "…final scenario unit…", levelId: "beginner", kind: "color",
+  //     color: "brown", bars: 0, label: "Brown belt", jp: "茶帯", emoji: "🤎" },
+  // Until then the beginner course tops out at White belt · 5 bars, which is
+  // honest: the course genuinely isn't finished.
 ];
-
-// When fluent ships, append e.g.:
-// { unitId: "…last fluent unit…", levelId: "fluent", kind: "color",
-//   color: "black", bars: 0, dan: 1, label: "Black belt · 1st dan", jp: "黒帯 初段", emoji: "⬛" }
 
 export const UNRANKED: Omit<BeltAward, "unitId" | "levelId" | "kind"> = {
   color: "white",

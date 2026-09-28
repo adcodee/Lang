@@ -58,7 +58,10 @@ export const meetMoveMap: MoveSpec[] = [
   { id: "give_name", required: "said", forms: ["わたしは X です", "X です"] },
   { id: "ask_name", required: false, forms: ["おなまえは？"] },
   { id: "close", required: "said", precondition: "give_name", forms: ["よろしく"] },
-  { id: "repair", required: false, forms: ["すみません"] },
+  // Patch 1.8: u2-understanding taught the repair kit, so "repair" is no
+  // longer just すみません. These are the words the learner now reaches for
+  // when they lose the thread, and the tutor should recognise all of them.
+  { id: "repair", required: false, forms: ["すみません", "わかりません"], alts: ["もういちど", "もっとゆっくり", "もういちど おねがいします"] },
 ];
 
 // Declared, never played — 1.4.1 scope is meet + free only. See the plan's
@@ -114,7 +117,7 @@ export const scenarios: Scenario[] = [
     // see resolveMoveMap in tutor.ts) already track this properly — the
     // brief just hadn't been updated to stop duplicating it in free text.
     brief:
-      "Roleplay meeting for the first time. You are ゆき. (1) Exchange greetings (こんにちは / はじめまして). (2) When asked your name, give it exactly once — わたしは ゆき です — and do not restate your own name again this scene. (3) Once the learner has given their name and said よろしく, close by saying よろしく back only — no name, no re-introduction. Do not treat はじめまして and よろしく as the same line: はじめまして is first-meeting only; よろしく is 'I look forward to this'. STOP after the close. Do not ask for goodbye — that word has not been taught. If the learner jumps ahead or stalls, gently bring them to whichever move is still open (see OPEN MOVES).",
+      "Roleplay meeting for the first time. You are ゆき. (1) Exchange greetings (こんにちは / はじめまして). (2) When asked your name, give it exactly once — わたしは ゆき です — and do not restate your own name again this scene. (3) Once the learner has given their name and said よろしく, close by saying よろしく back only — no name, no re-introduction. Do not treat はじめまして and よろしく as the same line: はじめまして is first-meeting only; よろしく is 'I look forward to this'. Once the close has landed you may end with さようなら or じゃあね, then STOP. If the learner jumps ahead or stalls, gently bring them to whichever move is still open (see OPEN MOVES).",
     map: meetMoveMap,
   },
   {

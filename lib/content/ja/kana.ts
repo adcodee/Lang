@@ -16,6 +16,13 @@ export interface Kana {
   // rows unlocked" hint — a same-named row would silently merge hiragana's
   // and katakana's progress into one count.
   script?: "hiragana" | "katakana";
+  // Patch 1.8.1: orthographic marks (っ ー ゃ ゅ ょ) are taught in u1b but
+  // never appear on their own — only inside a word. They are registered so
+  // the tutor's allowlist (lib/ai/constraints.ts) and the content rule know
+  // the learner can read them, and excluded from generated filler
+  // (lessonExercises.ts's toItems) because "type the romaji for っ" is not a
+  // real question and feeding a bare small-tsu to TTS produces silence.
+  mark?: boolean;
 }
 
 export const kana: Kana[] = [
@@ -71,21 +78,44 @@ export const kana: Kana[] = [
   // Small っ is teach-only (no standalone sound), so it isn't registered.
   { char: "が", romaji: "ga", row: "G-row", lessonId: "u1b-dakuten-gz" },
   { char: "ぎ", romaji: "gi", row: "G-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ぐ", romaji: "gu", row: "G-row", lessonId: "u1b-dakuten-gz" },
+  { char: "げ", romaji: "ge", row: "G-row", lessonId: "u1b-dakuten-gz" },
   { char: "ご", romaji: "go", row: "G-row", lessonId: "u1b-dakuten-gz" },
   { char: "ざ", romaji: "za", row: "Z-row", lessonId: "u1b-dakuten-gz" },
   { char: "じ", romaji: "ji", row: "Z-row", lessonId: "u1b-dakuten-gz" },
   { char: "ず", romaji: "zu", row: "Z-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ぜ", romaji: "ze", row: "Z-row", lessonId: "u1b-dakuten-gz" },
+  { char: "ぞ", romaji: "zo", row: "Z-row", lessonId: "u1b-dakuten-gz" },
   { char: "だ", romaji: "da", row: "D-row", lessonId: "u1b-dakuten-db" },
   { char: "で", romaji: "de", row: "D-row", lessonId: "u1b-dakuten-db" },
   { char: "ど", romaji: "do", row: "D-row", lessonId: "u1b-dakuten-db" },
   { char: "ば", romaji: "ba", row: "B-row", lessonId: "u1b-dakuten-db" },
   { char: "び", romaji: "bi", row: "B-row", lessonId: "u1b-dakuten-db" },
+  { char: "ぶ", romaji: "bu", row: "B-row", lessonId: "u1b-dakuten-db" },
+  { char: "べ", romaji: "be", row: "B-row", lessonId: "u1b-dakuten-db" },
   { char: "ぼ", romaji: "bo", row: "B-row", lessonId: "u1b-dakuten-db" },
   { char: "ぱ", romaji: "pa", row: "P-row", lessonId: "u1b-handakuten" },
   { char: "ぴ", romaji: "pi", row: "P-row", lessonId: "u1b-handakuten" },
   { char: "ぷ", romaji: "pu", row: "P-row", lessonId: "u1b-handakuten" },
   { char: "ぺ", romaji: "pe", row: "P-row", lessonId: "u1b-handakuten" },
   { char: "ぽ", romaji: "po", row: "P-row", lessonId: "u1b-handakuten" },
+  // Patch 1.8.1: u1b-yoon and u1b-sokuon had teach cards but NO kana.ts rows
+  // at all, so every one of these was missing from the tutor's allowlist —
+  // the same failure as the katakana ban fixed in acf257d. The combos carry
+  // real romaji and make good review items; the bare small kana and the
+  // long-vowel bar are marks (see the `mark` field above).
+  { char: "きゃ", romaji: "kya", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "しゅ", romaji: "shu", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "ちょ", romaji: "cho", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "じゃ", romaji: "ja", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "じょ", romaji: "jo", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "りょ", romaji: "ryo", row: "Yōon", lessonId: "u1b-yoon" },
+  { char: "ゃ", romaji: "ya (small)", row: "Yōon", lessonId: "u1b-yoon", mark: true },
+  { char: "ゅ", romaji: "yu (small)", row: "Yōon", lessonId: "u1b-yoon", mark: true },
+  { char: "ょ", romaji: "yo (small)", row: "Yōon", lessonId: "u1b-yoon", mark: true },
+  { char: "っ", romaji: "(double the next consonant)", row: "Sokuon", lessonId: "u1b-sokuon", mark: true },
+  { char: "ー", romaji: "(hold the vowel)", row: "Chōon", lessonId: "u1b-sokuon", mark: true },
+  { char: "ッ", romaji: "(double the next consonant)", row: "Katakana Sokuon", lessonId: "u6-katakana-long-vowel", script: "katakana", mark: true },
   { char: "きゃ", romaji: "kya", row: "Yōon", lessonId: "u1b-yoon" },
   { char: "しゅ", romaji: "shu", row: "Yōon", lessonId: "u1b-yoon" },
   { char: "ちょ", romaji: "cho", row: "Yōon", lessonId: "u1b-yoon" },
@@ -145,12 +175,16 @@ export const kana: Kana[] = [
   // generalizes past what's registered). P-row is the one complete row,
   // same as hiragana's ぱぴぷぺぽ — it's the whole closed handakuten set.
   { char: "ガ", romaji: "ga", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ギ", romaji: "gi", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ゴ", romaji: "go", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ザ", romaji: "za", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ジ", romaji: "ji", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ズ", romaji: "zu", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ゾ", romaji: "zo", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ダ", romaji: "da", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ド", romaji: "do", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "バ", romaji: "ba", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ビ", romaji: "bi", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ボ", romaji: "bo", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "パ", romaji: "pa", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ピ", romaji: "pi", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },

@@ -33,7 +33,11 @@ interface Item {
 
 function toItems(k: Kana[], v: Vocab[]): Item[] {
   return [
-    ...k.map((x): Item => ({ kind: "kana", term: x.char, answer: x.romaji })),
+    // `mark` kana (っ ー ゃ ゅ ょ) never stand alone — a generated
+    // "type the romaji for っ" item is unanswerable and its TTS is silent.
+    // They stay in the registry for the tutor allowlist; they just never
+    // become questions. See lib/content/ja/kana.ts's `mark` field.
+    ...k.filter((x) => !x.mark).map((x): Item => ({ kind: "kana", term: x.char, answer: x.romaji })),
     ...v.map((x): Item => ({ kind: "vocab", term: x.word, answer: x.gloss })),
   ];
 }

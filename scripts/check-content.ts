@@ -140,7 +140,12 @@ function stripKnownTokens(raw: string, knownWords: Set<string>): string {
 
 function checkScenarioMoveVocab(): Check[] {
   const checks: Check[] = [];
-  const vocabWords = new Set(jaVocab.map((v) => v.word));
+  // Verb stems join the candidate list so the prefix-based strip can
+  // decompose polite conjugations (たべ + ません) it cannot reach from the
+  // citation form alone. `word` is still what every other consumer reads.
+  const vocabWords = new Set(
+    jaVocab.flatMap((v) => (v.stem ? [v.word, v.stem] : [v.word]))
+  );
   let formsChecked = 0;
 
   for (const scenario of jaScenarios) {
@@ -229,10 +234,64 @@ function checkGeneratedContentRule(): Check[] {
   return checks;
 }
 
+// Patch 1.8: every vocab `word` must be registered EXACTLY ONCE. This check
+// did not exist, and its absence let three separate collisions through in a
+// single session (のみます and いきます registered by both Unit 7 and Unit 8;
+// どこ by both the u1b and u4 weaves) — every one of them from a different
+// author who could not see the others' registrations.
+//
+// A duplicate ships green but breaks things quietly: srs.ts keys on
+// `vocab:<word>`, so two rows collapse to one SRS entry; the glossary shows
+// the word twice; augmentLesson puts it in `core` for BOTH lessons; and
+// distractorsFor() (lessonExercises.ts) filters only against the target and
+// does NOT dedupe among the distractors it picks, so a generated item can
+// render an options list containing the same gloss twice — unanswerable.
+function checkVocabUniqueness(): Check[] {
+  const checks: Check[] = [];
+  const seen = new Map<string, string>(); // word -> first lessonId
+
+  for (const v of jaVocab) {
+    const prev = seen.get(v.word);
+    if (prev) {
+      checks.push({
+        ok: false,
+        message: `vocab word "${v.word}" is registered twice (lessons "${prev}" and "${v.lessonId}") — register it once, at the lesson that first teaches it`,
+      });
+    } else {
+      seen.set(v.word, v.lessonId);
+    }
+  }
+
+  // The same trap on the answer side: two different words sharing a gloss can
+  // land on one generated match board or in one options list, where the
+  // learner is asked to pick between two identical-looking right answers.
+  const byGloss = new Map<string, string[]>();
+  for (const v of jaVocab) {
+    byGloss.set(v.gloss, [...(byGloss.get(v.gloss) ?? []), v.word]);
+  }
+  for (const [gloss, words] of byGloss) {
+    if (words.length > 1) {
+      checks.push({
+        ok: false,
+        message: `gloss "${gloss}" is shared by ${words.length} words (${words.join(", ")}) — a generated board can show it twice, which has no correct answer`,
+      });
+    }
+  }
+
+  if (checks.length === 0) {
+    checks.push({
+      ok: true,
+      message: `${jaVocab.length} vocab word(s) and gloss(es) are each unique`,
+    });
+  }
+  return checks;
+}
+
 function main() {
   const results = [
     ...checkUniqueIds(),
     ...checkLessonReferences(),
+    ...checkVocabUniqueness(),
     ...checkScenarioMoveVocab(),
     ...checkGeneratedContentRule(),
   ];

@@ -192,7 +192,7 @@ function ExamPassed({
           ? award.kind === "color"
             ? `${award.label} earned!`
             : `Bar earned — ${award.label}.`
-          : "Belt earned!"}
+          : "Unit cleared."}
       </h1>
       {award && (
         <p className="mt-1 text-sm text-muted">{award.jp}</p>

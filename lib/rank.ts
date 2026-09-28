@@ -70,9 +70,19 @@ export function getRank(
   // separately). At the beginner cap (brown earned, nothing authored past
   // it), the bar sits full with a "not open yet" message instead of
   // claiming max rank.
+  //
+  // Patch 1.8: this used to walk forward from the *belt's* unit. That was only
+  // ever correct while every unit awarded a belt — since bars now land at
+  // milestones (u3/u4/u6/u7 award nothing, see lib/belts.ts), a learner on the
+  // u5 bar who has since cleared u6 and u7 would have been shown a progress
+  // bar for u6-katakana, a unit two behind where they actually are. Walk from
+  // the furthest exam actually passed instead.
   const units = unitsInOrder();
-  const beltUnitIdx = "unitId" in belt ? units.findIndex((u) => u.id === belt.unitId) : -1;
-  const nextUnit = units[beltUnitIdx + 1];
+  let lastPassedIdx = -1;
+  units.forEach((u, i) => {
+    if (examsPassed.includes(u.id)) lastPassedIdx = i;
+  });
+  const nextUnit = units[lastPassedIdx + 1];
 
   let progress = 0;
   let progressLabel: string;
@@ -81,7 +91,7 @@ export function getRank(
     progressLabel =
       belt.color === "black"
         ? "Post-fluent track."
-        : "Beginner course complete — intermediate not open yet.";
+        : "You're at the tip of the authored course — new units land here.";
   } else {
     const doneInNext = nextUnit.lessons.filter((l) =>
       completedLessons.includes(l.id)
