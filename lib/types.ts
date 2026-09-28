@@ -160,6 +160,18 @@ export interface PhraseTeachCard {
   polite?: { term: string; reading: string; note?: string }; // variant + when
   trace?: string; // one kana to trace (only if strokeData has it)
   contrast?: TeachContrast; // length / doubling pairs (Luganda Unit 0)
+  // Patch 1.8.2: words whose meaning genuinely shifts with the situation, so
+  // the headline `meaning` is not the whole story. Set it to the one-line
+  // heads-up the learner should carry away; PhraseCard renders the whole card
+  // on an amber surface with this line at the top.
+  //
+  // Why this exists: ちょっと is taught with meaning "A little" and glossed
+  // "a little" in vocab.ts — which is what the SRS, the glossary and every
+  // generated filler item repeat — while the refusal sense sat in note/uses/
+  // context where it is easy to scroll past. The learner then met a question
+  // testing the refusal and had every reinforcement pointing the other way.
+  // The amber surface is the warning that this word has a second life.
+  contextual?: string;
 }
 
 export type TeachCard = KanaTeachCard | PhraseTeachCard;

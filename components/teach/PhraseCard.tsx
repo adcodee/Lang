@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Volume2, Pencil } from "lucide-react";
+import { Volume2, Pencil, AlertTriangle } from "lucide-react";
 import { speak, matchesSpoken } from "@/lib/speech";
 import { useGameStore } from "@/lib/store/gameStore";
 import { learnedKana } from "@/lib/content/ja/kana";
@@ -62,7 +62,28 @@ export default function PhraseCard({
   const canTrace = card.trace && strokeData[card.trace];
 
   return (
-    <div className="teach-surface flex flex-col gap-6 rounded-2xl border-2 border-gray-100 p-6">
+    <div
+      className={`flex flex-col gap-6 rounded-2xl border-2 p-6 ${
+        card.contextual
+          ? "teach-surface-contextual border-gold"
+          : "teach-surface border-gray-100"
+      }`}
+    >
+      {/* Context warning. Sits ABOVE the term on purpose: the whole point is
+          that the headline meaning below is not the whole story, so the
+          learner has to meet the caveat before they read the gloss. */}
+      {card.contextual && (
+        <section className="flex items-start gap-2.5 rounded-xl border-2 border-gold/50 bg-white/60 px-3 py-2.5">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-wood" />
+          <div>
+            <div className="text-xs font-extrabold uppercase tracking-wide text-wood">
+              Depends on the situation
+            </div>
+            <p className="mt-0.5 text-sm text-ink">{card.contextual}</p>
+          </div>
+        </section>
+      )}
+
       {/* Header */}
       <section className="text-center">
         <div className="font-jp text-4xl font-bold text-sumi">{card.term}</div>

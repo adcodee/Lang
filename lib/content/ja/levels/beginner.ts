@@ -1579,6 +1579,7 @@ export const beginner: Level = {
               term: "すみません",
               reading: "sumimasen",
               meaning: "Excuse me / Sorry",
+              contextual: "Two jobs: stopping a stranger, and apologising. Tone and timing tell them apart, not the words.",
               parts: [
                 { kana: "す", reading: "su" },
                 { kana: "み", reading: "mi" },
@@ -1908,6 +1909,7 @@ export const beginner: Level = {
               term: "いいえ",
               reading: "iie",
               meaning: "No",
+              contextual: "Blunter than English 'no', and used far less. Most real refusals go through ちょっと or だいじょうぶ instead.",
               note: "Rarer and blunter than English 'no'. Most refusals go through ちょっと or だいじょうぶ instead.",
               parts: [
                 { kana: "い", reading: "i" },
@@ -1933,6 +1935,7 @@ export const beginner: Level = {
               term: "だいじょうぶ",
               reading: "daijoubu",
               meaning: "It's okay / I'm fine",
+              contextual: "Answers 'are you all right?' with yes — but answers 'do you want a bag?' with no. Reassurance or refusal, depending who asked.",
               parts: [
                 { kana: "だ", reading: "da" },
                 { kana: "い", reading: "i" },
@@ -1964,7 +1967,8 @@ export const beginner: Level = {
               kind: "phrase",
               term: "ちょっと",
               reading: "chotto",
-              meaning: "A little",
+              meaning: "A little — or, trailing off, 'no'",
+              contextual: "Said plainly it means 'a little'. Left hanging — ちょっと… — it is a refusal. Same word, opposite jobs.",
               note: "Literally 'a little' — and, left trailing, the standard polite 'no'.",
               parts: [
                 { kana: "ちょ", reading: "cho", note: "ち + small ょ = 'cho', one beat." },

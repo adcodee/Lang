@@ -77,6 +77,14 @@ body {
       linear-gradient(0deg, rgba(139, 111, 71, 0.02), rgba(139, 111, 71, 0.02)),
       #f5f1ea;
   }
+  /* Context-dependent words (PhraseTeachCard.contextual). Warmer and more
+     saturated than teach-surface so it reads as "pay attention" at a glance,
+     built from the existing gold token rather than an arbitrary yellow. */
+  .teach-surface-contextual {
+    background:
+      linear-gradient(0deg, rgba(201, 169, 98, 0.16), rgba(201, 169, 98, 0.16)),
+      #faf4e6;
+  }
   /* Dojo/Rank header — sumi ink with a torii-red accent edge. */
   .dojo-header {
     @apply font-jp shadow-card;
