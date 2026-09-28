@@ -2,6 +2,7 @@
 
 import { Capacitor } from "@capacitor/core";
 import { TextToSpeech, QueueStrategy } from "@capacitor-community/text-to-speech";
+import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 
 // Thin wrappers around the browser Web Speech API used by the voice tutor.
 // These power the STT/TTS for the Grok voice flow when no real key is wired up,
@@ -94,6 +95,134 @@ export function listenOnce(lang = "ja-JP"): {
   });
 
   return { promise, stop: () => recog.stop() };
+}
+
+// --- native speech recognition (packaged Android app) -----------------------
+//
+// The Web Speech API's SpeechRecognition does not exist in an Android
+// WebView at all — it is a Chrome-browser feature backed by Google's speech
+// service, not a WebView one. Verified on-device rather than assumed: the app
+// already holds RECORD_AUDIO (granted=true in dumpsys) and XAI_API_KEY is set
+// in production, yet no request ever reached /api/transcribe. The cloud
+// fallback could not fire either, because getUserMedia inside a WebView needs
+// the host app to answer WebChromeClient.onPermissionRequest — a SECOND gate,
+// separate from the OS permission — and nothing was answering it. So every
+// speaking surface silently dropped to typing.
+//
+// Same shape of problem, and same fix, as the TTS note at the top of this
+// file: go around the WebView to a real native engine. Static top-level
+// import for the reason documented up there — a dynamic import() hands the
+// plugin a disconnected copy of the Capacitor registry and its calls never
+// reach the bridge.
+
+export function nativeSpeechPlatform(): boolean {
+  return Capacitor.isNativePlatform();
+}
+
+// Whether the device actually has a recognition engine AND we hold the mic
+// permission. Asks for the permission if we do not — the OS grant is not
+// implied by the manifest entry on Android 6+.
+export async function nativeSpeechReady(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const { available } = await SpeechRecognition.available();
+    if (!available) return false;
+    let perm = await SpeechRecognition.checkPermissions();
+    if (perm.speechRecognition !== "granted") {
+      perm = await SpeechRecognition.requestPermissions();
+    }
+    return perm.speechRecognition === "granted";
+  } catch {
+    return false;
+  }
+}
+
+// One utterance via the device's own recogniser. Mirrors listenOnce()'s shape
+// so SpeakInput can treat the two tiers identically.
+// How long to wait for an attempt to produce anything before giving up on it.
+// Not a nicety: asking for EXTRA_PREFER_OFFLINE with no on-device model for
+// the language makes this device's speech service drop the binding WITHOUT
+// ever invoking the callback — confirmed in logcat on a Galaxy A15:
+//   "Connection to speech recognition service lost, but no #startListening
+//    has been invoked yet."
+// and then silence. A try/catch cannot rescue that, because nothing rejects;
+// the promise simply never settles and the UI hangs on "listening". Every
+// call across this bridge needs a deadline, not just an error handler.
+const OFFLINE_PROBE_MS = 3_000; // just long enough to bind and start
+const ONLINE_LISTEN_MS = 15_000; // generous: the learner has to speak
+
+function withDeadline<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = window.setTimeout(
+      () => reject(new Error(`speech: ${label} timed out after ${ms}ms`)),
+      ms
+    );
+    p.then(
+      (v) => {
+        window.clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        window.clearTimeout(t);
+        reject(e);
+      }
+    );
+  });
+}
+
+// Set true once the device is known to have the Japanese on-device model.
+// Left false by default because requesting offline without one does not
+// degrade — it hangs the service (see above), costing the learner a real
+// wait before the network retry. Flip this when the pack is installed; the
+// plumbing below already prefers offline whenever it is on.
+const TRY_OFFLINE_FIRST = false;
+
+export function listenOnceNative(lang = "ja-JP"): {
+  promise: Promise<string>;
+  stop: () => void;
+} {
+  const run = (preferOffline: boolean) =>
+    // partialResults/popup off: we want one final transcript, and the Android
+    // popup would cover the exercise card the learner is answering.
+    SpeechRecognition.start({
+      language: lang,
+      maxResults: 3,
+      partialResults: false,
+      popup: false,
+      // Not in the plugin's published types — added by our patch. See
+      // patches/@capacitor-community+speech-recognition+7.0.1.patch.
+      preferOffline,
+    } as Parameters<typeof SpeechRecognition.start>[0]);
+
+  const promise = (async () => {
+    if (TRY_OFFLINE_FIRST) {
+      try {
+        const offline = await withDeadline(run(true), OFFLINE_PROBE_MS, "offline");
+        const hit = offline?.matches?.[0];
+        if (hit) return hit;
+      } catch {
+        // No on-device model, or the service dropped the binding. Make sure
+        // the stalled session is torn down before starting another one —
+        // leaving it open is what produced "Client has opened 2 sessions".
+        try {
+          await SpeechRecognition.stop();
+        } catch {
+          /* nothing to stop */
+        }
+      }
+    }
+    const online = await withDeadline(run(false), ONLINE_LISTEN_MS, "online");
+    return online?.matches?.[0] ?? "";
+  })();
+
+  return {
+    promise,
+    stop: () => {
+      SpeechRecognition.stop().catch(() => {
+        /* already stopped */
+      });
+    },
+  };
 }
 
 // Lenient comparison of a speech-recognition transcript against a target

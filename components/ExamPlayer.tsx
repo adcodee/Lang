@@ -145,6 +145,7 @@ export default function ExamPlayer({ unitId }: { unitId: string }) {
         exercise={item.exercise}
         checked={checked}
         onChecked={handleChecked}
+        exam
       />
 
       {checked && (

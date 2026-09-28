@@ -24,6 +24,8 @@ const nextConfig = {
     // Android level).
     if (isServer) {
       config.resolve.alias["@capacitor-community/text-to-speech"] = false;
+      // Same unguarded top-level `window` reference, same SSR crash.
+      config.resolve.alias["@capacitor-community/speech-recognition"] = false;
     }
     return config;
   },

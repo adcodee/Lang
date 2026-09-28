@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Send } from "lucide-react";
-import { speechSupported, listenOnce } from "@/lib/speech";
+import {
+  speechSupported,
+  listenOnce,
+  nativeSpeechPlatform,
+  nativeSpeechReady,
+  listenOnceNative,
+} from "@/lib/speech";
 import {
   mediaRecorderSupported,
   isIOS,
@@ -11,14 +17,21 @@ import {
 } from "@/lib/audio";
 import { API_BASE } from "@/lib/apiBase";
 
-type Tier = "web-speech" | "cloud" | "typed";
+type Tier = "native" | "web-speech" | "cloud" | "typed";
 type Status = "idle" | "listening" | "recording" | "uploading" | "error";
 
 // One speaking-capture control used by every "say it" surface. Picks the best
-// available method: browser Web Speech (free, instant) → cloud STT via
-// /api/transcribe (iOS-safe) → typed-romaji fallback (keeps it speaking
-// practice when no STT key is configured). Always reports the recognized /
-// typed text through onTranscript; grading stays with the caller.
+// available method: native device recogniser (packaged app) → browser Web
+// Speech (free, instant) → cloud STT via /api/transcribe (iOS-safe) →
+// typed-romaji fallback. Always reports the recognized / typed text through
+// onTranscript; grading stays with the caller.
+//
+// The native tier exists because inside an Android WebView neither of the
+// other two works: SpeechRecognition is absent entirely (a Chrome feature,
+// not a WebView one), and getUserMedia is refused because the WebView asks
+// its own permission question the host app never answers — separate from the
+// OS RECORD_AUDIO grant, which the app already held. Result before this:
+// every speaking exercise dropped silently to typing. See lib/speech.ts.
 export default function SpeakInput({
   onTranscript,
   idleLabel = "Say it",
@@ -40,7 +53,28 @@ export default function SpeakInput({
   const recorderRef = useRef<Recorder | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const canRecord = mediaRecorderSupported();
+
+    // Packaged app: ask the device first. Async because it may have to
+    // request the mic permission, so the tier settles a beat after mount.
+    if (nativeSpeechPlatform()) {
+      nativeSpeechReady().then((ok) => {
+        if (cancelled) return;
+        if (ok) {
+          setTier("native");
+        } else if (canRecord) {
+          setTier("cloud");
+        } else {
+          setTier("typed");
+          setShowTyped(true);
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
     // iOS exposes a non-functional webkitSpeechRecognition, so prefer cloud STT
     // there. Elsewhere, the browser engine is free + instant when present.
     if (canRecord && (isIOS() || !speechSupported())) {
@@ -53,7 +87,38 @@ export default function SpeakInput({
       setTier("typed");
       setShowTyped(true);
     }
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  async function runNative() {
+    setStatus("listening");
+    setNote(null);
+    try {
+      const { promise } = listenOnceNative("ja-JP");
+      const text = await promise;
+      if (!text.trim()) {
+        setNote("Did not catch that — try again, or type what you said.");
+        setShowTyped(true);
+        return;
+      }
+      onTranscript(text);
+    } catch (err) {
+      // Say WHICH attempt failed. Three separate speech bugs this session all
+      // surfaced as the same vague sentence, which sent the debugging the
+      // wrong way each time — the phone should name the failure, not the log.
+      const msg = err instanceof Error ? err.message : "";
+      setNote(
+        msg.includes("timed out")
+          ? "The recogniser did not respond — type what you said below."
+          : "Speech recognition is unavailable — type what you said below."
+      );
+      setShowTyped(true);
+    } finally {
+      setStatus("idle");
+    }
+  }
 
   async function runWebSpeech() {
     setStatus("listening");
@@ -120,7 +185,9 @@ export default function SpeakInput({
   }
 
   function handleMic() {
-    if (tier === "web-speech") {
+    if (tier === "native") {
+      if (status === "idle") runNative();
+    } else if (tier === "web-speech") {
       if (status === "idle") runWebSpeech();
     } else if (tier === "cloud") {
       if (status === "recording") stopCloud();

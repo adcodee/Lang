@@ -14,12 +14,20 @@ export default function ExerciseCard({
   checked,
   onChecked,
   revealAnswer = true,
+  exam = false,
   onMatchPairsMiss,
   onMatchPairsCorrect,
 }: {
   exercise: Exercise;
   checked: boolean; // once true, inputs lock until parent advances
   onChecked: (correct: boolean) => void;
+  // Patch 1.8.2: an exam must not hand over the answer. speak-phrase items
+  // print `romaji` on screen as a pronunciation hint — right while teaching,
+  // wrong while testing, because it turns "say this Japanese phrase" into
+  // "read this romaji aloud". Distinct from revealAnswer, which is about
+  // post-answer highlighting. Also the first step of build-plan Phase 6
+  // (wean the romaji).
+  exam?: boolean;
   // When false (a retry is coming), a wrong pick shows red but the correct
   // option is NOT highlighted — otherwise the retry answers itself.
   revealAnswer?: boolean;
@@ -68,7 +76,12 @@ export default function ExerciseCard({
       );
     case "speak-phrase":
       return (
-        <SpeakPhrase exercise={exercise} checked={checked} onChecked={onChecked} />
+        <SpeakPhrase
+          exercise={exercise}
+          checked={checked}
+          onChecked={onChecked}
+          exam={exam}
+        />
       );
     case "category-sort":
       return (
@@ -481,10 +494,12 @@ function SpeakPhrase({
   exercise,
   checked,
   onChecked,
+  exam = false,
 }: {
   exercise: Extract<Exercise, { type: "speak-phrase" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  exam?: boolean;
 }) {
   const [captured, setCaptured] = useState("");
 
@@ -501,7 +516,7 @@ function SpeakPhrase({
       checked={checked}
       onCheck={() => onChecked(matchesSpoken(captured, exercise.display, accept))}
     >
-      {exercise.romaji && (
+      {exercise.romaji && !exam && (
         <p className="-mt-4 mb-4 text-center text-lg text-muted">
           {exercise.romaji}
         </p>
@@ -520,9 +535,9 @@ function SpeakPhrase({
             onTranscript={setCaptured}
             idleLabel="Tap and speak"
             hint={exercise.display}
-            typedPlaceholder={
-              exercise.romaji ? `Type "${exercise.romaji}"` : "Type the romaji…"
-            }
+            // Never `Type "${exercise.romaji}"` — that printed the expected
+            // answer straight into the box the learner is graded on.
+            typedPlaceholder="Type the romaji…"
           />
         )}
         {captured && (
