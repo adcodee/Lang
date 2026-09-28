@@ -200,7 +200,7 @@ export default function ChatPanel({
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Type in Japanese or English…"
               disabled={ended}
-              className="flex-1 rounded-2xl border-2 border-gray-200 px-4 py-2 outline-none focus:border-sky disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-2xl border-2 border-gray-200 px-4 py-2 outline-none focus:border-sky disabled:opacity-50"
             />
             <button
               onClick={send}

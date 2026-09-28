@@ -179,7 +179,7 @@ export default function SpeakInput({
               onChange={(e) => setTyped(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitTyped()}
               placeholder={typedPlaceholder}
-              className="flex-1 rounded-2xl border-2 border-gray-200 px-3 py-2 outline-none focus:border-brand"
+              className="min-w-0 flex-1 rounded-2xl border-2 border-gray-200 px-3 py-2 outline-none focus:border-brand"
             />
             <button
               onClick={submitTyped}

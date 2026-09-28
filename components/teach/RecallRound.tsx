@@ -199,7 +199,10 @@ export default function RecallRound({
           // Typed production: recall the sound and produce it — no chips to
           // recognise from. A miss stays hidden (the item recycles).
           <div className="flex flex-col items-center gap-2">
-            <div className="flex w-full max-w-xs items-center gap-2">
+            {/* Stacked, not side-by-side: `flex-1` does not set min-width:0,
+                so the input refused to shrink below its ~20ch intrinsic width
+                and pushed the button outside the card on a narrow phone. */}
+            <div className="flex w-full max-w-xs flex-col gap-2">
               <input
                 autoFocus
                 value={entry}
@@ -207,7 +210,7 @@ export default function RecallRound({
                 onChange={(e) => setEntry(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submitTyped()}
                 placeholder="Type the romaji…"
-                className={`flex-1 rounded-2xl border-2 px-4 py-3 text-lg outline-none ${
+                className={`w-full rounded-2xl border-2 px-4 py-3 text-lg outline-none ${
                   !picked
                     ? "border-gray-200 focus:border-sky"
                     : normalize(picked) === normalize(q.answer)
@@ -218,9 +221,9 @@ export default function RecallRound({
               <button
                 onClick={submitTyped}
                 disabled={!entry.trim() || !!picked}
-                className="rounded-2xl bg-brand px-4 py-3 font-bold text-white disabled:opacity-50"
+                className="btn-brand w-full"
               >
-                ✓
+                Check
               </button>
             </div>
             {picked && (

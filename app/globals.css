@@ -50,6 +50,12 @@ body {
   .btn-ghost {
     @apply rounded-2xl border-2 border-gray-200 bg-white px-6 py-3 font-bold uppercase tracking-wide text-muted transition hover:bg-gray-50 active:translate-y-[1px];
   }
+  /* Bottom reserve = room for BottomNav, plus the live height of
+     FeedbackBanner when one is on screen (it publishes --feedback-h).
+     A flat pb-24 could not cover a variable-height fixed overlay. */
+  .app-main {
+    padding-bottom: calc(6rem + var(--feedback-h, 0px));
+  }
   .card {
     @apply rounded-xl2 border-2 border-gray-100 bg-surface shadow-card;
   }

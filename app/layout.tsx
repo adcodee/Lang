@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" className={notoSansJp.variable}>
       <body>
         <TopBar />
-        <main className="mx-auto w-full max-w-2xl px-4 pb-24 pt-6">
+        <main className="app-main mx-auto w-full max-w-2xl px-4 pt-6">
           <LanguageGate>{children}</LanguageGate>
         </main>
         <BottomNav />
