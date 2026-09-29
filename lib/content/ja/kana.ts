@@ -244,6 +244,24 @@ export const lookalikePairs: LookalikePair[] = [
   { a: "シ", b: "ツ", tellA: "bottom stroke sweeps up-and-right", tellB: "bottom stroke sweeps down-and-left" },
   { a: "ソ", b: "ン", tellA: "top stroke steep, starts high", tellB: "top stroke short & near-horizontal, sits low" },
   { a: "ノ", b: "メ", tellA: "single stroke only", tellB: "adds a second crossing stroke" },
+  // Patch 1.9.1 — CROSS-SCRIPT pairs. Every pair above compares a kana with
+  // another kana of the SAME script, so a learner who finished Unit 6 was
+  // never once asked "is this the hiragana or the katakana?" — which is the
+  // confusion a real menu produces, where both scripts sit in one line.
+  //
+  // These only enter play once BOTH halves are learned, so they appear
+  // naturally as Unit 6 progresses rather than all at once.
+  { a: "り", b: "リ", tellA: "two strokes, the right one curves and drops", tellB: "two straight strokes, no curve" },
+  { a: "も", b: "モ", tellA: "vertical stroke crosses TWO horizontals", tellB: "two horizontals, vertical hangs below" },
+  { a: "や", b: "ヤ", tellA: "rounded, with a tail to the right", tellB: "sharp, a single diagonal through a stroke" },
+  { a: "こ", b: "コ", tellA: "two separate horizontals", tellB: "one connected stroke, square corner" },
+  { a: "か", b: "カ", tellA: "has the small stroke on the right", tellB: "no small stroke — just the hook" },
+  { a: "に", b: "ニ", tellA: "left stem, then two horizontals", tellB: "two horizontals only, no stem" },
+  { a: "へ", b: "ヘ", tellA: "the same shape — but hiragana へ is wider and softer", tellB: "narrower, sharper angle" },
+  { a: "せ", b: "サ", tellA: "the bottom curves right", tellB: "the bottom stroke is straight" },
+  { a: "ち", b: "テ", tellA: "curves round at the bottom", tellB: "straight vertical through the bar" },
+  { a: "く", b: "ク", tellA: "one clean angle, no top stroke", tellB: "adds a short stroke on top" },
+  { a: "け", b: "ケ", tellA: "left stem plus a full right shape", tellB: "one diagonal crossing a short stroke" },
 ];
 
 // Pairs where both kana are already learned — the drill's active pool.

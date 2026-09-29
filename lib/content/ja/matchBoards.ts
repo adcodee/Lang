@@ -5,6 +5,7 @@ import { learnedKana, type Kana } from "@/lib/content/ja/kana";
 // LookalikeDrill.tsx weights toward, exported from here so it's not
 // duplicated between the two drills.
 export const CONFUSION_PAIRS: [string, string][] = [
+  // Hiragana ↔ hiragana
   ["ぬ", "め"],
   ["ぬ", "ね"],
   ["め", "ね"],
@@ -13,6 +14,26 @@ export const CONFUSION_PAIRS: [string, string][] = [
   ["き", "さ"],
   ["は", "ほ"],
   ["あ", "お"],
+  // Patch 1.9.1 — katakana ↔ katakana. Unit 6 registered these as lookalike
+  // pairs but this list never learned about them, so the forced-pair
+  // mechanic was 100% hiragana for a learner who had finished katakana.
+  ["シ", "ツ"],
+  ["ソ", "ン"],
+  ["ノ", "メ"],
+  // Patch 1.9.1 — CROSS-SCRIPT. The confusion a learner actually meets on a
+  // menu, and the one the Dojo never asked about: the same sound in two
+  // scripts, drawn so similarly that only the stroke tells them apart.
+  ["り", "リ"],
+  ["も", "モ"],
+  ["や", "ヤ"],
+  ["こ", "コ"],
+  ["か", "カ"],
+  ["に", "ニ"],
+  ["へ", "ヘ"],
+  ["せ", "サ"],
+  ["ち", "テ"],
+  ["く", "ク"],
+  ["け", "ケ"],
 ];
 
 function shuffle<T>(arr: T[]): T[] {
@@ -37,7 +58,15 @@ function shuffle<T>(arr: T[]): T[] {
 // same pattern as LookalikeDrill/VowelSortDrill, so no Math.random() call
 // ever happens before real post-hydration data is in.
 export function matchPool(completedLessonIds: string[]): Kana[] {
-  return learnedKana(completedLessonIds).filter((k) => k.char !== "ん");
+  return learnedKana(completedLessonIds).filter(
+    // ん has no vowel to match on.
+    // Patch 1.9.1: and no `mark` kana. っ ー ゃ ゅ ょ ァ ィ ゥ ェ ォ ッ exist so
+    // the tutor allowlist and the content rule know the learner can read
+    // them; they are not matchable cards. A board asking you to pair ー with
+    // "(hold the vowel)" has no answer. lessonExercises.ts already excluded them
+    // from generated filler — the Dojo never got told.
+    (k) => k.char !== "ん" && !k.mark
+  );
 }
 
 // One muted (no audio) match-pairs board sampled from the given pool.

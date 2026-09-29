@@ -14,7 +14,8 @@ export type DrillKind =
   | "word-flash"
   | "match"
   | "listen"
-  | "punctuation";
+  | "punctuation"
+  | "script-sort";
 
 export interface DojoDrill {
   id: string;
@@ -113,6 +114,18 @@ export const dojoDrills: DojoDrill[] = [
     ],
   },
   {
+    id: "script-sort",
+    title: "Which Script?",
+    subtitle: "Hiragana or katakana — same sound, different set",
+    icon: "🪞",
+    skill: "reading",
+    kind: "script-sort",
+    // The one question the Dojo never asked. Only meaningful once katakana
+    // exists, so it unlocks on the first katakana lesson rather than with the
+    // other reading drills — before that the answer is always "hiragana".
+    unlockAfter: "u6-katakana-vowels-k-s",
+  },
+  {
     id: "punctuation",
     title: "Punctuation Dojo",
     subtitle: "Fix the 。 、 ー っ",
@@ -144,6 +157,22 @@ export const dojoDrills: DojoDrill[] = [
         options: ["raamen (long a)", "ramen (short)", "ra-men-u", "rai-men"],
         answer: "raamen (long a)",
         note: "ー lengthens the vowel before it.",
+      },
+      {
+        type: "translate-choice",
+        prompt: "Which mark doubles the next consonant?",
+        display: "❓",
+        options: ["っ", "ー", "。", "、"],
+        answer: "っ",
+        note: "Small っ holds the sound before it — きって, not きて. ー stretches a vowel instead.",
+      },
+      {
+        type: "translate-choice",
+        prompt: "ビル or ビール — which one is 'beer'?",
+        display: "❓",
+        options: ["ビール", "ビル", "both", "neither"],
+        answer: "ビール",
+        note: "ー stretches the vowel. Drop it and ビル is a building — two real words, one mark apart.",
       },
     ],
   },
@@ -210,14 +239,25 @@ function collectReviewCards(
     (isDue(seen[id], now) ? due : fresh).push(card);
   }
   for (const v of learnedVocab(completed)) {
+    // Patch 1.9.1: recognition-only words (staff phrases, signage) still
+    // resurface here — being able to recognise いらっしゃいませ is the whole
+    // point of registering it. What must never happen is the review loop
+    // asking the learner to PRODUCE one; that is enforced where the review
+    // picks its format, not by withholding the card.
     const id = vocabItemId(v.word);
-    const card: TeachCard =
+    const base: TeachCard =
       authoredCard(id) ?? {
         kind: "phrase",
         term: v.word,
         reading: "",
         meaning: v.gloss,
       };
+    // Carry the flag through to the review loop. An authored card does not
+    // know it belongs to a recognition-only word; vocab.ts does.
+    const card: TeachCard =
+      v.recognitionOnly && base.kind === "phrase"
+        ? { ...base, recognitionOnly: true }
+        : base;
     (isDue(seen[id], now) ? due : fresh).push(card);
   }
   return { due, fresh };
@@ -248,9 +288,105 @@ export function unlockLessonTitle(drill: DojoDrill): string {
 // Lesson-shaped view for the fixed kinds, consumed by LessonPlayer.
 // "match" is an endless drill with its own component now (QuickMatchDrill),
 // not routed through here — see DrillPageClient.tsx.
+// Patch 1.9.1: Listen & Repeat was three hand-authored items — こんにちは and
+// ありがとう — frozen since Unit 2. A learner at brown belt with 161 words was
+// still hearing the same two. It now draws from what they have actually
+// learned, so the drill grows with the course instead of ageing out of it.
+//
+// Recognition-only words (staff phrases, signage) are heard but never asked
+// to be said back: they take the listen half and are excluded from the speak
+// half, which is the distinction the flag exists to make.
+function buildListenExercises(completed: string[]): Exercise[] {
+  const pool = learnedVocab(completed);
+  if (pool.length < 4) return [];
+
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const heard = shuffled.slice(0, 4);
+  const out: Exercise[] = [];
+
+  for (const v of heard) {
+    const distractors = pool
+      .filter((x) => x.word !== v.word && x.gloss !== v.gloss)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map((x) => x.gloss);
+    if (distractors.length < 3) continue;
+    out.push({
+      type: "listen-choice",
+      prompt: "What did you hear?",
+      audio: v.word,
+      options: [v.gloss, ...distractors].sort(() => Math.random() - 0.5),
+      answer: v.gloss,
+    });
+    if (!v.recognitionOnly) {
+      out.push({
+        type: "speak-phrase",
+        prompt: "Now say it back",
+        display: v.word,
+        note: v.gloss,
+      });
+    }
+  }
+  return out;
+}
+
+// Patch 1.9.1: nothing in the Dojo ever asked "is this hiragana or katakana?"
+// Every lookalike pair compared two kana of the SAME script, so a learner who
+// finished Unit 6 was never tested on the confusion a real menu produces,
+// where both scripts sit in one line.
+//
+// Built from learned kana only, and marks are excluded — っ and ッ are a
+// genuine cross-script pair but sorting them teaches nothing about reading.
+function buildScriptSortExercises(completed: string[]): Exercise[] {
+  const pool = learnedKana(completed).filter((k) => !k.mark && k.char !== "ん");
+  const hira = pool.filter((k) => (k.script ?? "hiragana") === "hiragana");
+  const kata = pool.filter((k) => k.script === "katakana");
+  if (hira.length < 3 || kata.length < 3) return [];
+
+  const pick = <T,>(arr: T[], n: number) =>
+    [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+
+  const out: Exercise[] = [];
+  for (let round = 0; round < 3; round++) {
+    const items = [...pick(hira, 3), ...pick(kata, 3)].sort(() => Math.random() - 0.5);
+    out.push({
+      type: "category-sort",
+      prompt: "Sort each character into its script",
+      categories: ["Hiragana", "Katakana"],
+      items: items.map((k) => ({
+        label: k.char,
+        // No romaji: the sound is not the question, and showing it would name
+        // the answer for any learner who knows one script's readings better.
+        category: (k.script ?? "hiragana") === "hiragana" ? "Hiragana" : "Katakana",
+      })),
+      note: "Katakana is the sharper, more angular set — straight strokes and corners where hiragana curves.",
+    });
+  }
+  return out;
+}
+
 export function getDrill(id: string, completed: string[] = []): Lesson | undefined {
   const d = getDrillConfig(id);
-  if (!d || !d.exercises) return undefined;
+  if (!d) return undefined;
+  if (d.kind === "script-sort") {
+    const exercises = buildScriptSortExercises(completed);
+    if (exercises.length === 0) return undefined;
+    return {
+      id: d.id, title: d.title, subtitle: d.subtitle, icon: d.icon,
+      skill: d.skill, xp: 0, exercises,
+    };
+  }
+  if (d.kind === "listen") {
+    const generated = buildListenExercises(completed);
+    // Fall back to the authored starter set before enough vocab exists.
+    const exercises = generated.length > 0 ? generated : d.exercises ?? [];
+    if (exercises.length === 0) return undefined;
+    return {
+      id: d.id, title: d.title, subtitle: d.subtitle, icon: d.icon,
+      skill: d.skill, xp: 0, exercises,
+    };
+  }
+  if (!d.exercises) return undefined;
   const exercises = d.exercises;
   return {
     id: d.id,

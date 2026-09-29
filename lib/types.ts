@@ -186,6 +186,11 @@ export interface PhraseTeachCard {
   // testing the refusal and had every reinforcement pointing the other way.
   // The amber surface is the warning that this word has a second life.
   contextual?: string;
+  // Patch 1.9.1: mirrors Vocab.recognitionOnly onto the card the SRS review
+  // builds, so the review's typed-production format skips it. Recognising
+  // いらっしゃいませ is the whole reason it is registered; being asked to type
+  // it is not. Set by dojo.ts when it assembles the review deck.
+  recognitionOnly?: boolean;
 }
 
 export type TeachCard = KanaTeachCard | PhraseTeachCard;

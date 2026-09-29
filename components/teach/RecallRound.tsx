@@ -289,7 +289,12 @@ function buildQuestions(cards: TeachCardData[]): Question[] {
     let q: Question | null = null;
     if (c.kind === "phrase") {
       const variant = i % 3;
-      if (variant === 2 && c.reading) {
+      // Patch 1.9.1: never ask a recognition-only word to be produced. Staff
+      // phrases and signage are registered so the learner RECOGNISES them —
+      // いらっしゃいませ is heard over every counter and said by nobody. Same
+      // rule the kana branch below already applies to silent marks.
+      const producible = Boolean(c.reading) && !c.recognitionOnly;
+      if (variant === 2 && producible) {
         q = {
           cardIndex: i, mode: "term-type-reading", prompt: c.term, answer: c.reading,
           options: [], typed: true, jpOptions: false, jpPrompt: true,
