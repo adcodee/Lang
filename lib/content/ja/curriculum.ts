@@ -49,6 +49,32 @@ export function getLesson(id: string): Lesson | undefined {
   return allLessons().find((l) => l.id === id);
 }
 
+// Patch 1.8.2: lessons that have gained teaching material since the learner
+// finished them. Without this a shipped lesson is "done" forever, so appended
+// teach cards never re-surface while the words they teach immediately become
+// live in the SRS, the tutor allowlist and later lessons — which is how
+// おねがいします ended up being first met as an exam question.
+export function lessonsWithNewContent(
+  completedLessons: string[],
+  completedVersions: Record<string, number>
+): string[] {
+  const done = new Set(completedLessons);
+  return allLessons()
+    .filter((l) => done.has(l.id) && (l.version ?? 1) > (completedVersions[l.id] ?? 1))
+    .map((l) => l.id);
+}
+
+export function hasNewContent(
+  lessonId: string,
+  completedLessons: string[],
+  completedVersions: Record<string, number>
+): boolean {
+  if (!completedLessons.includes(lessonId)) return false;
+  const lesson = getLesson(lessonId);
+  if (!lesson) return false;
+  return (lesson.version ?? 1) > (completedVersions[lessonId] ?? 1);
+}
+
 export function getLessonIndex(id: string): number {
   return allLessons().findIndex((l) => l.id === id);
 }

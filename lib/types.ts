@@ -187,6 +187,19 @@ export interface Lesson {
   // Mandatory review checkpoint: no new material, mixes previously-taught
   // items to keep them fresh. Rendered as a distinct dojo node in the path.
   checkpoint?: boolean;
+  // Bump when a SHIPPED lesson gains new teaching material (a teach card, a
+  // word it now registers). Absent means 1.
+  //
+  // Why this exists: completedLessons is a flat list of ids with no notion of
+  // content version, so a lesson stays "done" forever. Patch 1.8 appended
+  // teach cards to lessons the owner had already completed — learnedVocab()
+  // immediately counted the new words as taught, the tutor and SRS started
+  // using them, and later lessons tested them, but the cards themselves never
+  // re-showed. He met おねがいします for the first time as an exam question.
+  // A version lets the skill tree say "this has new material" instead of the
+  // release notes saying "replay these three lessons", which does not scale
+  // and does not survive being forgotten.
+  version?: number;
   exercises: Exercise[];
 }
 
@@ -230,6 +243,9 @@ export interface GameState {
   // ExamPlayer's own local per-attempt hearts, which this never touches.
   lives: number;
   completedLessons: string[];
+  // lessonId -> Lesson.version at the time it was completed. A missing entry
+  // reads as 1 (progress saved before this field existed).
+  completedVersions: Record<string, number>;
   // Lessons whose Learn part (teach + recall) is done — gates the Test part.
   learnedLessons: string[];
   skillStats: SkillStats;

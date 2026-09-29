@@ -29,6 +29,10 @@ interface Item {
   kind: "kana" | "vocab";
   term: string;
   answer: string;
+  // Other taught meanings of the same term (Vocab.senses). Accepted when
+  // typed, and never used to pick distractors — otherwise a word with two
+  // taught senses can produce an item with two correct options.
+  alsoMeans?: string[];
 }
 
 function toItems(k: Kana[], v: Vocab[]): Item[] {
@@ -38,13 +42,27 @@ function toItems(k: Kana[], v: Vocab[]): Item[] {
     // They stay in the registry for the tutor allowlist; they just never
     // become questions. See lib/content/ja/kana.ts's `mark` field.
     ...k.filter((x) => !x.mark).map((x): Item => ({ kind: "kana", term: x.char, answer: x.romaji })),
-    ...v.map((x): Item => ({ kind: "vocab", term: x.word, answer: x.gloss })),
+    ...v.map((x): Item => ({
+      kind: "vocab",
+      term: x.word,
+      answer: x.gloss,
+      alsoMeans: x.senses,
+    })),
   ];
 }
 
 function distractorsFor(target: Item, pool: Item[], n: number): Item[] {
+  // A distractor must not be a correct answer by any route: not the target's
+  // term, not its gloss, and not one of its other taught senses (nor can the
+  // distractor's own senses collide with the target's gloss).
+  const wrongIf = new Set<string>([target.answer, ...(target.alsoMeans ?? [])]);
   return shuffle(
-    pool.filter((p) => p.term !== target.term && p.answer !== target.answer)
+    pool.filter(
+      (p) =>
+        p.term !== target.term &&
+        !wrongIf.has(p.answer) &&
+        !(p.alsoMeans ?? []).some((m) => wrongIf.has(m))
+    )
   ).slice(0, n);
 }
 
@@ -73,6 +91,9 @@ function typeAnswerFor(target: Item): Exercise {
         : "Type the meaning (English)",
     display: target.term,
     answer: target.answer,
+    // A word with two taught senses must accept either. Marking a learner
+    // wrong for the meaning their own card taught is the bug this exists for.
+    ...(target.alsoMeans?.length ? { accept: target.alsoMeans } : {}),
   };
 }
 

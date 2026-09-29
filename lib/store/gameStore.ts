@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GameState, SkillCategory, SkillStats } from "@/lib/types";
 import { nextLevel } from "@/lib/srs";
+import { getLesson } from "@/lib/content/lookup";
 import { DEFAULT_LANGUAGE, type LanguageId } from "@/lib/languages";
 
 // Checkpoint-lives (patch 1.2.2) — shared across every lesson test between
@@ -35,6 +36,9 @@ function freshGameState(): GameState {
     lastActiveDay: null,
     lives: MAX_LIVES,
     completedLessons: [],
+    // lessonId -> the Lesson.version in force when it was completed. Missing
+    // entries read as 1, so progress saved before this existed still works.
+    completedVersions: {},
     learnedLessons: [],
     skillStats: emptySkillStats(),
     revisionItems: [],
@@ -77,6 +81,7 @@ function extractGameState(s: GameState): GameState {
     lastActiveDay: s.lastActiveDay,
     lives: s.lives,
     completedLessons: s.completedLessons,
+    completedVersions: s.completedVersions,
     learnedLessons: s.learnedLessons,
     skillStats: s.skillStats,
     revisionItems: s.revisionItems,
@@ -96,6 +101,7 @@ function fillGameState(saved: Partial<GameState> | undefined): GameState {
   return {
     ...fresh,
     ...p,
+    completedVersions: { ...fresh.completedVersions, ...(p.completedVersions ?? {}) },
     skillStats: { ...fresh.skillStats, ...(p.skillStats ?? {}) },
     revisionSkills: { ...fresh.revisionSkills, ...(p.revisionSkills ?? {}) },
   };
@@ -251,6 +257,12 @@ export const useGameStore = create<GameStore>()(
             completedLessons: already
               ? s.completedLessons
               : [...s.completedLessons, lessonId],
+            // Always recorded, including on a replay — replaying is exactly
+            // how a learner clears a "new material" flag.
+            completedVersions: {
+              ...s.completedVersions,
+              [lessonId]: getLesson(lessonId)?.version ?? 1,
+            },
           };
         }),
 

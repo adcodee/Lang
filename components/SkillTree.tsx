@@ -14,6 +14,7 @@ const OFFSETS = [0, 1, 0, -1, 0, 1, 0, -1];
 export default function SkillTree() {
   const completed = useGameStore((s) => s.completedLessons);
   const examsPassed = useGameStore((s) => s.examsPassed);
+  const completedVersions = useGameStore((s) => s.completedVersions);
   const activeLang = useGameStore((s) => s.active);
   const levels = levelsFor(activeLang);
   const [mounted, setMounted] = useState(false);
@@ -153,6 +154,11 @@ export default function SkillTree() {
                             variant={variant}
                             status={statusFor(unitIndex, lesson, variant)}
                             offset={OFFSETS[n % OFFSETS.length]}
+                            hasNew={
+                              (lesson.version ?? 1) >
+                              (completedVersions[lesson.id] ?? 1) &&
+                              completed.includes(lesson.id)
+                            }
                           />
                         </div>
                       );

@@ -562,6 +562,8 @@ export const beginner: Level = {
       lessons: [
         {
           id: "u1b-dakuten-gz",
+          // Patch 1.8 added ぐ げ ぜ ぞ to an already-shipped lesson.
+          version: 2,
           title: "Dakuten: G & Z",
           subtitle: "が-row & ざ-row",
           icon: "゛",
@@ -725,6 +727,8 @@ export const beginner: Level = {
         },
         {
           id: "u1b-dakuten-db",
+          // Patch 1.8 added ぶ べ, and the ぢ/づ note to an already-shipped lesson.
+          version: 2,
           title: "Dakuten: D & B",
           subtitle: "だ-row & ば-row",
           icon: "゛",
@@ -1045,6 +1049,8 @@ export const beginner: Level = {
         },
         {
           id: "u1b-yoon",
+          // Patch 1.8 added じょ to an already-shipped lesson.
+          version: 2,
           title: "Small ゃ ゅ ょ",
           subtitle: "きゃ しゅ ちょ — blended sounds",
           icon: "ゃ",
@@ -1222,6 +1228,8 @@ export const beginner: Level = {
       lessons: [
         {
           id: "u2-greetings-core",
+          // Patch 1.8 added さようなら / じゃあね / おやすみ to an already-shipped lesson.
+          version: 2,
           title: "Basic Greetings",
           subtitle: "Hello, thanks & goodbye",
           icon: "👋",
@@ -1442,6 +1450,8 @@ export const beginner: Level = {
         },
         {
           id: "u2-self-intro",
+          // Patch 1.8 added おねがいします to an already-shipped lesson.
+          version: 2,
           title: "Introducing Yourself",
           subtitle: "Name & nice to meet you",
           icon: "🙋",
@@ -2801,6 +2811,8 @@ export const beginner: Level = {
         },
         {
           id: "u4-food-objects",
+          // Patch 1.8 added ください / いただきます / ごちそうさまでした to an already-shipped lesson.
+          version: 2,
           title: "Food vs Objects",
           subtitle: "Sorting game",
           icon: "🍙",
@@ -3038,6 +3050,8 @@ export const beginner: Level = {
         },
         {
           id: "u5-positive-negative",
+          // Patch 1.8 added すごい to an already-shipped lesson.
+          version: 2,
           title: "Good vs Bad",
           subtitle: "Sorting game",
           icon: "⚖️",
@@ -3983,6 +3997,8 @@ export const beginner: Level = {
         },
         {
           id: "u6-katakana-voiced-combo",
+          // Patch 1.8 added ギ ズ ゾ ビ to an already-shipped lesson.
+          version: 2,
           title: "Katakana: Voiced & Combo Sounds",
           subtitle: "ガ行　ザ行　ダ行　バ行　パ行　きゃ・しゅ・ちょ",
           icon: "゛",

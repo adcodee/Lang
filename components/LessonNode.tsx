@@ -21,11 +21,16 @@ export default function LessonNode({
   status,
   offset,
   variant = "single",
+  hasNew = false,
 }: {
   lesson: Lesson;
   status: NodeStatus;
   offset: number; // -1, 0, 1 — gives the path a gentle zig-zag
   variant?: NodeVariant;
+  // A completed lesson that has gained teaching material since. Replaying it
+  // is the only way the learner ever sees the new cards — see
+  // lessonsWithNewContent() in curriculum.ts for why this is needed at all.
+  hasNew?: boolean;
 }) {
   const locked = status === "locked";
   const checkpoint = Boolean(lesson.checkpoint);
@@ -60,8 +65,10 @@ export default function LessonNode({
         locked ? "cursor-not-allowed opacity-70" : "cursor-pointer"
       }`}
     >
-      {status === "completed" ? (
+      {status === "completed" && !hasNew ? (
         <Check className="h-8 w-8" strokeWidth={3} />
+      ) : status === "completed" && hasNew ? (
+        <span className="text-2xl">✨</span>
       ) : locked ? (
         <Lock className="h-7 w-7 text-gray-400" />
       ) : (
@@ -82,6 +89,11 @@ export default function LessonNode({
           }`}
         >
           {checkpoint ? "⛩️ Checkpoint" : "Start"}
+        </span>
+      )}
+      {status === "completed" && hasNew && (
+        <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-extrabold uppercase text-wood shadow-card">
+          New material
         </span>
       )}
       {locked ? (

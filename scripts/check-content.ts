@@ -265,9 +265,14 @@ function checkVocabUniqueness(): Check[] {
   // The same trap on the answer side: two different words sharing a gloss can
   // land on one generated match board or in one options list, where the
   // learner is asked to pick between two identical-looking right answers.
+  // Senses count as meanings too: if ちょっと's sense "no thank you" collided
+  // with another word's gloss, a generated board could still offer two
+  // correct-looking answers — exactly what this check exists to stop.
   const byGloss = new Map<string, string[]>();
   for (const v of jaVocab) {
-    byGloss.set(v.gloss, [...(byGloss.get(v.gloss) ?? []), v.word]);
+    for (const meaning of [v.gloss, ...(v.senses ?? [])]) {
+      byGloss.set(meaning, [...(byGloss.get(meaning) ?? []), v.word]);
+    }
   }
   for (const [gloss, words] of byGloss) {
     if (words.length > 1) {

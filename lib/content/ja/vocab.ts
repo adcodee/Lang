@@ -15,6 +15,21 @@ export interface Vocab {
   // stripKnownTokens can decompose polite conjugations (たべ + ませんでした)
   // it cannot reach from the citation form alone. No UI reads it.
   stem?: string;
+  // Patch 1.8.2: additional taught meanings for the SAME word. Not a second
+  // vocab row — checkVocabUniqueness forbids that, and rightly: two rows for
+  // one word give the SRS two entries under one key (srs.ts keys on
+  // `vocab:<word>`) and let a generated board show the same term twice.
+  //
+  // `gloss` stays the single canonical short answer, because it doubles as
+  // the expected typed answer in generated type-answer items and as the
+  // right-hand cell on match boards. `senses` are accepted as alternative
+  // answers and are excluded from distractor pools, so an item can never
+  // offer two correct options.
+  //
+  // Why it exists: ちょっと is taught as "a little" and tested as the polite
+  // refusal. The learner had every reinforcement pointing at the literal
+  // sense and was marked wrong for it. See Lang-content-followups.md.
+  senses?: string[];
 }
 
 export const vocab: Vocab[] = [
@@ -43,7 +58,7 @@ export const vocab: Vocab[] = [
   { word: "はい", gloss: "yes", category: "へんじ (answers)", lessonId: "u2-yes-no" },
   { word: "いいえ", gloss: "no", category: "へんじ (answers)", lessonId: "u2-yes-no" },
   { word: "だいじょうぶ", gloss: "it's okay", category: "へんじ (answers)", lessonId: "u2-yes-no" },
-  { word: "ちょっと", gloss: "a little", category: "へんじ (answers)", lessonId: "u2-yes-no" },
+  { word: "ちょっと", gloss: "a little", senses: ["no thank you"], category: "へんじ (answers)", lessonId: "u2-yes-no" },
   { word: "そうです", gloss: "that's right", category: "へんじ (answers)", lessonId: "u2-yes-no" },
   // u3-numbers-1-10 — numbers
   { word: "いち", gloss: "one (1)", category: "かず (numbers)", lessonId: "u3-numbers-1-10" },
