@@ -243,7 +243,7 @@ export default function SpeakInput({
             Needs internet
           </p>
           <p className="mt-0.5 text-sm text-ink">
-            {offline === "missing"
+            {offline === "missing" || offline === "claimed"
               ? "This device cannot recognise Japanese offline, so speaking practice needs a connection."
               : "Speaking practice uses the internet unless the Japanese voice pack is installed."}
           </p>

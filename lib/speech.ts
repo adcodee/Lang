@@ -210,7 +210,17 @@ let tryOfflineFirst = false;
 // It runs at most once per session, only when the learner asks for it (or as
 // a side effect of a real recognition attempt), and the result is cached.
 
-export type OfflineSpeechState = "unknown" | "checking" | "available" | "missing";
+// "claimed" is the state this device sits in: checkRecognitionSupport() says
+// the language IS installed on-device, and recognition with it still fails.
+// So a support result can never promote us past `claimed` — only a real,
+// successful offline transcription earns "available". The notice keeps
+// showing while claimed, because from the learner's side it does not work.
+export type OfflineSpeechState =
+  | "unknown"
+  | "checking"
+  | "available" // proven: a real offline transcription came back
+  | "claimed" // engine says the language is installed, unproven in practice
+  | "missing";
 
 let offlineState: OfflineSpeechState = "unknown";
 let offlineProbe: Promise<OfflineSpeechState> | null = null;
@@ -228,7 +238,11 @@ export function offlineSpeechState(): OfflineSpeechState {
 // Resolves whether on-device recognition works for `lang`. Safe to call from
 // several components — they share one probe.
 export function checkOfflineSpeech(lang = "ja-JP"): Promise<OfflineSpeechState> {
-  if (offlineState === "available" || offlineState === "missing") {
+  if (
+    offlineState === "available" ||
+    offlineState === "claimed" ||
+    offlineState === "missing"
+  ) {
     return Promise.resolve(offlineState);
   }
   if (offlineProbe) return offlineProbe;
@@ -263,16 +277,21 @@ export function checkOfflineSpeech(lang = "ja-JP"): Promise<OfflineSpeechState> 
         // `supported` is true only when the language is actually INSTALLED
         // on-device — a language the engine merely knows about, but has not
         // downloaded, cannot transcribe anything.
-        offlineState = r.supported ? "available" : "missing";
-        if (!r.supported) {
-          lastOfflineReason = r.reason ?? "language not installed on-device";
-        }
+        // Deliberately NOT "available" — see the type comment. The engine
+        // reporting the language as installed is a claim, not a capability.
+        offlineState = r.supported ? "claimed" : "missing";
+        lastOfflineReason = r.supported
+          ? "the device reports Japanese as installed but will not transcribe with it"
+          : r.reason ?? "language not installed on-device";
       }
     } catch (e) {
       offlineState = "missing";
       lastOfflineReason = e instanceof Error ? e.message : "probe failed";
     }
-    tryOfflineFirst = offlineState === "available";
+    // Always false here, and tsc proves it: the support query can only yield
+    // "claimed" or "missing", never "available". Offline is enabled in exactly
+    // one place — listenOnceNative, after a real transcription comes back.
+    tryOfflineFirst = false;
     return offlineState;
   })();
   return offlineProbe;
@@ -307,7 +326,11 @@ export function listenOnceNative(lang = "ja-JP"): {
       try {
         const offline = await withDeadline(run(true), OFFLINE_PROBE_MS, "offline");
         const hit = offline?.matches?.[0];
-        if (hit) return hit;
+        if (hit) {
+          // Proof, at last: offline actually produced a transcript.
+          offlineState = "available";
+          return hit;
+        }
       } catch {
         // No on-device model, or the service dropped the binding. Make sure
         // the stalled session is torn down before starting another one —
