@@ -231,6 +231,31 @@ export const vocab: Vocab[] = [
   { word: "がっこう", gloss: "school", category: "ばしょ (places)", lessonId: "u7-wo-ni" },
   // u8-verb-masu-masen — the one genuinely new verb of Unit 8.
   { word: "たべます", stem: "たべ", gloss: "eat", category: "どうし (verbs)", lessonId: "u8-verb-masu-masen" },
+  // u9-pointing — the counter transaction. Pointing words first, then the
+  // verb Japanese uses where English says "have", then counting and price.
+  // Prices are RECOGNITION only here: ひゃく and せん let the learner parse
+  // what a till says. The five sound-changed joins (さんびゃく ろっぴゃく
+  // はっぴゃく さんぜん はっせん) are named on the card so a bent one does not
+  // sound like a different number, and are deliberately NOT registered —
+  // they belong to the shop unit in intermediate, with a situation.
+  { word: "これ", gloss: "this one", category: "しじご (pointing words)", lessonId: "u9-kore-sore-are" },
+  { word: "それ", gloss: "that one near you", category: "しじご (pointing words)", lessonId: "u9-kore-sore-are" },
+  { word: "あれ", gloss: "that one over there", category: "しじご (pointing words)", lessonId: "u9-kore-sore-are" },
+  { word: "この", gloss: "this (before a noun)", category: "しじご (pointing words)", lessonId: "u9-kono" },
+  { word: "ここ", gloss: "here", category: "しじご (pointing words)", lessonId: "u9-koko-soko" },
+  { word: "そこ", gloss: "there by you", category: "しじご (pointing words)", lessonId: "u9-koko-soko" },
+  { word: "あそこ", gloss: "over there", category: "しじご (pointing words)", lessonId: "u9-koko-soko" },
+  { word: "あります", stem: "あり", gloss: "there is", senses: ["we have it"], category: "どうし (verbs)", lessonId: "u9-arimasu" },
+  { word: "います", stem: "い", gloss: "there is someone", category: "どうし (verbs)", lessonId: "u9-imasu" },
+  { word: "ひとつ", gloss: "one thing", category: "かぞえかた (counting)", lessonId: "u9-counters" },
+  { word: "ふたつ", gloss: "two things", category: "かぞえかた (counting)", lessonId: "u9-counters" },
+  { word: "みっつ", gloss: "three things", category: "かぞえかた (counting)", lessonId: "u9-counters" },
+  { word: "えん", gloss: "yen", category: "おかね (money)", lessonId: "u9-how-much" },
+  { word: "いくら", gloss: "how much", category: "ぎもんし (question words)", lessonId: "u9-how-much" },
+  { word: "いくらですか", gloss: "how much is it", category: "ぎもんし (question words)", lessonId: "u9-how-much" },
+  { word: "ひゃく", gloss: "hundred (100)", category: "かず (numbers)", lessonId: "u9-price-listen" },
+  { word: "せん", gloss: "thousand (1000)", category: "かず (numbers)", lessonId: "u9-price-listen" },
+  { word: "いらっしゃいませ", recognitionOnly: true, gloss: "welcome (the shop says it to you)", category: "あいさつ (greetings)", lessonId: "u9-price-listen" },
 ];
 
 export function learnedVocab(completed: string[]): Vocab[] {

@@ -87,7 +87,12 @@ export default function ExerciseCard({
       );
     case "category-sort":
       return (
-        <CategorySort exercise={exercise} checked={checked} onChecked={onChecked} />
+        <CategorySort
+          exercise={exercise}
+          checked={checked}
+          onChecked={onChecked}
+          exam={exam}
+        />
       );
   }
 }
@@ -563,10 +568,12 @@ function CategorySort({
   exercise,
   checked,
   onChecked,
+  exam = false,
 }: {
   exercise: Extract<Exercise, { type: "category-sort" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  exam?: boolean;
 }) {
   // Present items in a stable shuffled order.
   const items = useMemo(() => shuffle(exercise.items), [exercise]);
@@ -634,8 +641,12 @@ function CategorySort({
               {/* Hidden pre-check for single-kana labels — showing the
                   romaji reading there gives away the exact thing a kana
                   sort is meant to test. Word/phrase labels (length > 1)
-                  are unaffected; romaji always shows once checked. */}
-              {it.romaji && (checked || it.label.length !== 1) && (
+                  are unaffected; romaji always shows once checked.
+                  Patch 1.9: also hidden throughout an exam. Unlike
+                  speak-phrase, this had no `exam` guard, so a multi-character
+                  label's reading was on screen during the exam that awards a
+                  belt — the same giveaway the romaji fade exists to close. */}
+              {it.romaji && !exam && (checked || it.label.length !== 1) && (
                 <div className="text-xs font-normal text-muted">{it.romaji}</div>
               )}
             </button>

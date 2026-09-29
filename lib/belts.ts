@@ -54,11 +54,11 @@ export const BELT_AWARDS: BeltAward[] = [
   // So brown now means FOUNDATION COMPLETE: both scripts read cold, a
   // constrained conversation held, pointing, existence, what/where/how much.
   // It lands on the last unit of patch 1.9 rather than after five roleplays.
-  // When 1.9 ships, add:
-  //   { unitId: "…final scenario unit…", levelId: "beginner", kind: "color",
-  //     color: "brown", bars: 0, label: "Brown belt", jp: "茶帯", emoji: "🤎" },
-  // Until then the beginner course tops out at White belt · 5 bars, which is
-  // honest: the course genuinely isn't finished.
+  // Patch 1.9 shipped: u9-pointing is the last unit of the foundation, so
+  // this is where White becomes Brown. Brown means foundation complete —
+  // both scripts cold, a constrained conversation, pointing, existence,
+  // what/where/how much — not "you finished a long course".
+  { unitId: "u9-pointing", levelId: "beginner", kind: "color", color: "brown", bars: 0, label: "Brown belt", jp: "茶帯", emoji: "🤎" },
 ];
 
 export const UNRANKED: Omit<BeltAward, "unitId" | "levelId" | "kind"> = {
