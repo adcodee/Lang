@@ -8,6 +8,11 @@ import {
   nativeSpeechPlatform,
   nativeSpeechReady,
   listenOnceNative,
+  checkOfflineSpeech,
+  offlineSpeechState,
+  OFFLINE_PACK_HINT,
+  offlineSpeechReason,
+  type OfflineSpeechState,
 } from "@/lib/speech";
 import {
   mediaRecorderSupported,
@@ -50,6 +55,10 @@ export default function SpeakInput({
   const [showTyped, setShowTyped] = useState(false);
   const [typed, setTyped] = useState("");
   const [note, setNote] = useState<string | null>(null);
+  // Offline-model state for the "works without internet" notice. Starts from
+  // the module cache so the notice does not flicker between exercises.
+  const [offline, setOffline] = useState<OfflineSpeechState>(offlineSpeechState());
+  const [offlineDismissed, setOfflineDismissed] = useState(false);
   const recorderRef = useRef<Recorder | null>(null);
 
   useEffect(() => {
@@ -63,6 +72,14 @@ export default function SpeakInput({
         if (cancelled) return;
         if (ok) {
           setTier("native");
+          // Safe to run unprompted: checkRecognitionSupport never opens the
+          // mic. Doing it here means tryOfflineFirst is already correct
+          // before the learner's first tap, so a device without the model
+          // goes straight to the network instead of stalling on a doomed
+          // offline attempt first.
+          checkOfflineSpeech("ja-JP").then((st) => {
+            if (!cancelled) setOffline(st);
+          });
         } else if (canRecord) {
           setTier("cloud");
         } else {
@@ -195,6 +212,11 @@ export default function SpeakInput({
     }
   }
 
+  async function probeOffline() {
+    setOffline("checking");
+    setOffline(await checkOfflineSpeech("ja-JP"));
+  }
+
   const busy = status === "uploading";
   const active = status === "listening" || status === "recording";
   const micLabel =
@@ -206,8 +228,48 @@ export default function SpeakInput({
       ? "Checking…"
       : idleLabel;
 
+  const showOfflineNotice =
+    tier === "native" && offline !== "available" && !offlineDismissed;
+
   return (
     <div className="flex flex-col items-center gap-2">
+      {/* Speech works over the internet already; this is about whether it
+          ALSO works without one. The learner has to install the language
+          model themselves — the app cannot — so it has to be said out loud
+          rather than the exercise just being quietly network-dependent. */}
+      {showOfflineNotice && (
+        <div className="w-full max-w-xs rounded-xl border-2 border-gold/50 bg-gold/10 px-3 py-2 text-left">
+          <p className="text-xs font-extrabold uppercase tracking-wide text-wood">
+            Needs internet
+          </p>
+          <p className="mt-0.5 text-sm text-ink">
+            {offline === "missing"
+              ? "This device cannot recognise Japanese offline, so speaking practice needs a connection."
+              : "Speaking practice uses the internet unless the Japanese voice pack is installed."}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            {offline === "missing" && offlineSpeechReason()
+              ? offlineSpeechReason()
+              : OFFLINE_PACK_HINT}
+          </p>
+          <div className="mt-1.5 flex gap-3">
+            <button
+              onClick={probeOffline}
+              disabled={offline === "checking"}
+              className="text-xs font-bold text-brand-dark disabled:opacity-50"
+            >
+              {offline === "checking" ? "Checking…" : "I've installed it"}
+            </button>
+            <button
+              onClick={() => setOfflineDismissed(true)}
+              className="text-xs font-bold text-muted"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {tier !== "typed" && (
         <button
           onClick={handleMic}

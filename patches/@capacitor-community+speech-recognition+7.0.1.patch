@@ -15,11 +15,11 @@ index 0000000..765b43f
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/Receiver.dex differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.dex b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.dex
 new file mode 100644
-index 0000000..12fee46
+index 0000000..28eb7c6
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.dex differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition.dex b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition.dex
 new file mode 100644
-index 0000000..3103704
+index 0000000..1e3bf33
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/getcapacitor/community/speechrecognition/SpeechRecognition.dex differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/351a0d48dd04aa78b47a81f1aeecda8c/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
 new file mode 100644
@@ -34,7 +34,7 @@ index 0000000..0d259dd
 +o/classes
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/372162ba8ed1a9b4509fe1a916dfa69e/transformed/classes/classes_dex/classes.dex b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/372162ba8ed1a9b4509fe1a916dfa69e/transformed/classes/classes_dex/classes.dex
 new file mode 100644
-index 0000000..cfe1133
+index 0000000..10cdd3a
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/.transforms/372162ba8ed1a9b4509fe1a916dfa69e/transformed/classes/classes_dex/classes.dex differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
 new file mode 100644
@@ -85,7 +85,7 @@ index 0000000..b3c0af9
 \ No newline at end of file
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar
 new file mode 100644
-index 0000000..7f4a56e
+index 0000000..c6ef6a1
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aar_main_jar/debug/syncDebugLibJars/classes.jar differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
 new file mode 100644
@@ -112,7 +112,7 @@ new file mode 100644
 index 0000000..e69de29
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
 new file mode 100644
-index 0000000..9672c23
+index 0000000..21219ad
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
 new file mode 100644
@@ -200,11 +200,11 @@ index 0000000..af9be6c
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/Receiver.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class
 new file mode 100644
-index 0000000..0e8b0b5
+index 0000000..ba3de6b
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition.class b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition.class
 new file mode 100644
-index 0000000..afa8ef8
+index 0000000..b06e647
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/getcapacitor/community/speechrecognition/SpeechRecognition.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
 new file mode 100644
@@ -328,15 +328,15 @@ index 0000000..af9be6c
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/Receiver.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class
 new file mode 100644
-index 0000000..0e8b0b5
+index 0000000..ba3de6b
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition$SpeechRecognitionListener.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition.class b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition.class
 new file mode 100644
-index 0000000..afa8ef8
+index 0000000..b06e647
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/getcapacitor/community/speechrecognition/SpeechRecognition.class differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
 new file mode 100644
-index 0000000..0959c5e
+index 0000000..bc9f36d
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/@capacitor-community/speech-recognition/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
 new file mode 100644
@@ -350,7 +350,7 @@ index 0000000..f0ee474
 +string my_string
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/outputs/aar/capacitor-community-speech-recognition-debug.aar b/node_modules/@capacitor-community/speech-recognition/android/build/outputs/aar/capacitor-community-speech-recognition-debug.aar
 new file mode 100644
-index 0000000..0591654
+index 0000000..511b1c0
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/outputs/aar/capacitor-community-speech-recognition-debug.aar differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/@capacitor-community/speech-recognition/android/build/outputs/logs/manifest-merger-debug-report.txt
 new file mode 100644
@@ -388,21 +388,108 @@ index 0000000..0d8a46f
 +		INJECTED from /home/adhub/Code/lang/node_modules/@capacitor-community/speech-recognition/android/src/main/AndroidManifest.xml
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition$SpeechRecognitionListener.class.uniqueId1 b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition$SpeechRecognitionListener.class.uniqueId1
 new file mode 100644
-index 0000000..ce9bf75
+index 0000000..de562c7
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition$SpeechRecognitionListener.class.uniqueId1 differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition.class.uniqueId0 b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition.class.uniqueId0
 new file mode 100644
-index 0000000..ca8b327
+index 0000000..9fac977
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/compileTransaction/stash-dir/SpeechRecognition.class.uniqueId0 differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
 new file mode 100644
-index 0000000..da17901
+index 0000000..171d5d8
 Binary files /dev/null and b/node_modules/@capacitor-community/speech-recognition/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
 diff --git a/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java b/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
-index a99ea69..f54f041 100644
+index a99ea69..1c1dcae 100644
 --- a/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
 +++ b/node_modules/@capacitor-community/speech-recognition/android/src/main/java/com/getcapacitor/community/speechrecognition/SpeechRecognition.java
-@@ -168,6 +168,14 @@ public class SpeechRecognition extends Plugin implements Constants {
+@@ -7,7 +7,10 @@ import android.os.Build;
+ import android.os.Bundle;
+ import android.speech.RecognitionListener;
+ import android.speech.RecognizerIntent;
++import android.speech.RecognitionSupport;
++import android.speech.RecognitionSupportCallback;
+ import android.speech.SpeechRecognizer;
++import java.util.concurrent.Executors;
+ import androidx.activity.result.ActivityResult;
+ import com.getcapacitor.JSArray;
+ import com.getcapacitor.JSObject;
+@@ -93,6 +96,75 @@ public class SpeechRecognition extends Plugin implements Constants {
+         }
+     }
+ 
++    // Lang addition: ask the ON-DEVICE recogniser which languages it can
++    // actually serve, WITHOUT opening the microphone. Android 13+ only.
++    //
++    // Needed because "the offline pack is installed" and "a third-party app
++    // can use it" are different claims: a device can list 日本語 under the
++    // Google app's offline speech recognition while its on-device
++    // RecognitionService (Android System Intelligence) supports a much
++    // narrower set. Guessing between those two cost several debugging rounds,
++    // so this reports the truth instead.
++    @PluginMethod
++    public void onDeviceSupport(PluginCall call) {
++        JSObject out = new JSObject();
++        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
++            out.put("supported", false);
++            out.put("reason", "requires Android 13+");
++            call.resolve(out);
++            return;
++        }
++        if (!SpeechRecognizer.isOnDeviceRecognitionAvailable(bridge.getActivity())) {
++            out.put("supported", false);
++            out.put("reason", "no on-device recognition service");
++            call.resolve(out);
++            return;
++        }
++
++        final String language = call.getString("language", "ja-JP");
++        bridge
++            .getActivity()
++            .runOnUiThread(() -> {
++                try {
++                    SpeechRecognizer probe = SpeechRecognizer.createOnDeviceSpeechRecognizer(bridge.getActivity());
++                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
++                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
++                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
++                    probe.checkRecognitionSupport(
++                        intent,
++                        Executors.newSingleThreadExecutor(),
++                        new RecognitionSupportCallback() {
++                            @Override
++                            public void onSupportResult(RecognitionSupport support) {
++                                JSObject r = new JSObject();
++                                r.put("supported", !support.getInstalledOnDeviceLanguages().isEmpty());
++                                r.put("installed", new JSArray(support.getInstalledOnDeviceLanguages()));
++                                r.put("pending", new JSArray(support.getPendingOnDeviceLanguages()));
++                                r.put("supportedOnDevice", new JSArray(support.getSupportedOnDeviceLanguages()));
++                                r.put("online", new JSArray(support.getOnlineLanguages()));
++                                probe.destroy();
++                                call.resolve(r);
++                            }
++
++                            @Override
++                            public void onError(int error) {
++                                JSObject r = new JSObject();
++                                r.put("supported", false);
++                                r.put("reason", "checkRecognitionSupport error " + error);
++                                probe.destroy();
++                                call.resolve(r);
++                            }
++                        }
++                    );
++                } catch (Exception ex) {
++                    JSObject r = new JSObject();
++                    r.put("supported", false);
++                    r.put("reason", ex.getMessage());
++                    call.resolve(r);
++                }
++            });
++    }
++
+     @PluginMethod
+     public void getSupportedLanguages(PluginCall call) {
+         if (languageReceiver == null) {
+@@ -168,6 +240,14 @@ public class SpeechRecognition extends Plugin implements Constants {
          intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, bridge.getActivity().getPackageName());
          intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, partialResults);
          intent.putExtra("android.speech.extra.DICTATION_MODE", partialResults);
@@ -417,3 +504,32 @@ index a99ea69..f54f041 100644
  
          if (prompt != null) {
              intent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+@@ -188,7 +268,27 @@ public class SpeechRecognition extends Plugin implements Constants {
+                             speechRecognizer = null;
+                         }
+ 
+-                        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(bridge.getActivity());
++                        // Lang: offline needs the ON-DEVICE recognition service, not
++                        // the system default. Verified on a Galaxy A15 (Android 16):
++                        // the default voice_recognition_service is
++                        // com.google.android.tts, while the downloaded offline
++                        // language packs belong to Android System Intelligence
++                        // (com.google.android.as). Asking the default for
++                        // EXTRA_PREFER_OFFLINE therefore binds a component with no
++                        // model, which drops the connection without ever invoking
++                        // the callback — the UI just hangs on "listening".
++                        // createOnDeviceSpeechRecognizer binds the right one.
++                        boolean wantOffline = Boolean.TRUE.equals(call.getBoolean("preferOffline", false));
++                        if (
++                            wantOffline &&
++                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
++                            SpeechRecognizer.isOnDeviceRecognitionAvailable(bridge.getActivity())
++                        ) {
++                            Logger.info(getLogTag(), "Using on-device speech recognizer");
++                            speechRecognizer = SpeechRecognizer.createOnDeviceSpeechRecognizer(bridge.getActivity());
++                        } else {
++                            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(bridge.getActivity());
++                        }
+                         SpeechRecognitionListener listener = new SpeechRecognitionListener();
+                         listener.setCall(call);
+                         listener.setPartialResults(partialResults);

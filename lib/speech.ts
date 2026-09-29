@@ -170,12 +170,120 @@ function withDeadline<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
-// Set true once the device is known to have the Japanese on-device model.
-// Left false by default because requesting offline without one does not
-// degrade — it hangs the service (see above), costing the learner a real
-// wait before the network retry. Flip this when the pack is installed; the
-// plumbing below already prefers offline whenever it is on.
-const TRY_OFFLINE_FIRST = false;
+// Whether to try the on-device model before the network one.
+//
+// FINDING (Galaxy A15, Android 16, 2026-09-29): offline recognition is not
+// reachable by third-party apps on this device, and no amount of client code
+// changes that. Android System Intelligence (com.google.android.as) is listed
+// as a RecognitionService, and the patched plugin binds it correctly via
+// createOnDeviceSpeechRecognizer — but the service drops the connection
+// without ever invoking the callback. Not only for recognition: even
+// checkRecognitionSupport(), which records nothing and merely asks which
+// languages are installed, gets the same treatment:
+//   "Connection to speech recognition service lost, but no #startListening
+//    has been invoked yet."
+// The 日本語 pack the device lists under "offline speech recognition" belongs
+// to the Google app's own voice typing, which does not go through
+// RecognitionService and cannot be reached from here.
+//
+// So the plumbing stays (it is correct, and works wherever the on-device
+// engine actually serves callers), but it activates only on a positive
+// support result. On this device that never arrives, so speaking practice
+// uses the network — which is confirmed working.
+// Starts OFF and is only ever switched on by a POSITIVE support result.
+// It was briefly defaulted to true, which is what kept the UI hanging: the
+// app attempted offline on every tap, the on-device service dropped the
+// binding without calling back, and the learner waited out the deadline
+// before the network retry even started. Opt in on proof, never on hope.
+let tryOfflineFirst = false;
+
+// --- offline model availability --------------------------------------------
+//
+// Speaking exercises work over the network, but the whole point of the dojo
+// is that it works on a plane. That needs the language's on-device model,
+// which the LEARNER installs — the app cannot do it for them. So the app has
+// to (a) know whether it is there and (b) say so, rather than silently being
+// slower and network-dependent forever.
+//
+// A probe OPENS THE MIC, so it is never run automatically on mount — that
+// would flash the system mic indicator at a learner who only opened a lesson.
+// It runs at most once per session, only when the learner asks for it (or as
+// a side effect of a real recognition attempt), and the result is cached.
+
+export type OfflineSpeechState = "unknown" | "checking" | "available" | "missing";
+
+let offlineState: OfflineSpeechState = "unknown";
+let offlineProbe: Promise<OfflineSpeechState> | null = null;
+let lastOfflineReason = "";
+
+// Why offline is unavailable, for the notice and for debugging.
+export function offlineSpeechReason(): string {
+  return lastOfflineReason;
+}
+
+export function offlineSpeechState(): OfflineSpeechState {
+  return offlineState;
+}
+
+// Resolves whether on-device recognition works for `lang`. Safe to call from
+// several components — they share one probe.
+export function checkOfflineSpeech(lang = "ja-JP"): Promise<OfflineSpeechState> {
+  if (offlineState === "available" || offlineState === "missing") {
+    return Promise.resolve(offlineState);
+  }
+  if (offlineProbe) return offlineProbe;
+  if (!Capacitor.isNativePlatform()) {
+    offlineState = "missing";
+    return Promise.resolve(offlineState);
+  }
+
+  offlineState = "checking";
+  offlineProbe = (async () => {
+    try {
+      // Ask the on-device engine what it can serve. This does NOT open the
+      // mic — it is Android 13's checkRecognitionSupport, surfaced by our
+      // patch as onDeviceSupport(). The previous version started a real
+      // recognition just to see if it bound, which flashed the system mic
+      // indicator and could not distinguish "no model" from "heard nothing".
+      const api = SpeechRecognition as unknown as {
+        onDeviceSupport?: (o: { language: string }) => Promise<{
+          supported: boolean;
+          installed?: string[];
+          reason?: string;
+        }>;
+      };
+      if (!api.onDeviceSupport) {
+        offlineState = "missing";
+      } else {
+        const r = await withDeadline(
+          api.onDeviceSupport({ language: lang }),
+          OFFLINE_PROBE_MS,
+          "offline-support"
+        );
+        // `supported` is true only when the language is actually INSTALLED
+        // on-device — a language the engine merely knows about, but has not
+        // downloaded, cannot transcribe anything.
+        offlineState = r.supported ? "available" : "missing";
+        if (!r.supported) {
+          lastOfflineReason = r.reason ?? "language not installed on-device";
+        }
+      }
+    } catch (e) {
+      offlineState = "missing";
+      lastOfflineReason = e instanceof Error ? e.message : "probe failed";
+    }
+    tryOfflineFirst = offlineState === "available";
+    return offlineState;
+  })();
+  return offlineProbe;
+}
+
+// Opens the system screen where on-device speech models are downloaded.
+// Verified on-device (Galaxy A15): the generic VOICE_INPUT_SETTINGS intent
+// lands on the digital-assistant page instead, and Gboard's settings activity
+// no longer exists under its documented name, so neither is usable here.
+export const OFFLINE_PACK_HINT =
+  "Settings → open Speech Services by Google → download 日本語";
 
 export function listenOnceNative(lang = "ja-JP"): {
   promise: Promise<string>;
@@ -195,7 +303,7 @@ export function listenOnceNative(lang = "ja-JP"): {
     } as Parameters<typeof SpeechRecognition.start>[0]);
 
   const promise = (async () => {
-    if (TRY_OFFLINE_FIRST) {
+    if (tryOfflineFirst) {
       try {
         const offline = await withDeadline(run(true), OFFLINE_PROBE_MS, "offline");
         const hit = offline?.matches?.[0];
