@@ -23,6 +23,20 @@ export type SkillCategory =
 // see exerciseSkill() in lib/exercise.ts.
 interface ExerciseBase {
   skill?: SkillCategory;
+  // Patch 1.8.2: this item deliberately offers near-miss options that are
+  // only told apart by the SITUATION in the prompt — ちょっと meaning "a
+  // little" or "no thank you" depending on whether it trails off, だいじょうぶ
+  // reassuring or declining depending on who asked.
+  //
+  // Only ever set on HAND-AUTHORED items. Generated filler carries no
+  // situation, so two defensible answers there is not a hard question, it is
+  // an unanswerable one — generateFiller excludes same-meaning distractors
+  // for exactly that reason.
+  //
+  // Shown as an amber flag while teaching, hidden in exams: same rule as the
+  // romaji pronunciation hint, and for the same reason — a hint that helps a
+  // learner is a giveaway in a test.
+  contextCounts?: boolean;
 }
 
 export interface TranslateChoiceExercise extends ExerciseBase {

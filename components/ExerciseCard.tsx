@@ -45,6 +45,7 @@ export default function ExerciseCard({
           checked={checked}
           onChecked={onChecked}
           revealAnswer={revealAnswer}
+          exam={exam}
         />
       );
     case "type-answer":
@@ -72,6 +73,7 @@ export default function ExerciseCard({
           checked={checked}
           onChecked={onChecked}
           revealAnswer={revealAnswer}
+          exam={exam}
         />
       );
     case "speak-phrase":
@@ -100,10 +102,12 @@ function TranslateChoice({
   checked,
   onChecked,
   revealAnswer = true,
+  exam = false,
 }: {
   exercise: Extract<Exercise, { type: "translate-choice" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  exam?: boolean;
   revealAnswer?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -125,6 +129,7 @@ function TranslateChoice({
       prompt={exercise.prompt}
       display={exercise.display}
       canCheck={selected !== null}
+      contextCounts={!exam && Boolean(exercise.contextCounts)}
       checked={checked}
       onCheck={() => onChecked(selected === exercise.answer)}
     >
@@ -422,10 +427,12 @@ function ListenChoice({
   checked,
   onChecked,
   revealAnswer = true,
+  exam = false,
 }: {
   exercise: Extract<Exercise, { type: "listen-choice" }>;
   checked: boolean;
   onChecked: (correct: boolean) => void;
+  exam?: boolean;
   revealAnswer?: boolean;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -459,6 +466,7 @@ function ListenChoice({
       canCheck={selected !== null}
       checked={checked}
       onCheck={() => onChecked(selected === exercise.answer)}
+      contextCounts={!exam && Boolean(exercise.contextCounts)}
     >
       <button
         type="button"
@@ -699,6 +707,7 @@ function Frame({
   checked,
   onCheck,
   hideCheck = false,
+  contextCounts = false,
 }: {
   prompt: string;
   display?: string;
@@ -709,9 +718,19 @@ function Frame({
   // match-pairs grades itself per-pair and reports automatically — no
   // Check button for that exercise type. Every other type is unaffected.
   hideCheck?: boolean;
+  // Amber "Context counts" flag for items whose options are separated only
+  // by the situation. Suppressed in exams by the caller.
+  contextCounts?: boolean;
 }) {
   return (
     <div className="card p-6">
+      {contextCounts && (
+        <div className="-mt-1 mb-3 flex justify-end">
+          <span className="rounded-full border-2 border-gold/50 bg-gold/15 px-2.5 py-1 text-[0.65rem] font-extrabold uppercase tracking-wide text-wood">
+            Context counts
+          </span>
+        </div>
+      )}
       <h2 className="text-lg font-extrabold text-ink">{prompt}</h2>
       {display && (
         <div className="my-6 text-center text-5xl font-bold tracking-wide">

@@ -246,6 +246,33 @@ function checkGeneratedContentRule(): Check[] {
 // distractorsFor() (lessonExercises.ts) filters only against the target and
 // does NOT dedupe among the distractors it picks, so a generated item can
 // render an options list containing the same gloss twice — unanswerable.
+// Patch 1.8.2: every kana registry row must be a distinct character.
+// This check did not exist, and its absence let five duplicate yōon rows
+// (きゃ しゅ ちょ じゃ りょ) sit in kana.ts unnoticed — added because an audit
+// regex of `char: "(.)"` matched only SINGLE-character rows and reported the
+// existing multi-character ones as absent. A duplicate inflates the taught
+// count, gives learnedKana() the same character twice, and lets a generated
+// match board draw one character into two cells of the same board.
+function checkKanaUniqueness(): Check[] {
+  const checks: Check[] = [];
+  const seen = new Map<string, string>();
+  for (const k of jaKana) {
+    const prev = seen.get(k.char);
+    if (prev) {
+      checks.push({
+        ok: false,
+        message: `kana "${k.char}" is registered twice (lessons "${prev}" and "${k.lessonId}")`,
+      });
+    } else {
+      seen.set(k.char, k.lessonId);
+    }
+  }
+  if (checks.length === 0) {
+    checks.push({ ok: true, message: `${jaKana.length} kana row(s), all distinct characters` });
+  }
+  return checks;
+}
+
 function checkVocabUniqueness(): Check[] {
   const checks: Check[] = [];
   const seen = new Map<string, string>(); // word -> first lessonId
@@ -296,6 +323,7 @@ function main() {
   const results = [
     ...checkUniqueIds(),
     ...checkLessonReferences(),
+    ...checkKanaUniqueness(),
     ...checkVocabUniqueness(),
     ...checkScenarioMoveVocab(),
     ...checkGeneratedContentRule(),

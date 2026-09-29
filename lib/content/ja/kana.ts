@@ -116,11 +116,6 @@ export const kana: Kana[] = [
   { char: "っ", romaji: "(double the next consonant)", row: "Sokuon", lessonId: "u1b-sokuon", mark: true },
   { char: "ー", romaji: "(hold the vowel)", row: "Chōon", lessonId: "u1b-sokuon", mark: true },
   { char: "ッ", romaji: "(double the next consonant)", row: "Katakana Sokuon", lessonId: "u6-katakana-long-vowel", script: "katakana", mark: true },
-  { char: "きゃ", romaji: "kya", row: "Yōon", lessonId: "u1b-yoon" },
-  { char: "しゅ", romaji: "shu", row: "Yōon", lessonId: "u1b-yoon" },
-  { char: "ちょ", romaji: "cho", row: "Yōon", lessonId: "u1b-yoon" },
-  { char: "じゃ", romaji: "ja", row: "Yōon", lessonId: "u1b-yoon" },
-  { char: "りょ", romaji: "ryo", row: "Yōon", lessonId: "u1b-yoon" },
   // Katakana (Unit 6) — same 46 sounds as hiragana above, new shapes. ー
   // (chōonpu, long vowel) is teach-only like っ, already taught in
   // u1b-sokuon, and correspondingly not registered here.

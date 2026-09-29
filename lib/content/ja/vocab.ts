@@ -56,9 +56,9 @@ export const vocab: Vocab[] = [
   { word: "もっとゆっくり", gloss: "more slowly", category: "かいわ (conversation)", lessonId: "u2-understanding" },
   // u2-yes-no — answering
   { word: "はい", gloss: "yes", category: "へんじ (answers)", lessonId: "u2-yes-no" },
-  { word: "いいえ", gloss: "no", category: "へんじ (answers)", lessonId: "u2-yes-no" },
-  { word: "だいじょうぶ", gloss: "it's okay", category: "へんじ (answers)", lessonId: "u2-yes-no" },
-  { word: "ちょっと", gloss: "a little", senses: ["no thank you"], category: "へんじ (answers)", lessonId: "u2-yes-no" },
+  { word: "いいえ", gloss: "no", senses: ["not at all"], category: "へんじ (answers)", lessonId: "u2-yes-no" },
+  { word: "だいじょうぶ", gloss: "it's okay", senses: ["no thanks, I'm fine"], category: "へんじ (answers)", lessonId: "u2-yes-no" },
+  { word: "ちょっと", gloss: "a little", senses: ["that's a bit difficult (= no)"], category: "へんじ (answers)", lessonId: "u2-yes-no" },
   { word: "そうです", gloss: "that's right", category: "へんじ (answers)", lessonId: "u2-yes-no" },
   // u3-numbers-1-10 — numbers
   { word: "いち", gloss: "one (1)", category: "かず (numbers)", lessonId: "u3-numbers-1-10" },

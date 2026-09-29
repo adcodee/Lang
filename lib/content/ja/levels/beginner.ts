@@ -2046,6 +2046,8 @@ export const beginner: Level = {
             {
               type: "translate-choice",
               prompt: "They ask わかりませんか ('you don't understand?') — and you don't. What do you say?",
+              // Context counts: the negative-question flip: English says 'no', Japanese says はい.
+              contextCounts: true,
               display: "わかりませんか",
               options: ["はい", "いいえ", "そうです", "ちょっと"],
               answer: "はい",
@@ -2054,6 +2056,8 @@ export const beginner: Level = {
             {
               type: "translate-choice",
               prompt: "Someone offers you more. You've had enough. Which is the polite 'no'?",
+              // Context counts: だいじょうぶ reassures or declines depending who asked.
+              contextCounts: true,
               display: "🙅",
               options: ["だいじょうぶ です", "はい", "そうです", "もういちど"],
               answer: "だいじょうぶ です",
@@ -2062,6 +2066,8 @@ export const beginner: Level = {
             {
               type: "translate-choice",
               prompt: "Your host says ちょっと… and stops. What did they mean?",
+              // Context counts: ちょっと trailing off is a refusal, not a quantity.
+              contextCounts: true,
               display: "ちょっと…",
               options: ["No, thank you", "Yes, a little more", "Say it again", "That's right"],
               answer: "No, thank you",
@@ -2085,6 +2091,8 @@ export const beginner: Level = {
             {
               type: "listen-choice",
               prompt: "You're being asked if you're lost. Which reply is correct?",
+              // Context counts: same negative-question flip, heard rather than read.
+              contextCounts: true,
               audio: "わかりませんか",
               options: [
                 "はい — right, I don't understand",
