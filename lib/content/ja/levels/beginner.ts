@@ -3438,6 +3438,8 @@ export const beginner: Level = {
       lessons: [
         {
           id: "u6-katakana-vowels-k-s",
+          // Patch 1.9: items corrected — they used kana from a later lesson.
+          version: 2,
           title: "Katakana: Vowels, K & S",
           subtitle: "ア イ ウ エ オ　K-row　S-row",
           icon: "ア",
@@ -3601,12 +3603,12 @@ export const beginner: Level = {
             {
               type: "category-sort",
               prompt: "Sort: hiragana vs katakana",
-              categories: ["ひらがな", "カタカナ"],
+              categories: ["Hiragana", "Katakana"],
               items: [
-                { label: "あ", romaji: "a", category: "ひらがな" },
-                { label: "ア", romaji: "a", category: "カタカナ" },
-                { label: "か", romaji: "ka", category: "ひらがな" },
-                { label: "カ", romaji: "ka", category: "カタカナ" },
+                { label: "あ", romaji: "a", category: "Hiragana" },
+                { label: "ア", romaji: "a", category: "Katakana" },
+                { label: "か", romaji: "ka", category: "Hiragana" },
+                { label: "カ", romaji: "ka", category: "Katakana" },
               ],
               note: "Same sounds, two different sets of shapes — katakana is generally the sharper, more angular one.",
             },
@@ -3621,6 +3623,8 @@ export const beginner: Level = {
         },
         {
           id: "u6-katakana-t-n-h",
+          // Patch 1.9: items corrected — they used kana from a later lesson.
+          version: 2,
           title: "Katakana: T, N & H",
           subtitle: "T-row　N-row　H-row",
           icon: "タ",
@@ -3763,16 +3767,16 @@ export const beginner: Level = {
             {
               type: "type-answer",
               prompt: "Type the romaji for this word",
-              display: "ホテル",
-              answer: "hoteru",
-              note: "'Hotel' — you'll need this word constantly.",
+              display: "ネコ",
+              answer: "neko",
+              note: "Cat. ネ and コ are both yours now. ホテル is coming — ル arrives next lesson.",
             },
             {
               type: "listen-choice",
               prompt: "Listen and tap the word you hear",
-              audio: "トマト",
-              options: ["トマト", "タコ", "ナイフ", "テスト"],
-              answer: "トマト",
+              audio: "ニク",
+              options: ["ニク", "タコ", "ナイフ", "テスト"],
+              answer: "ニク",
             },
             {
               type: "match-pairs",
@@ -3788,7 +3792,7 @@ export const beginner: Level = {
               type: "translate-choice",
               prompt: "シ or ツ — which one is 'tsu'?",
               display: "❓",
-              options: ["ツ", "シ", "ソ", "ン"],
+              options: ["ツ", "シ", "ソ", "ス"],
               answer: "ツ",
               note: "シ sweeps up-and-right; ツ sweeps down-and-left.",
             },
@@ -3810,6 +3814,8 @@ export const beginner: Level = {
         },
         {
           id: "u6-katakana-m-y-r-w",
+          // Patch 1.9: items corrected — they used kana from a later lesson.
+          version: 2,
           title: "Katakana: M, Y, R & W",
           subtitle: "M-row　Y-row　R-row　ワ・ヲ・ン",
           icon: "ラ",
@@ -3967,7 +3973,7 @@ export const beginner: Level = {
               type: "listen-choice",
               prompt: "Listen and tap the word you hear",
               audio: "トイレ",
-              options: ["トイレ", "ラジオ", "ロボット", "ミルク"],
+              options: ["トイレ", "ヤマ", "リス", "ミルク"],
               answer: "トイレ",
               note: "Worth memorizing this one above all the others this lesson.",
             },
@@ -3995,11 +4001,11 @@ export const beginner: Level = {
             },
             {
               type: "build-sentence",
-              prompt: "Build 'button' (botan)",
-              display: "button",
-              tiles: ["ボ", "タ", "ン"],
-              answer: ["ボ", "タ", "ン"],
-              note: "ボ isn't taught until next lesson — this previews it. You've got the sound already from ホ + ゛.",
+              prompt: "Build 'melon' (meron)",
+              display: "melon",
+              tiles: ["メ", "ロ", "ン"],
+              answer: ["メ", "ロ", "ン"],
+              note: "Every tile here is from this lesson — メ, ロ and ン.",
             },
           ],
         },

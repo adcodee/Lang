@@ -261,28 +261,159 @@ function checkGeneratedContentRule(): Check[] {
 // rendered on the skill tree. check-content's header already admits
 // hand-authored prose is "only checked by eye"; this is the part of that
 // which can be machine-checked, so it is.
+//
+// Patch 1.9: that version scanned lessons and nothing else, which left every
+// OTHER learner-visible surface unguarded — unit titles/subtitles (rendered
+// on the skill tree above the lesson nodes), level titles/blurbs (the level
+// picker), vocab.ts (`word`/`gloss`/`senses`/`category`, all of which reach
+// the glossary, match boards and generated type-answer items), kana.ts, and
+// scenarios.ts (the `brief` goes into the tutor's system prompt,
+// `starter.content` and `label` go on screen, and the move `forms`/`alts` are
+// the phrases the tutor is told the learner knows). 1.9 writes three new unit
+// strings and ~20 new vocab rows, so the hole was about to be walked through.
+//
+// ¥ (U+00A5) and ￥ (U+FFE5) need no allowlist: neither is Han, so both fall
+// outside the range by construction and a price ships freely. 円 (U+5186) IS
+// Han and is caught anywhere in here, `note` prose included — see
+// Lang-beginner-gaps-1.9-plan.md, open question 4 ("neither in 1.9").
+//
+// Scope is deliberately every level, not just beginner: intermediate and
+// advanced are empty `comingSoon` shells today, so scanning them costs
+// nothing, and whoever first authors legitimate kanji up there should hit a
+// red check and decide the scoping rule then, rather than inherit a carve-out
+// nobody asked for.
 function checkNoKanji(): Check[] {
   const checks: Check[] = [];
   const HAN = /[\u4E00-\u9FFF]/g;
   let scanned = 0;
 
+  // One area/id pair per learner-visible record. Whole records are
+  // stringified rather than field-picked where the shape allows it: every
+  // remaining field on a vocab/kana/scenario row is an ASCII id or flag, so
+  // there is nothing to false-positive on, and a field added later is covered
+  // without anyone having to remember this check exists.
+  const scan = (area: string, id: string, blob: string) => {
+    scanned++;
+    const found = Array.from(new Set(blob.match(HAN) ?? []));
+    if (found.length > 0) {
+      checks.push({
+        ok: false,
+        message: `${area} "${id}" contains kanji (${found.join(" ")}) — the beginner course is kana-only`,
+      });
+    }
+  };
+
   for (const level of jaLevels) {
+    scan(
+      "level (levels/*.ts)",
+      level.id,
+      JSON.stringify({ title: level.title, blurb: level.blurb })
+    );
     for (const unit of level.units) {
+      scan(
+        "unit (levels/*.ts)",
+        unit.id,
+        JSON.stringify({ title: unit.title, subtitle: unit.subtitle })
+      );
       for (const lesson of unit.lessons) {
-        scanned++;
         // Everything the learner can actually see: titles, subtitles, and
         // every string inside the teach cards and exercises.
-        const blob = JSON.stringify({
-          title: lesson.title,
-          subtitle: lesson.subtitle,
-          teach: lesson.teach ?? [],
-          exercises: lesson.exercises,
-        });
-        const found = Array.from(new Set(blob.match(HAN) ?? []));
-        if (found.length > 0) {
+        scan(
+          "lesson (levels/*.ts)",
+          lesson.id,
+          JSON.stringify({
+            title: lesson.title,
+            subtitle: lesson.subtitle,
+            teach: lesson.teach ?? [],
+            exercises: lesson.exercises,
+          })
+        );
+      }
+    }
+  }
+
+  for (const v of jaVocab) scan("vocab.ts word", v.word, JSON.stringify(v));
+  for (const k of jaKana) scan("kana.ts char", k.char, JSON.stringify(k));
+  // The whole scenario: `brief` (tutor prompt), `starter`/`label` (on screen),
+  // and `map`'s move forms/alts (the phrases it grades the learner against).
+  for (const s of jaScenarios) scan("scenarios.ts scenario", s.id, JSON.stringify(s));
+
+  if (checks.length === 0) {
+    checks.push({
+      ok: true,
+      message: `${scanned} learner-visible record(s) — levels, units, lessons, vocab, kana, scenarios — contain no kanji`,
+    });
+  }
+  return checks;
+}
+
+// Patch 1.9: the content rule, applied to HAND-AUTHORED items.
+//
+// checkGeneratedContentRule above only covers generated filler; this file's
+// header says hand-authored exercises are "still only checked by eye". That
+// eye missed real cases, found in live testing: u6-katakana-t-n-h asked the
+// learner to type ホテル when ル is not taught until the NEXT lesson, and
+// played トマト as a listen-choice option when マ is equally unтaught.
+//
+// Only ANSWERABLE fields are checked — display, audio, options, tiles,
+// match-pairs left, category-sort labels and buckets, accept, answer. Prose
+// (`prompt`, `note`) is deliberately exempt: a forward reference like "don't
+// mix it up with ツ later" is good teaching, not a violation.
+//
+// ゛ and ゜ (U+309B/U+309C) are diacritic marks, not kana. The lessons that
+// teach them necessarily show them, so they are never counted.
+const DIACRITICS = new Set(["\u309B", "\u309C"]);
+const KANA_RANGE = /[\u3040-\u30FF]/;
+
+function answerableStrings(ex: Exercise): string[] {
+  const e = ex as unknown as Record<string, unknown>;
+  const out: string[] = [];
+  const push = (v: unknown) => {
+    if (typeof v === "string") out.push(v);
+  };
+  for (const k of ["display", "audio", "answer"]) push(e[k]);
+  for (const k of ["options", "tiles", "accept", "categories"]) {
+    if (Array.isArray(e[k])) (e[k] as unknown[]).forEach(push);
+  }
+  if (Array.isArray(e.pairs)) {
+    for (const p of e.pairs as { left?: unknown }[]) push(p.left);
+  }
+  if (Array.isArray(e.items)) {
+    for (const it of e.items as { label?: unknown }[]) push(it.label);
+  }
+  return out;
+}
+
+function checkAuthoredContentRule(): Check[] {
+  const checks: Check[] = [];
+  const lessons = jaAllLessons();
+  const order = lessons.map((l) => l.id);
+  let scanned = 0;
+
+  for (const lesson of lessons) {
+    const idx = order.indexOf(lesson.id);
+    const allowedIds = new Set([...order.slice(0, idx), lesson.id]);
+    const taught = new Set(
+      jaKana
+        .filter((k) => allowedIds.has(k.lessonId))
+        .flatMap((k) => k.char.split(""))
+    );
+
+    for (const [i, ex] of lesson.exercises.entries()) {
+      for (const str of answerableStrings(ex)) {
+        if (!KANA_RANGE.test(str)) continue;
+        scanned++;
+        const untaught = Array.from(
+          new Set(
+            str
+              .split("")
+              .filter((c) => KANA_RANGE.test(c) && !DIACRITICS.has(c) && !taught.has(c))
+          )
+        );
+        if (untaught.length > 0) {
           checks.push({
             ok: false,
-            message: `lesson "${lesson.id}" contains kanji (${found.join(" ")}) — the beginner course is kana-only`,
+            message: `lesson "${lesson.id}" exercise #${i} (${ex.type}) uses "${str}" — ${untaught.join(" ")} not taught until later`,
           });
         }
       }
@@ -290,7 +421,10 @@ function checkNoKanji(): Check[] {
   }
 
   if (checks.length === 0) {
-    checks.push({ ok: true, message: `${scanned} lesson(s) contain no kanji` });
+    checks.push({
+      ok: true,
+      message: `${scanned} hand-authored Japanese string(s) use only kana taught by that point`,
+    });
   }
   return checks;
 }
@@ -366,6 +500,7 @@ function main() {
     ...checkUniqueIds(),
     ...checkLessonReferences(),
     ...checkNoKanji(),
+    ...checkAuthoredContentRule(),
     ...checkKanaUniqueness(),
     ...checkVocabUniqueness(),
     ...checkScenarioMoveVocab(),
