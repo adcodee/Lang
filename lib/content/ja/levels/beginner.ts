@@ -4092,7 +4092,7 @@ export const beginner: Level = {
             {
               char: "ド",
               romaji: "do",
-              mnemonic: "ト + ゛ = ド. to → do.",
+              mnemonic: "ト + ゛ = ド. to → do. The ダ-row also has ヂ and ヅ, the katakana twins of ぢ and づ — just as rare, and they sound like ジ and ズ. Know they exist; you will not need to write them.",
               mnemonicEmoji: "゛",
               example: { word: "ドア", romaji: "doa", meaning: "door" },
               contrast: {
@@ -4117,6 +4117,48 @@ export const beginner: Level = {
               mnemonic: "ヒ + ゛ = ビ. hi → bi. You need this one for ビール — and for telling ビール (beer) from ビル (building), which the next lesson turns into its whole teaching point.",
               mnemonicEmoji: "゛",
               example: { word: "ビール", romaji: "biiru", meaning: "beer" },
+            },
+            {
+              char: "グ",
+              romaji: "gu",
+              mnemonic: "ク + ゛ = グ. ku → gu.",
+              mnemonicEmoji: "゛",
+              example: { word: "グラム", romaji: "guramu", meaning: "gram" },
+            },
+            {
+              char: "ゲ",
+              romaji: "ge",
+              mnemonic: "ケ + ゛ = ゲ. ke → ge.",
+              mnemonicEmoji: "゛",
+              example: { word: "ゲーム", romaji: "geemu", meaning: "game" },
+            },
+            {
+              char: "ゼ",
+              romaji: "ze",
+              mnemonic: "セ + ゛ = ゼ. se → ze.",
+              mnemonicEmoji: "゛",
+              example: { word: "ゼロ", romaji: "zero", meaning: "zero" },
+            },
+            {
+              char: "デ",
+              romaji: "de",
+              mnemonic: "テ + ゛ = デ. te → de. You need it for デパート and デザート.",
+              mnemonicEmoji: "゛",
+              example: { word: "デパート", romaji: "depaato", meaning: "department store" },
+            },
+            {
+              char: "ブ",
+              romaji: "bu",
+              mnemonic: "フ + ゛ = ブ. fu → bu.",
+              mnemonicEmoji: "゛",
+              example: { word: "テーブル", romaji: "teeburu", meaning: "table" },
+            },
+            {
+              char: "ベ",
+              romaji: "be",
+              mnemonic: "ヘ + ゛ = ベ. he → be. Also エレベーター — lifts are labelled in katakana everywhere.",
+              mnemonicEmoji: "゛",
+              example: { word: "ベッド", romaji: "beddo", meaning: "bed" },
             },
             {
               char: "ボ",
@@ -4204,6 +4246,13 @@ export const beginner: Level = {
               mnemonic: "チ + small ョ = cho, one syllable.",
               mnemonicEmoji: "🍫",
               example: { word: "チョコ", romaji: "choko", meaning: "chocolate (short for チョコレート)" },
+            },
+            {
+              char: "ェ",
+              romaji: "e (small)",
+              mnemonic: "Katakana goes further than hiragana: it has to write sounds Japanese does not have. Small ァ ィ ゥ ェ ォ bolt onto a consonant to make one — チ + ェ = che, which hiragana never needs. You will read these constantly: チェックイン at a hotel, フォーク on a table, パーティー on a sign.",
+              mnemonicEmoji: "🔤",
+              example: { word: "チェックイン", romaji: "chekkuin", meaning: "check-in" },
             },
           ],
           exercises: [

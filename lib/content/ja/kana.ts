@@ -170,16 +170,22 @@ export const kana: Kana[] = [
   // generalizes past what's registered). P-row is the one complete row,
   // same as hiragana's ぱぴぷぺぽ — it's the whole closed handakuten set.
   { char: "ガ", romaji: "ga", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "グ", romaji: "gu", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ゲ", romaji: "ge", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ギ", romaji: "gi", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ゴ", romaji: "go", row: "Katakana G-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ザ", romaji: "za", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ジ", romaji: "ji", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ズ", romaji: "zu", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ゼ", romaji: "ze", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ゾ", romaji: "zo", row: "Katakana Z-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ダ", romaji: "da", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ド", romaji: "do", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "デ", romaji: "de", row: "Katakana D-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "バ", romaji: "ba", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ビ", romaji: "bi", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ブ", romaji: "bu", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  { char: "ベ", romaji: "be", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ボ", romaji: "bo", row: "Katakana B-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "パ", romaji: "pa", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "ピ", romaji: "pi", row: "Katakana P-row", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
@@ -189,6 +195,13 @@ export const kana: Kana[] = [
   { char: "キャ", romaji: "kya", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "シュ", romaji: "shu", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
   { char: "チョ", romaji: "cho", row: "Katakana Yōon", lessonId: "u6-katakana-voiced-combo", script: "katakana" },
+  // Small vowels for sounds Japanese lacks (チェ, フォ, ティ, ファ).
+  // Marks: they never stand alone, only bolted onto a consonant.
+  { char: "ァ", romaji: "a (small)", row: "Katakana small vowels", lessonId: "u6-katakana-voiced-combo", script: "katakana", mark: true },
+  { char: "ィ", romaji: "i (small)", row: "Katakana small vowels", lessonId: "u6-katakana-voiced-combo", script: "katakana", mark: true },
+  { char: "ゥ", romaji: "u (small)", row: "Katakana small vowels", lessonId: "u6-katakana-voiced-combo", script: "katakana", mark: true },
+  { char: "ェ", romaji: "e (small)", row: "Katakana small vowels", lessonId: "u6-katakana-voiced-combo", script: "katakana", mark: true },
+  { char: "ォ", romaji: "o (small)", row: "Katakana small vowels", lessonId: "u6-katakana-voiced-combo", script: "katakana", mark: true },
 ];
 
 // Kana the learner has unlocked (its introducing lesson is completed).
