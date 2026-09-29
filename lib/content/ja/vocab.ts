@@ -30,6 +30,21 @@ export interface Vocab {
   // refusal. The learner had every reinforcement pointing at the literal
   // sense and was marked wrong for it. See Lang-content-followups.md.
   senses?: string[];
+  // Patch 1.9: words to UNDERSTAND but never be asked to produce — staff
+  // phrases, signage, things said TO you. いらっしゃいませ, 〜えんに なります,
+  // なんめいさま: a learner needs to recognise these instantly and will never
+  // once need to say them.
+  //
+  // Registration is production by construction, which is the problem this
+  // solves. A vocab row is picked up by generateFiller (typeAnswerFor renders
+  // "Type the meaning (English)"), by the SRS's typed-production format, by
+  // the tutor allowlist, the glossary and the exam pool. Before this flag the
+  // only honest options were "drill it as production" or "do not register it
+  // at all", and the second means the word is met once and never resurfaces.
+  //
+  // Flagged words stay fully real for recognition — heard, matched, read,
+  // used as distractors — and are never typed or spoken.
+  recognitionOnly?: boolean;
 }
 
 export const vocab: Vocab[] = [

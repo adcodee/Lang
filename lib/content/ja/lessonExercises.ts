@@ -33,6 +33,10 @@ interface Item {
   // typed, and never used to pick distractors — otherwise a word with two
   // taught senses can produce an item with two correct options.
   alsoMeans?: string[];
+  // Vocab.recognitionOnly — understand it, never produce it. Eligible as a
+  // target for recognition formats and as a distractor anywhere; never the
+  // target of a production format.
+  recognitionOnly?: boolean;
 }
 
 function toItems(k: Kana[], v: Vocab[]): Item[] {
@@ -47,6 +51,7 @@ function toItems(k: Kana[], v: Vocab[]): Item[] {
       term: x.word,
       answer: x.gloss,
       alsoMeans: x.senses,
+      recognitionOnly: x.recognitionOnly,
     })),
   ];
 }
@@ -200,8 +205,16 @@ export function generateFiller(
     }
     const typeIndex = cycle[i % cycle.length];
     const target = targets[i];
-    if (typeIndex === 0) out.push(translateChoiceFor(target, allItems));
-    else if (typeIndex === 1) out.push(typeAnswerFor(target));
+    // A recognition-only word is never the target of a production format.
+    // It stays in the pool rather than being filtered out — dropping it would
+    // empty `coreItems` for an all-recognition lesson, and cyclePool would
+    // fall back to `allItems`, so the lesson's generated filler would test
+    // every unit EXCEPT the one it belongs to. Substitute the format instead.
+    const wantsProduction = typeIndex === 1;
+    if (wantsProduction && target.recognitionOnly) {
+      out.push(listenChoiceFor(target, allItems));
+    } else if (typeIndex === 0) out.push(translateChoiceFor(target, allItems));
+    else if (wantsProduction) out.push(typeAnswerFor(target));
     else out.push(listenChoiceFor(target, allItems));
   }
 

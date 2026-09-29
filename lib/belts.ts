@@ -42,9 +42,19 @@ export const BELT_AWARDS: BeltAward[] = [
   { unitId: "u5-adjectives", levelId: "beginner", kind: "bar", color: "white", bars: 4, label: "White belt · 4 bars", jp: "白帯 四本", emoji: "🤍" },
   // u6-katakana, u7-particles — no belt movement.
   { unitId: "u8-verb-forms", levelId: "beginner", kind: "bar", color: "white", bars: 5, label: "White belt · 5 bars", jp: "白帯 五本", emoji: "🤍" },
-  // The White -> Brown promotion belongs to the LAST beginner unit. The five
-  // scenario units (konbini, restaurant, train station, directions, hotel) are
-  // not authored yet — when the last of them ships, add:
+  // The White -> Brown promotion belongs to the LAST beginner unit.
+  //
+  // Owner's call, 2026-09-29: the five scenario units (konbini, restaurant,
+  // train station, directions, hotel) move to the INTERMEDIATE course. They
+  // are the conversations you have once the foundation exists, and each
+  // teaches its own situational vocabulary — prices, counters, party sizes,
+  // clock times — in the situation that makes it make sense, rather than
+  // being pre-loaded into beginner.
+  //
+  // So brown now means FOUNDATION COMPLETE: both scripts read cold, a
+  // constrained conversation held, pointing, existence, what/where/how much.
+  // It lands on the last unit of patch 1.9 rather than after five roleplays.
+  // When 1.9 ships, add:
   //   { unitId: "…final scenario unit…", levelId: "beginner", kind: "color",
   //     color: "brown", bars: 0, label: "Brown belt", jp: "茶帯", emoji: "🤎" },
   // Until then the beginner course tops out at White belt · 5 bars, which is
