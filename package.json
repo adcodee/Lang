@@ -10,7 +10,7 @@
     "check:content": "tsx scripts/check-content.ts",
     "check:moves": "tsx scripts/check-moves.ts",
     "bench:grok": "tsx scripts/bench-grok-models.ts",
-    "postinstall": "patch-package"
+    "postinstall": "node scripts/apply-patches.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
