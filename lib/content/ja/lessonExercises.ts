@@ -81,7 +81,25 @@ function translateChoiceFor(target: Item, pool: Item[]): Exercise {
   };
 }
 
+// Many glosses carry a disambiguating parenthetical — "one (1)", "hot
+// (weather)", "mother (address)" — which is genuinely useful on a card and
+// in the glossary. But `gloss` doubles as the required typed answer, and
+// grading only lowercases and strips whitespace: a learner typing "one"
+// against "one (1)" was marked WRONG. That applied to 27 words including
+// every number in the course.
+//
+// So the typed item asks for the plain form and accepts the full gloss (and
+// any other taught sense) as well. The parenthetical keeps doing its job
+// everywhere it is read rather than typed.
+function plainGloss(g: string): string {
+  return g.replace(/\s*\([^)]*\)/g, "").trim();
+}
+
 function typeAnswerFor(target: Item): Exercise {
+  const plain = target.kind === "vocab" ? plainGloss(target.answer) : target.answer;
+  const accept = Array.from(
+    new Set([target.answer, ...(target.alsoMeans ?? [])].filter((a) => a && a !== plain))
+  );
   return {
     type: "type-answer",
     skill: "writing",
@@ -90,10 +108,10 @@ function typeAnswerFor(target: Item): Exercise {
         ? "Type the romaji for this character"
         : "Type the meaning (English)",
     display: target.term,
-    answer: target.answer,
+    answer: plain || target.answer,
     // A word with two taught senses must accept either. Marking a learner
     // wrong for the meaning their own card taught is the bug this exists for.
-    ...(target.alsoMeans?.length ? { accept: target.alsoMeans } : {}),
+    ...(accept.length ? { accept } : {}),
   };
 }
 

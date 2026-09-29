@@ -253,6 +253,48 @@ function checkGeneratedContentRule(): Check[] {
 // existing multi-character ones as absent. A duplicate inflates the taught
 // count, gives learnedKana() the same character twice, and lets a generated
 // match board draw one character into two cells of the same board.
+// Patch 1.8.2: the beginner course is kana-only BY DESIGN, and nothing
+// asserted it. A scan found 24 Han characters across 10 lines of
+// beginner.ts — including a graded category-sort whose bucket labels were
+// "1画 (one stroke)" and "交差 (crossing strokes)", i.e. untaught kanji on
+// screen inside an item the learner is scored on, plus 行 in four subtitles
+// rendered on the skill tree. check-content's header already admits
+// hand-authored prose is "only checked by eye"; this is the part of that
+// which can be machine-checked, so it is.
+function checkNoKanji(): Check[] {
+  const checks: Check[] = [];
+  const HAN = /[\u4E00-\u9FFF]/g;
+  let scanned = 0;
+
+  for (const level of jaLevels) {
+    for (const unit of level.units) {
+      for (const lesson of unit.lessons) {
+        scanned++;
+        // Everything the learner can actually see: titles, subtitles, and
+        // every string inside the teach cards and exercises.
+        const blob = JSON.stringify({
+          title: lesson.title,
+          subtitle: lesson.subtitle,
+          teach: lesson.teach ?? [],
+          exercises: lesson.exercises,
+        });
+        const found = Array.from(new Set(blob.match(HAN) ?? []));
+        if (found.length > 0) {
+          checks.push({
+            ok: false,
+            message: `lesson "${lesson.id}" contains kanji (${found.join(" ")}) — the beginner course is kana-only`,
+          });
+        }
+      }
+    }
+  }
+
+  if (checks.length === 0) {
+    checks.push({ ok: true, message: `${scanned} lesson(s) contain no kanji` });
+  }
+  return checks;
+}
+
 function checkKanaUniqueness(): Check[] {
   const checks: Check[] = [];
   const seen = new Map<string, string>();
@@ -323,6 +365,7 @@ function main() {
   const results = [
     ...checkUniqueIds(),
     ...checkLessonReferences(),
+    ...checkNoKanji(),
     ...checkKanaUniqueness(),
     ...checkVocabUniqueness(),
     ...checkScenarioMoveVocab(),

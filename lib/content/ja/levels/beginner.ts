@@ -3439,7 +3439,7 @@ export const beginner: Level = {
         {
           id: "u6-katakana-vowels-k-s",
           title: "Katakana: Vowels, K & S",
-          subtitle: "ア イ ウ エ オ　カ行　サ行",
+          subtitle: "ア イ ウ エ オ　K-row　S-row",
           icon: "ア",
           skill: "reading",
           xp: 30,
@@ -3622,7 +3622,7 @@ export const beginner: Level = {
         {
           id: "u6-katakana-t-n-h",
           title: "Katakana: T, N & H",
-          subtitle: "タ行　ナ行　ハ行",
+          subtitle: "T-row　N-row　H-row",
           icon: "タ",
           skill: "reading",
           xp: 30,
@@ -3690,7 +3690,7 @@ export const beginner: Level = {
               contrast: {
                 label: "Same word, different register",
                 a: { word: "いぬ", romaji: "inu", meaning: "the normal way to write it (hiragana/kanji)" },
-                b: { word: "イヌ", romaji: "inu", meaning: "casual/emphasis katakana — you'll see this too, but いぬ/犬 is standard" },
+                b: { word: "イヌ", romaji: "inu", meaning: "casual/emphasis katakana — you'll see this too, but いぬ is standard" },
               },
             },
             {
@@ -3811,7 +3811,7 @@ export const beginner: Level = {
         {
           id: "u6-katakana-m-y-r-w",
           title: "Katakana: M, Y, R & W",
-          subtitle: "マ行　ヤ行　ラ行　ワ・ヲ・ン",
+          subtitle: "M-row　Y-row　R-row　ワ・ヲ・ン",
           icon: "ラ",
           skill: "reading",
           xp: 30,
@@ -3984,12 +3984,12 @@ export const beginner: Level = {
             {
               type: "category-sort",
               prompt: "Sort: single stroke vs crossing strokes",
-              categories: ["1画 (one stroke)", "交差 (crossing strokes)"],
+              categories: ["One stroke", "Crossing strokes"],
               items: [
-                { label: "ノ", romaji: "no", category: "1画 (one stroke)" },
-                { label: "メ", romaji: "me", category: "交差 (crossing strokes)" },
-                { label: "ン", romaji: "n", category: "交差 (crossing strokes)" },
-                { label: "ソ", romaji: "so", category: "交差 (crossing strokes)" },
+                { label: "ノ", romaji: "no", category: "One stroke" },
+                { label: "メ", romaji: "me", category: "Crossing strokes" },
+                { label: "ン", romaji: "n", category: "Crossing strokes" },
+                { label: "ソ", romaji: "so", category: "Crossing strokes" },
               ],
               note: "ノ really is a single stroke — everything else in this lesson's lookalike traps has two.",
             },
@@ -4008,7 +4008,7 @@ export const beginner: Level = {
           // Patch 1.8 added ギ ズ ゾ ビ to an already-shipped lesson.
           version: 2,
           title: "Katakana: Voiced & Combo Sounds",
-          subtitle: "ガ行　ザ行　ダ行　バ行　パ行　きゃ・しゅ・ちょ",
+          subtitle: "Voiced rows　きゃ・しゅ・ちょ",
           icon: "゛",
           skill: "reading",
           xp: 30,
