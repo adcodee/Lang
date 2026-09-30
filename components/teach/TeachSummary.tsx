@@ -94,20 +94,17 @@ export default function TeachSummary({
       )}
 
       <div className="flex flex-col gap-2">
-        {rows.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            onClick={() => speak(r.main)}
-            className="card flex items-start gap-4 p-4 text-left active:translate-y-[1px]"
-          >
-            <div className="min-w-[3.5rem] shrink-0 text-center">
-              <div className="font-jp text-3xl font-bold text-sumi">{r.main}</div>
-              {r.reading && (
-                <div className="mt-0.5 text-xs font-bold text-muted">{r.reading}</div>
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
+        {rows.map((r) => {
+          // A glyph column only works for a glyph. `min-w` is a floor, not a
+          // ceiling, and `shrink-0` forbids shrinking, so a whole sentence in
+          // that column took its full intrinsic width and shoved the meaning
+          // off the right of the screen — seen on device with
+          // わたしは いえが おおきいです。 Anything longer than a short word
+          // stacks instead: term on its own line, wrapping, meaning beneath.
+          const stacked = r.main.length > 5;
+
+          const body = (
+            <div className={stacked ? "" : "min-w-0 flex-1"}>
               <div className="font-bold text-ink">{r.meaning}</div>
               {r.example && (
                 <div className="mt-0.5 text-sm text-muted">
@@ -117,8 +114,41 @@ export default function TeachSummary({
               )}
               {r.note && <p className="mt-1 text-sm text-muted">{r.note}</p>}
             </div>
-          </button>
-        ))}
+          );
+
+          return (
+            <button
+              key={r.key}
+              type="button"
+              onClick={() => speak(r.main)}
+              className={`card p-4 text-left active:translate-y-[1px] ${
+                stacked ? "flex flex-col gap-2" : "flex items-start gap-4"
+              }`}
+            >
+              <div
+                className={
+                  stacked ? "min-w-0" : "min-w-[3.5rem] shrink-0 text-center"
+                }
+              >
+                <div
+                  className={`font-jp font-bold text-sumi ${
+                    stacked
+                      ? "break-words text-xl leading-snug"
+                      : "text-3xl"
+                  }`}
+                >
+                  {r.main}
+                </div>
+                {r.reading && (
+                  <div className="mt-0.5 break-words text-xs font-bold text-muted">
+                    {r.reading}
+                  </div>
+                )}
+              </div>
+              {body}
+            </button>
+          );
+        })}
       </div>
 
       <p className="text-center text-xs text-muted">Tap any line to hear it.</p>
