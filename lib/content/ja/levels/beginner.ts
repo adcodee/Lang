@@ -4518,6 +4518,8 @@ export const beginner: Level = {
       lessons: [
         {
           id: "u7-wa-ga",
+          // Patch 1.9.2: added the は/が confirming card at the owner's request.
+          version: 2,
           title: "Topic vs Subject",
           subtitle: "は　が",
           icon: "は",
@@ -4635,11 +4637,45 @@ export const beginner: Level = {
               },
               context: "This A は B が 〜 shape is everywhere in Japanese. Meet it now, use it forever.",
             },
+            {
+              kind: "phrase",
+              term: "わたしは / わたしが",
+              reading: "watashi wa / watashi ga",
+              meaning: "Same three words — は states, が answers",
+              contextual: "Which particle you choose changes what the sentence is DOING, not what it means. Read the situation, not just the words.",
+              note: "Nothing else in the sentence moves. は tells someone about you; が tells them you are the one they were asking about.",
+              contrast: {
+                label: "One particle apart",
+                a: { word: "わたしは せんせいです。", romaji: "watashi wa sensei desu", meaning: "I'm a teacher. (telling you about me)" },
+                b: { word: "わたしが せんせいです。", romaji: "watashi ga sensei desu", meaning: "I'M the teacher. (answering which one)" },
+              },
+              uses: [
+                {
+                  situation: "Introducing yourself — nobody asked a question",
+                  english: "I'm a teacher.",
+                  example: "わたしは せんせいです。",
+                },
+                {
+                  situation: "Someone asked だれが せんせいですか — you are the answer",
+                  english: "I'm the teacher.",
+                  example: "わたしが せんせいです。",
+                },
+              ],
+              check: {
+                prompt: "Someone looks round the room and asks だれが せんせいですか。 You are. What do you say?",
+                options: ["わたしが せんせいです。", "わたしは せんせいです。", "せんせいは わたしです。"],
+                answer: "わたしが せんせいです。",
+                note: "They asked WHICH ONE. が is the particle that answers that. は would just be telling them about yourself, which is not what they asked.",
+              },
+              context: "The one test that settles every は/が choice: did someone ask which one? If yes, が. If you are simply saying what the sentence is about, は. Not people-versus-things — わたし takes both, and so does ほん.",
+            },
           ],
           exercises: [
             {
               type: "translate-choice",
               prompt: "わたし＿ せんせいです。 — you're introducing yourself. Which particle?",
+              // Only the situation separates は from が here.
+              contextCounts: true,
               display: "❓",
               options: ["は", "が", "を", "の"],
               answer: "は",
@@ -4648,6 +4684,8 @@ export const beginner: Level = {
             {
               type: "translate-choice",
               prompt: "Someone asks だれが せんせいですか。 ('Who is the teacher?') — how do you answer?",
+              // Only the situation separates は from が here.
+              contextCounts: true,
               display: "❓",
               options: ["わたしが せんせいです。", "わたしは せんせいです。", "わたしを せんせいです。", "わたしの せんせいです。"],
               answer: "わたしが せんせいです。",
@@ -4713,6 +4751,8 @@ export const beginner: Level = {
             {
               type: "translate-choice",
               prompt: "ほん＿ あたらしいです。 — you're just telling someone about the book. Which particle?",
+              // Only the situation separates は from が here.
+              contextCounts: true,
               display: "❓",
               options: ["は", "が", "を", "で"],
               answer: "は",
