@@ -65,12 +65,47 @@ export default function SkillTree() {
     if (level) setActiveLevelId(level.id);
   }, [mounted, currentLesson]);
 
+  // Open the tree on the lesson you are actually up to.
+  //
+  // Two faults made this silently stop working, and both had to be fixed:
+  //
+  // 1. The "already scrolled" ref was set BEFORE the node was looked up, so a
+  //    commit where the node was not in the DOM yet burned the one attempt and
+  //    the tree stayed at the top forever. Now the ref is only set on success.
+  // 2. Next's App Router resets scroll to the top after hydration, AFTER a
+  //    mount effect runs — so even a successful scroll was immediately undone.
+  //    Retrying across a few frames lands the scroll after the router's reset.
+  //
+  // Gives up after RETRY_FRAMES rather than looping forever: if the node truly
+  // is not rendered (a level the learner is not on), leaving the tree where it
+  // is beats spinning.
   const scrolledToCurrent = useRef(false);
   useEffect(() => {
     if (!mounted || !currentKey || scrolledToCurrent.current) return;
-    scrolledToCurrent.current = true;
-    const el = document.querySelector(`[data-node-key="${CSS.escape(currentKey)}"]`);
-    el?.scrollIntoView({ block: "center" });
+
+    const RETRY_FRAMES = 12;
+    let frame = 0;
+    let raf = 0;
+
+    const attempt = () => {
+      if (scrolledToCurrent.current) return;
+      const el = document.querySelector(
+        `[data-node-key="${CSS.escape(currentKey)}"]`
+      );
+      if (el) {
+        el.scrollIntoView({ block: "center" });
+        // Keep retrying for a few more frames even after a hit: the router's
+        // scroll reset can still land after this one.
+        if (frame >= 3) {
+          scrolledToCurrent.current = true;
+          return;
+        }
+      }
+      if (++frame < RETRY_FRAMES) raf = requestAnimationFrame(attempt);
+    };
+
+    raf = requestAnimationFrame(attempt);
+    return () => cancelAnimationFrame(raf);
   }, [mounted, currentKey]);
 
   function statusFor(
