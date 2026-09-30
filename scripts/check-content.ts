@@ -325,6 +325,7 @@ function checkNoKanji(): Check[] {
             title: lesson.title,
             subtitle: lesson.subtitle,
             teach: lesson.teach ?? [],
+            recap: lesson.recap ?? "",
             exercises: lesson.exercises,
           })
         );
@@ -429,6 +430,82 @@ function checkAuthoredContentRule(): Check[] {
   return checks;
 }
 
+// Patch 1.9.2: the content rule, applied to the Learn-phase RECAP line.
+//
+// `recap` is the one line the lesson wants carried away, shown on the summary
+// page between the last teach card and the recall round. It is prose, so it is
+// not covered by checkAuthoredContentRule (which only reads answerable fields)
+// — but unlike a teach card's `note`, a recap is framed as consolidation of
+// what the learner has just been shown. A recap naming something from a LATER
+// lesson is the same bug as the か card's いくらですか example, which pulled a
+// Unit 9 word into Unit 7 and was caught by eye rather than by machine.
+//
+// The allowance is wider than checkAuthoredContentRule's on purpose: a recap
+// may name anything on ITS OWN lesson's teach cards, example words included.
+// Unit 1's rows teach あ with the example あめ before め exists, so a recap
+// that quotes あめ is describing what is on screen, not reaching forward.
+function checkRecapContentRule(): Check[] {
+  const checks: Check[] = [];
+  const lessons = jaAllLessons();
+  const order = lessons.map((l) => l.id);
+  let scanned = 0;
+
+  for (const lesson of lessons) {
+    if (!lesson.recap) continue;
+    scanned++;
+
+    const idx = order.indexOf(lesson.id);
+    const allowedIds = new Set([...order.slice(0, idx), lesson.id]);
+    const taught = new Set(
+      jaKana
+        .filter((k) => allowedIds.has(k.lessonId))
+        .flatMap((k) => k.char.split(""))
+    );
+    // Everything this lesson's own cards put in front of the learner.
+    for (const card of lesson.teach ?? []) {
+      const shown =
+        card.kind === "phrase"
+          ? card.term
+          : `${card.char}${card.example?.word ?? ""}`;
+      for (const c of shown) taught.add(c);
+    }
+
+    const untaught = Array.from(
+      new Set(
+        lesson.recap
+          .split("")
+          .filter((c) => KANA_RANGE.test(c) && !DIACRITICS.has(c) && !taught.has(c))
+      )
+    );
+    if (untaught.length > 0) {
+      checks.push({
+        ok: false,
+        message: `lesson "${lesson.id}" recap names ${untaught.join(" ")} — not taught by this point, and not on this lesson's own cards`,
+      });
+    }
+  }
+
+  // A recap is only worth a page where there are items to compare, which is
+  // exactly where TeachSummary shows one: two or more teach cards.
+  const missing = lessons
+    .filter((l) => (l.teach?.length ?? 0) >= 2 && !l.recap)
+    .map((l) => l.id);
+  if (missing.length > 0) {
+    checks.push({
+      ok: false,
+      message: `${missing.length} lesson(s) show a recap page with no recap line: ${missing.join(", ")}`,
+    });
+  }
+
+  if (checks.length === 0) {
+    checks.push({
+      ok: true,
+      message: `${scanned} lesson recap line(s) name only kana taught by that point`,
+    });
+  }
+  return checks;
+}
+
 function checkKanaUniqueness(): Check[] {
   const checks: Check[] = [];
   const seen = new Map<string, string>();
@@ -501,6 +578,7 @@ function main() {
     ...checkLessonReferences(),
     ...checkNoKanji(),
     ...checkAuthoredContentRule(),
+    ...checkRecapContentRule(),
     ...checkKanaUniqueness(),
     ...checkVocabUniqueness(),
     ...checkScenarioMoveVocab(),

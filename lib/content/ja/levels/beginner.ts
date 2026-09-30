@@ -23,6 +23,8 @@ export const beginner: Level = {
           icon: "あ",
           skill: "reading",
           xp: 20,
+          recap:
+            "These five are the whole vowel set — every other hiragana is one of them with a consonant bolted on the front, which is why あ い う え お is the order every chart, every dictionary and every row in this course runs in. The pair to watch is あ and お: both a cross with a loop, but あ's loop hangs off to the bottom-left and お's flicks off to the right.",
           teach: [
             {
               char: "あ",
@@ -103,6 +105,8 @@ export const beginner: Level = {
           icon: "か",
           skill: "reading",
           xp: 20,
+          recap:
+            "One consonant, five vowels, in the あいうえお order you just learned — か き く け こ is ka-ki-ku-ke-ko, and every row after this is built the same way. Inside the row it is き and け that get mixed up: き stacks two crossbars on a curve, け has a single upright with one bar.",
           teach: [
             {
               char: "か",
@@ -175,6 +179,8 @@ export const beginner: Level = {
           icon: "さ",
           skill: "reading",
           xp: 20,
+          recap:
+            "The s-row runs さ し す せ そ — but し is 'shi', not 'si'. That swap is the row's only irregularity, and it holds everywhere し appears for the rest of the language. Watch さ against き from the last row: same tilted shape, but き carries two crossbars and さ only one.",
           teach: [
             { char: "さ", romaji: "sa", mnemonic: "さ looks like a fishhook — 'sa'.", example: { word: "あさ", romaji: "asa", meaning: "morning" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "き", romaji: "ki", meaning: "two cross-strokes" }, b: { word: "さ", romaji: "sa", meaning: "one cross-stroke" } } },
             { char: "し", romaji: "shi", mnemonic: "し is a single hook swooping down — 'shi'.", example: { word: "しか", romaji: "shika", meaning: "deer" } },
@@ -197,6 +203,8 @@ export const beginner: Level = {
           icon: "た",
           skill: "reading",
           xp: 20,
+          recap:
+            "Two of these five are not what the pattern predicts: ち is 'chi', not 'ti', and つ is 'tsu', not 'tu'. Say them the Japanese way from the start — you will never unlearn it later. And keep つ apart from し: one stroke each, but つ opens to the right and し opens upward.",
           teach: [
             { char: "た", romaji: "ta", mnemonic: "た has a cross and a hook — 'ta'.", example: { word: "たこ", romaji: "tako", meaning: "octopus" } },
             { char: "ち", romaji: "chi", mnemonic: "ち is like a chin — 'chi'.", example: { word: "くち", romaji: "kuchi", meaning: "mouth" } },
@@ -219,6 +227,8 @@ export const beginner: Level = {
           icon: "な",
           skill: "reading",
           xp: 20,
+          recap:
+            "No sound swaps in this row — な に ぬ ね の are all exactly what they look like. The trouble here is visual: ぬ and ね start identically and only part at the very end, ぬ closing into a loop, ね curling open. の is the easy one, and you will see it more than almost any other kana in the language.",
           teach: [
             { char: "な", romaji: "na", mnemonic: "な has a cross and a knot — 'na'.", example: { word: "さかな", romaji: "sakana", meaning: "fish" } },
             { char: "に", romaji: "ni", mnemonic: "に looks like two marks — 'ni'.", example: { word: "にく", romaji: "niku", meaning: "meat" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "こ", romaji: "ko", meaning: "two strokes only" }, b: { word: "に", romaji: "ni", meaning: "adds the left stem" } } },
@@ -257,6 +267,8 @@ export const beginner: Level = {
           icon: "は",
           skill: "reading",
           xp: 20,
+          recap:
+            "は ひ ふ へ ほ — ふ is the odd sound, sitting somewhere between 'fu' and 'hu', made with the lips barely touching and never with an English F. The pair to separate is は and ほ: identical except ほ carries a second crossbar on its upright.",
           teach: [
             { char: "は", romaji: "ha", mnemonic: "は looks like an 'H' shape — 'ha'.", example: { word: "はな", romaji: "hana", meaning: "flower" } },
             { char: "ひ", romaji: "hi", mnemonic: "ひ is a wide smile — 'hi'.", example: { word: "ひと", romaji: "hito", meaning: "person" } },
@@ -336,6 +348,8 @@ export const beginner: Level = {
           icon: "ま",
           skill: "reading",
           xp: 20,
+          recap:
+            "Regular all the way through — ma mi mu me mo, no surprises. Two pairs to keep apart, and both reach back to earlier rows: め against ぬ from the n-row, where ぬ finishes in a closed loop and め does not; and ま against も, where ま closes into a loop at the bottom and も swings out into an open hook.",
           teach: [
             { char: "ま", romaji: "ma", mnemonic: "ま has a loop at the bottom — 'ma'.", example: { word: "まめ", romaji: "mame", meaning: "bean" } },
             { char: "み", romaji: "mi", mnemonic: "み curls like the number 21 — 'mi'.", example: { word: "みみ", romaji: "mimi", meaning: "ear" } },
@@ -370,6 +384,8 @@ export const beginner: Level = {
           icon: "や",
           skill: "reading",
           xp: 20,
+          recap:
+            "Only three. There is no 'yi' and no 'ye' in modern Japanese, so this row has gaps where every other row has a kana — that is a fact about the language, not something missing from the course. Small versions of these same three characters come back later to build sounds like kya and sho.",
           teach: [
             { char: "や", romaji: "ya", mnemonic: "や looks like a yak's horns — 'ya'.", example: { word: "やま", romaji: "yama", meaning: "mountain" } },
             { char: "ゆ", romaji: "yu", mnemonic: "ゆ has a loop like a fish — 'yu'.", example: { word: "ゆき", romaji: "yuki", meaning: "snow" } },
@@ -390,6 +406,8 @@ export const beginner: Level = {
           icon: "ら",
           skill: "reading",
           xp: 20,
+          recap:
+            "The r-sound is neither English R nor L: the tongue taps the roof of the mouth once, much closer to the middle of 'butter' than to either letter. Then the shape pair — る and ろ are the same stroke, and the loop at the end is the only thing that tells them apart. る has it, ろ does not.",
           teach: [
             { char: "ら", romaji: "ra", mnemonic: "ら is a flag on a pole — 'ra'.", example: { word: "そら", romaji: "sora", meaning: "sky" } },
             { char: "り", romaji: "ri", mnemonic: "り is two strokes — 'ri'.", example: { word: "とり", romaji: "tori", meaning: "bird" } },
@@ -412,6 +430,8 @@ export const beginner: Level = {
           icon: "ん",
           skill: "reading",
           xp: 20,
+          recap:
+            "Three leftovers, each a special case. わ is an ordinary kana you will read inside words. を is a particle and nothing else — never part of a word, and said 'o', not 'wo'. ん is the only kana that is a consonant on its own, and it never starts a word. Keep わ apart from ね and れ: all three share that left-hand upright, and only the tail differs.",
           teach: [
             { char: "わ", romaji: "wa", mnemonic: "わ has a tail — 'wa'.", example: { word: "かわ", romaji: "kawa", meaning: "river" }, contrast: { label: "Lookalike alert — see & hear them apart:", a: { word: "れ", romaji: "re", meaning: "kicks outward" }, b: { word: "わ", romaji: "wa", meaning: "curls inward" } } },
             { char: "を", romaji: "wo", mnemonic: "を is the object-marker particle — said 'o'.", example: { word: "を", romaji: "o", meaning: "marks the object of a verb" } },
@@ -569,6 +589,8 @@ export const beginner: Level = {
           icon: "゛",
           skill: "reading",
           xp: 25,
+          recap:
+            "Nothing new to draw. Two small strokes in the top-right corner are the entire change, and they always do the same thing — take the hard sound and make it buzz. か becomes が, さ becomes ざ. The one irregular member is じ: it is 'ji', not 'zi', because し was 'shi' to begin with.",
           teach: [
             {
               char: "が",
@@ -734,6 +756,8 @@ export const beginner: Level = {
           icon: "゛",
           skill: "reading",
           xp: 25,
+          recap:
+            "The same two strokes on two more rows: た becomes だ, は becomes ば. Notice what happened to the h-row — ha turns into BA, not 'va', and that is the one pairing you could never have guessed from the sound. The d-row is short here on purpose: two of its five are so rare in modern Japanese that this course leaves them out.",
           teach: [
             {
               char: "だ",
@@ -873,6 +897,8 @@ export const beginner: Level = {
           icon: "゜",
           skill: "reading",
           xp: 25,
+          recap:
+            "A small circle instead of two strokes, and only the h-row ever takes it. So は has three lives: は on its own, ば with the two strokes, ぱ with the circle. Check that corner before you say the word — the mark is the only thing separating pan from han.",
           teach: [
             {
               char: "ぱ",
@@ -1056,6 +1082,8 @@ export const beginner: Level = {
           icon: "ゃ",
           skill: "reading",
           xp: 25,
+          recap:
+            "A full-size kana plus a SMALL や ゆ よ is one beat, not two — きゃ is 'kya', a single syllable, never 'ki-ya'. Only the i-column kana take them (き し ち に ひ み り and their voiced forms), and the size of that second character is the whole difference: written full-size, きや really would be two beats.",
           teach: [
             {
               char: "きゃ",
@@ -1151,6 +1179,8 @@ export const beginner: Level = {
           icon: "っ",
           skill: "punctuation",
           xp: 25,
+          recap:
+            "Both of these are marks, not sounds. You never say either one on its own, and both change the length of what is around them. Small っ doubles the consonant after it and takes up a beat of silence — きて is 'kite', きって is 'kit-te'. The ー holds the vowel before it for an extra beat. Getting either wrong does not make you sound approximate; it makes a different word.",
           teach: [
             {
               char: "っ",
@@ -1235,6 +1265,8 @@ export const beginner: Level = {
           icon: "👋",
           skill: "writing",
           xp: 25,
+          recap:
+            "Three of these are tied to the clock and cannot be swapped: おはよう is morning only, こんにちは is daytime, こんばんは is evening. Getting it wrong lands the way 'good morning' does at nine at night. さようなら is heavier than English 'goodbye' — it carries a sense of not meeting again for a while — so じゃあね is what you actually say to someone you will see tomorrow.",
           teach: [
             {
               kind: "phrase",
@@ -1457,6 +1489,8 @@ export const beginner: Level = {
           icon: "🙋",
           skill: "writing",
           xp: 30,
+          recap:
+            "です is the piece that makes a sentence polite, and it goes on the end of nearly everything you will say on this trip. Two of these work as a pair: はじめまして opens a first meeting, よろしく おねがいします closes it. すみません is the one to watch — it is both 'excuse me' and 'sorry', and nothing but your timing tells the other person which one you meant.",
           teach: [
             {
               kind: "phrase",
@@ -1676,6 +1710,8 @@ export const beginner: Level = {
           icon: "🤔",
           skill: "writing",
           xp: 30,
+          recap:
+            "One ending separates the two you will need most: わかりました is 'got it', わかりません is 'I don't'. Listen for ました against ません on the end — that swap runs through every polite verb in Japanese, and this is the first place you meet it. The other two are rescue lines: もういちど asks for a repeat, もっとゆっくり asks for it slower.",
           teach: [
             {
               kind: "phrase",
@@ -1883,6 +1919,8 @@ export const beginner: Level = {
           icon: "⭕",
           skill: "writing",
           xp: 30,
+          recap:
+            "Japanese almost never refuses with いいえ — it is blunt, and you will rarely hear it used the way English uses 'no'. Real refusals go sideways: ちょっと… left hanging IS a no, and だいじょうぶ answers 'are you all right?' with yes but 'would you like a bag?' with no. Those two change meaning with the situation, not with the words. And はい often means only 'I'm listening', not 'I agree'.",
           teach: [
             {
               kind: "phrase",
@@ -2308,6 +2346,8 @@ export const beginner: Level = {
           icon: "🔢",
           skill: "writing",
           xp: 25,
+          recap:
+            "Three of these ten have a second name you will meet later — 4, 7 and 9. For now say よん, なな and きゅう every time: they are the ones that never clash with anything, and native speakers reach for them when counting too. The rest are fixed. And じゅう is 'ten' as a whole word — it is not assembled out of anything else here.",
           teach: [
             { kind: "phrase", term: "いち", reading: "ichi", meaning: "one (1)" },
             { kind: "phrase", term: "に", reading: "ni", meaning: "two (2)", note: "The number. The particle に is a different job, later." },
@@ -2373,6 +2413,8 @@ export const beginner: Level = {
           icon: "⏰",
           skill: "writing",
           xp: 30,
+          recap:
+            "Both questions are built the same way — a question word, then ですか on the end. Learn that shape and you can ask far more than these two. 〜さい bolts straight onto a number with nothing in between: ごさい is 'five years old'. Be careful who you ask, though: asking a child their age is normal, asking an adult you have just met is not.",
           teach: [
             { kind: "phrase", term: "〜さい", reading: "sai", meaning: "~ years old", note: "わたしは ごさい です = 'I am 5 years old'. Some ages change sound (いっさい, はっさい) — later; this lesson is the pattern." },
             { kind: "phrase", term: "なんさいですか", reading: "nansai desu ka", meaning: "How old are you?" },
@@ -2496,6 +2538,8 @@ export const beginner: Level = {
           icon: "👪",
           skill: "writing",
           xp: 25,
+          recap:
+            "Every one of these ends in さん, and every one is for someone ELSE's family — or for calling your own mother or father to their face. Japanese swaps to a second, humbler set when you talk about your own family to an outsider; you do not need that set yet. What you do need is the long vowels: おかあさん and おとうさん both hold their second beat, and cutting it short makes them wrong.",
           teach: [
             {
               kind: "phrase",
@@ -2575,6 +2619,8 @@ export const beginner: Level = {
           icon: "🗂️",
           skill: "writing",
           xp: 30,
+          recap:
+            "One of these four is a person and three are things, and Japanese draws that line far harder than English does — it will later decide which word you use for 'there is'. せんせい is also a title: you attach it to a teacher's name instead of さん, and you never use it about yourself.",
           teach: [
             {
               kind: "phrase",
@@ -2618,6 +2664,8 @@ export const beginner: Level = {
           icon: "❓",
           skill: "speaking",
           xp: 30,
+          recap:
+            "なに and なん are the same word. It shifts to なん in front of です and か, which is why the question you will actually say is なんですか and never 'なにですか'. Pair it with どこ and you can ask about almost anything by pointing: なんですか for what it is, どこですか for where it is.",
           teach: [
             {
               kind: "phrase",
@@ -2826,6 +2874,8 @@ export const beginner: Level = {
           icon: "🍙",
           skill: "writing",
           xp: 30,
+          recap:
+            "ください is the word that turns any of these into a request — name the thing, add ください, and you have ordered it. The two long ones are not optional politeness: いただきます before eating and ごちそうさまでした after are said at almost every meal in Japan, including when you are on your own. And ごはん does double duty — it is rice, and it is the whole meal.",
           teach: [
             {
               kind: "phrase",
@@ -2979,6 +3029,8 @@ export const beginner: Level = {
           icon: "📏",
           skill: "writing",
           xp: 25,
+          recap:
+            "All four end in い, and that ending is what lets you put です straight after and have a finished sentence. あつい and さむい are about the air around you — weather words, not the ones for hot tea or a cold drink. And listen to the opening beat of おおきい and ちいさい: both hold it long, and cutting it short is the commonest mistake in this lesson.",
           teach: [
             { kind: "phrase", term: "おおきい", reading: "ookii", meaning: "big" },
             { kind: "phrase", term: "ちいさい", reading: "chiisai", meaning: "small" },
@@ -3065,6 +3117,8 @@ export const beginner: Level = {
           icon: "⚖️",
           skill: "writing",
           xp: 30,
+          recap:
+            "Three opposite pairs and one wildcard. おいしい and まずい are about taste only. いい and わるい are the general good and bad. あたらしい and ふるい are new and old — and ふるい is for things, never for people. すごい is the wildcard: it means amazing, but in real speech it does most of the work English gives to 'wow', good or bad.",
           teach: [
             { kind: "phrase", term: "おいしい", reading: "oishii", meaning: "delicious" },
             { kind: "phrase", term: "まずい", reading: "mazui", meaning: "bad-tasting" },
@@ -3161,6 +3215,8 @@ export const beginner: Level = {
           icon: "📣",
           skill: "writing",
           xp: 30,
+          recap:
+            "Three shapes of one word, and the difference is who is saying it to whom. がんばって is the everyday cheer you give a friend. がんばれ is the same thing as a bare command — shouted at a match, not said to your host. がんばります is the reply: I will. Default to がんばって and you will never get it wrong.",
           teach: [
             {
               kind: "phrase",
@@ -3445,6 +3501,8 @@ export const beginner: Level = {
           icon: "ア",
           skill: "reading",
           xp: 30,
+          recap:
+            "Same sounds you already own, a second set of shapes for them. Katakana is what Japanese writes foreign and borrowed words in, so most of what you can read on a menu or a shop sign lives here — and the strokes are straighter and sharper than hiragana's curves. Two you half-know already: カ is か with the curl straightened out, キ is き with a crossbar removed. The one to be careful with is シ, which is not し.",
           teach: [
             {
               char: "ア",
@@ -3630,6 +3688,8 @@ export const beginner: Level = {
           icon: "タ",
           skill: "reading",
           xp: 30,
+          recap:
+            "This block holds the worst lookalike pair in the language: シ and ツ. Both are three marks and the difference is the ANGLE — シ's strokes come in flat from the left and its long tail sweeps upward, ツ's drop in from the top and its tail sweeps left. Nothing else separates them. Elsewhere you get a freebie: ヘ is all but identical to hiragana へ, same sound, same shape.",
           teach: [
             {
               char: "タ",
@@ -3821,6 +3881,8 @@ export const beginner: Level = {
           icon: "ラ",
           skill: "reading",
           xp: 30,
+          recap:
+            "The second bad pair, and the same trick as シ／ツ: ソ and ン. ソ drops steeply from the top; ン comes in low and flat from the left and flicks up. Three here are near-copies of their hiragana twins and cost you nothing — リ against り, ヤ against や, モ against も. And ヲ you will almost never meet: the particle is written を.",
           teach: [
             {
               char: "マ",
@@ -4018,6 +4080,8 @@ export const beginner: Level = {
           icon: "゛",
           skill: "reading",
           xp: 30,
+          recap:
+            "No new rules in this block, only new shapes wearing the old marks — two strokes to voice it, a circle for the p-row, exactly as in hiragana. The small ャ ュ ョ behave the same way too: full-size kana plus a small one is still one beat. What IS new is how much of this you will actually read. ピザ, バス, ビール, ドア, ペン — katakana is where the loanwords live, and you can now sound out most of a menu.",
           teach: [
             {
               char: "ガ",
@@ -4330,6 +4394,8 @@ export const beginner: Level = {
           icon: "ー",
           skill: "reading",
           xp: 25,
+          recap:
+            "Hiragana stretches a vowel by doubling it; katakana uses this one bar instead, and it is the mark you will see most on signs and menus. It is never decoration and never a hyphen — ビル is a building, ビール is a beer, and the bar is the only difference between them. Give the ー its full beat when you sound a loanword out and it suddenly snaps into the English word it came from.",
           teach: [
             {
               kind: "phrase",
@@ -4806,6 +4872,8 @@ export const beginner: Level = {
           icon: "を",
           skill: "writing",
           xp: 30,
+          recap:
+            "を marks what the action lands ON; に marks where it is HEADED. That is the whole split, and the verb decides it for you: motion verbs take に and never を, because you do not do something TO a place. All four verbs here end in ます — かいます, のみます, よみます and いきます — and いきます is the one that takes に.",
           teach: [
             {
               kind: "phrase",
@@ -5040,6 +5108,8 @@ export const beginner: Level = {
           icon: "で",
           skill: "punctuation",
           xp: 30,
+          recap:
+            "に and で both attach to a place and they are not interchangeable: に is where you are going, で is where the doing happens. いえに いきます is going home; いえで よみます is reading at home. へ overlaps with に for direction and is the softer, vaguer of the two — either will be understood. And へ plays は's trick: written へ, said 'e' whenever it is doing this job.",
           teach: [
             {
               kind: "phrase",
@@ -5224,6 +5294,8 @@ export const beginner: Level = {
           icon: "の",
           skill: "writing",
           xp: 30,
+          recap:
+            "の glues two nouns together, and the owner always comes first: わたしの いえ, だれの くるま. But 'owns' is too narrow — の also covers what kind, where from, which one, which is why がっこうの せんせい is the teacher AT school, not a teacher the school owns. Set it against は and が from two lessons back: の builds one lump out of two nouns; は and が decide what the sentence then does with that lump.",
           teach: [
             {
               kind: "phrase",
@@ -5649,6 +5721,8 @@ export const beginner: Level = {
           icon: "🍚",
           skill: "writing",
           xp: 30,
+          recap:
+            "ません REPLACES ます — it never stacks on top of it. たべます becomes たべません, and the part in front of the ending never moves. That single swap negates every polite verb you own, and you own five: たべます, のみます, よみます, いきます, かいます.",
           teach: [
             {
               kind: "phrase",
@@ -5824,6 +5898,8 @@ export const beginner: Level = {
           icon: "⏪",
           skill: "writing",
           xp: 30,
+          recap:
+            "Same swap, two more endings. ます is now, ました is done, ません is not, ませんでした is did not — four cells, one stem, and the stem never changes. Take ませんでした as a single block rather than trying to assemble it out of ません plus something else; that assembly makes sense a couple of lessons from here, not yet.",
           teach: [
             {
               kind: "phrase",
@@ -6052,6 +6128,8 @@ export const beginner: Level = {
           icon: "🎓",
           skill: "writing",
           xp: 30,
+          recap:
+            "です has the same four cells the verbs do: です, でした, ではありません, ではありませんでした. Look at the negative — it is not one word but で + は + ありません, and that は is the topic particle, so it is said 'wa'. In a shop you will hear it squashed to じゃありません, which is the same thing in everyday clothes. Recognise all four; you only need to say the first two.",
           teach: [
             {
               kind: "phrase",
@@ -6411,6 +6489,8 @@ export const beginner: Level = {
           icon: "👉",
           skill: "writing",
           xp: 30,
+          recap:
+            "Three words where English has two. これ is by you, それ is by them, あれ is away from both — and the line is drawn by whose side the thing is on, not by how far off it is. All three are ordinary nouns, so they take は and を exactly like ほん or くるま. Hold something up, say これは なんですか。, and you can learn the name of anything in Japan by pointing at it.",
           teach: [
             {
               kind: "phrase",
@@ -6603,6 +6683,8 @@ export const beginner: Level = {
           icon: "📕",
           skill: "reading",
           xp: 30,
+          recap:
+            "これ stands on its own; この must have a noun behind it. これは おおきいです is 'this one is big'; この ほんは おおきいです is 'this book is big'. Swap れ for の and the second set comes free — それ becomes その, あれ becomes あの. Then これを ください is a complete purchase: point, name it, ask.",
           teach: [
             {
               kind: "phrase",
@@ -6773,6 +6855,8 @@ export const beginner: Level = {
           icon: "📍",
           skill: "listening",
           xp: 30,
+          recap:
+            "The same three-way split as これ／それ／あれ, but for places rather than things: ここ is where you are, そこ is where they are, あそこ is neither. Watch the odd shape — ここ and そこ take two beats, あそこ takes three, and that extra beat is how you will catch it when someone says it fast. And そこ anchors on the listener, so when they say it back to you it lands on YOUR side.",
           teach: [
             {
               kind: "phrase",
@@ -6947,6 +7031,8 @@ export const beginner: Level = {
           icon: "🫙",
           skill: "writing",
           xp: 30,
+          recap:
+            "Japanese asks whether a thing EXISTS, never whether you own it — which is why ありますか is how you ask a shop 'do you have it?'. Two things to carry away. Existence takes に, not で, even though Unit 7 said で is where things happen: nothing is happening, the thing simply is. And the は／が choice finally bites — みずは ありますか asks about water, みずが あります puts water into a conversation that did not have any.",
           teach: [
             {
               kind: "phrase",
@@ -7183,6 +7269,8 @@ export const beginner: Level = {
           icon: "🧍",
           skill: "writing",
           xp: 30,
+          recap:
+            "One question decides it: can it move on its own? People and animals take います; everything else — books, cars, desks, food, buildings — takes あります. Get it backwards and you have filed a person in with the furniture. The endings behave normally on both, using the same swaps you already learned: あります becomes ありません, います becomes いません.",
           teach: [
             {
               kind: "phrase",
@@ -7332,6 +7420,8 @@ export const beginner: Level = {
           icon: "✌️",
           skill: "reading",
           xp: 30,
+          recap:
+            "These are not いち, に, さん. Japanese kept an older set of number words for counting objects, and this is it — いち is the number itself, ひとつ is one THING. Then the word order, which is not English's: the thing, then を, then how many. これを ふたつ ください。 You can now buy anything in Japan without knowing what it is called.",
           teach: [
             {
               kind: "phrase",
@@ -7519,6 +7609,8 @@ export const beginner: Level = {
           icon: "💴",
           skill: "writing",
           xp: 30,
+          recap:
+            "Three lines and the exchange is finished: you ask いくらですか。, they answer with a number and えん, you close with これを ください。 えん clips straight onto the number with no particle and no gap. And いくらですか works exactly the way なんですか does — a question word plus ですか is already a whole sentence, so you never have to name the thing you are holding.",
           teach: [
             {
               kind: "phrase",
@@ -7704,6 +7796,8 @@ export const beginner: Level = {
           icon: "🧾",
           skill: "listening",
           xp: 30,
+          recap:
+            "Everything from 11 to 99 is already yours: じゅう AFTER a digit multiplies, so はちじゅう is 80; じゅう BEFORE a digit adds, so じゅうはち is 18. Hundreds and thousands stack the same way, and bare ひゃく is already 100 — never いちひゃく. Prices run big to small, left to right, and a zero is simply not said. いらっしゃいませ is the odd one out: it is said TO you the moment you walk in, and a nod is the whole reply.",
           teach: [
             {
               kind: "phrase",

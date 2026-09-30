@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { X } from "lucide-react";
+import JaArt from "@/components/ui/JaArt";
 import { speak } from "@/lib/speech";
 import type { TeachCard as TeachCardData } from "@/lib/types";
 
@@ -17,18 +20,44 @@ import type { TeachCard as TeachCardData } from "@/lib/types";
 // lesson whose cards ARE the contrast it becomes the differentiation page by
 // construction. A lesson can add `recap` to state the one thing to carry away.
 export default function TeachSummary({
+  lessonId,
   cards,
   recap,
   onContinue,
 }: {
+  lessonId: string;
   cards: TeachCardData[];
   recap?: string;
   onContinue: () => void;
 }) {
+  // Full-screen view of the recap panel. Baked-in labels are small at phone
+  // width, so the panel is height-fitted and pans sideways rather than being
+  // shrunk to fit — the text is the point of the image.
+  const [zoomed, setZoomed] = useState(false);
+
   const rows = cards.map((c) =>
     c.kind === "phrase"
-      ? { key: c.term, main: c.term, reading: c.reading, meaning: c.meaning, note: c.contextual }
-      : { key: c.char, main: c.char, reading: c.romaji, meaning: c.example?.meaning ?? "", note: undefined }
+      ? {
+          key: c.term,
+          main: c.term,
+          reading: c.reading,
+          meaning: c.meaning,
+          example: undefined as { word: string; romaji: string } | undefined,
+          note: c.contextual,
+        }
+      : {
+          key: c.char,
+          main: c.char,
+          reading: c.romaji,
+          meaning: c.example?.meaning ?? "",
+          // The example word was invisible here before: a kana row read
+          // "あ / a / rain" with あめ nowhere on the page, which is the one
+          // thing that makes the sound concrete.
+          example: c.example
+            ? { word: c.example.word, romaji: c.example.romaji }
+            : undefined,
+          note: undefined,
+        }
   );
 
   return (
@@ -45,6 +74,18 @@ export default function TeachSummary({
           All of it, side by side
         </h2>
       </div>
+
+      {/* Optional illustrated panel, looked up by convention rather than
+          declared in content: drop /art/ja/recap-<lessonId>.png in and it
+          appears. JaArt's onError means a lesson without one renders nothing,
+          so the art set can fill in lesson by lesson with no code change. */}
+      <JaArt
+        id={`recap-${lessonId}`}
+        alt={recap ?? "Illustration of what this lesson taught"}
+        onClick={() => setZoomed(true)}
+        className="w-full cursor-zoom-in rounded-xl border-2 border-gold/40"
+        fallback={null}
+      />
 
       {recap && (
         <div className="rounded-xl border-2 border-gold/50 bg-gold/10 px-4 py-3">
@@ -68,6 +109,12 @@ export default function TeachSummary({
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-bold text-ink">{r.meaning}</div>
+              {r.example && (
+                <div className="mt-0.5 text-sm text-muted">
+                  <span className="font-jp text-base text-sumi">{r.example.word}</span>{" "}
+                  <span className="text-xs">{r.example.romaji}</span>
+                </div>
+              )}
               {r.note && <p className="mt-1 text-sm text-muted">{r.note}</p>}
             </div>
           </button>
@@ -79,6 +126,30 @@ export default function TeachSummary({
       <button onClick={onContinue} className="btn-brand w-full">
         Got it
       </button>
+
+      {zoomed && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center overflow-x-auto overflow-y-hidden bg-black/90"
+          onClick={() => setZoomed(false)}
+        >
+          <JaArt
+            id={`recap-${lessonId}`}
+            alt={recap ?? "Illustration of what this lesson taught"}
+            className="h-full w-auto max-w-none"
+            fallback={null}
+          />
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setZoomed(false)}
+            className="fixed right-4 top-4 rounded-full bg-black/60 p-2 text-white"
+          >
+            <X />
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }

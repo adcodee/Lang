@@ -79,6 +79,7 @@ export default function LessonFlow({ id }: { id: string }) {
     if (!(learnDone && learned) && lesson.teach) {
       return (
         <TeachPhase
+          lessonId={id}
           cards={lesson.teach}
           recap={lesson.recap}
           onReady={() => {

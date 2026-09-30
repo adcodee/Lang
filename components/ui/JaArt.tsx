@@ -9,10 +9,16 @@ export default function JaArt({
   id,
   className,
   fallback,
+  alt = "",
+  onClick,
 }: {
   id: string;
   className?: string;
   fallback?: ReactNode;
+  // Decorative by default. Set it where the image carries teaching the page
+  // does not otherwise state — the recap panels do.
+  alt?: string;
+  onClick?: () => void;
 }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <>{fallback}</>;
@@ -20,8 +26,9 @@ export default function JaArt({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`/art/ja/${id}.png`}
-      alt=""
+      alt={alt}
       className={className}
+      onClick={onClick}
       onError={() => setFailed(true)}
     />
   );

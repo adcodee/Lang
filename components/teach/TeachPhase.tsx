@@ -17,10 +17,13 @@ const TEACH_BONUS = 5; // flat bonus for finishing the intro
 // off via onReady(). Feeds Rank honestly: real speaking attempts + flat/writing
 // XP (no fake accuracy).
 export default function TeachPhase({
+  lessonId,
   cards,
   recap,
   onReady,
 }: {
+  // Used by the recap page to look up /art/ja/recap-<lessonId>.png.
+  lessonId: string;
   cards: TeachCardData[];
   // One line the lesson wants carried away, shown on the recap page.
   recap?: string;
@@ -97,6 +100,7 @@ export default function TeachPhase({
           <div className="flex-1" />
         </div>
         <TeachSummary
+          lessonId={lessonId}
           cards={cards}
           recap={recap}
           onContinue={() => (hasRecall ? setPhase("recall") : onReady())}
