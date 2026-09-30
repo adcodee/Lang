@@ -218,6 +218,11 @@ export interface Lesson {
   // A version lets the skill tree say "this has new material" instead of the
   // release notes saying "replay these three lessons", which does not scale
   // and does not survive being forgotten.
+  // One line shown on the Learn phase's recap page — the thing to carry away
+  // once every card has been met. Optional; the recap lists the cards either
+  // way. Worth writing wherever the lesson's difficulty is telling its items
+  // APART rather than remembering them individually.
+  recap?: string;
   version?: number;
   exercises: Exercise[];
 }

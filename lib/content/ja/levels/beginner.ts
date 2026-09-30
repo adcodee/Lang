@@ -4520,6 +4520,7 @@ export const beginner: Level = {
           id: "u7-wa-ga",
           // Patch 1.9.2: added the は/が confirming card at the owner's request.
           version: 2,
+          recap: "は and が both attach to a word and decide its job — は says what the sentence is ABOUT, が says WHICH ONE. Think of a spotlight: は throws it forward onto what follows, が shines it on its own word. か is a different kind of thing entirely: it goes on the END and turns the whole sentence into a question.",
           title: "Topic vs Subject",
           subtitle: "は　が",
           icon: "は",

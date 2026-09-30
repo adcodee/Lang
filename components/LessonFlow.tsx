@@ -80,6 +80,7 @@ export default function LessonFlow({ id }: { id: string }) {
       return (
         <TeachPhase
           cards={lesson.teach}
+          recap={lesson.recap}
           onReady={() => {
             markLearned(id);
             setLearnDone(true);

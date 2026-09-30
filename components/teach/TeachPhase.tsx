@@ -7,6 +7,7 @@ import { useGameStore } from "@/lib/store/gameStore";
 import TeachCard from "@/components/teach/TeachCard";
 import PhraseCard from "@/components/teach/PhraseCard";
 import RecallRound from "@/components/teach/RecallRound";
+import TeachSummary from "@/components/teach/TeachSummary";
 import type { TeachCard as TeachCardData } from "@/lib/types";
 
 const TRACE_XP = 2; // small writing credit per character traced
@@ -17,9 +18,12 @@ const TEACH_BONUS = 5; // flat bonus for finishing the intro
 // XP (no fake accuracy).
 export default function TeachPhase({
   cards,
+  recap,
   onReady,
 }: {
   cards: TeachCardData[];
+  // One line the lesson wants carried away, shown on the recap page.
+  recap?: string;
   onReady: () => void;
 }) {
   const router = useRouter();
@@ -34,13 +38,15 @@ export default function TeachPhase({
     }
   }
 
-  const [phase, setPhase] = useState<"learn" | "recall">("learn");
+  const [phase, setPhase] = useState<"learn" | "summary" | "recall">("learn");
   const [index, setIndex] = useState(0);
   const tracedCredited = useRef<Set<number>>(new Set());
   const card = cards[index];
   const isLast = index === cards.length - 1;
   // A recall warm-up needs at least 2 cards for distractors.
   const hasRecall = cards.length >= 2;
+  // Nothing to compare with a single card.
+  const hasSummary = cards.length >= 2;
 
   function handleTraced() {
     if (tracedCredited.current.has(index)) return;
@@ -66,11 +72,37 @@ export default function TeachPhase({
     if (isLast) {
       addXp(TEACH_BONUS);
       seedSeen();
-      if (hasRecall) setPhase("recall");
+      // Recap before recall: the cards were shown one at a time, so this is
+      // the learner's first chance to see them together. Only worth a page
+      // when there is more than one thing to compare.
+      if (hasSummary) setPhase("summary");
+      else if (hasRecall) setPhase("recall");
       else onReady();
     } else {
       setIndex((i) => i + 1);
     }
+  }
+
+  if (phase === "summary") {
+    return (
+      <div>
+        <div className="mb-6 flex items-center gap-3">
+          <button
+            onClick={() => router.push("/")}
+            aria-label="Quit"
+            className="text-muted hover:text-ink"
+          >
+            <X />
+          </button>
+          <div className="flex-1" />
+        </div>
+        <TeachSummary
+          cards={cards}
+          recap={recap}
+          onContinue={() => (hasRecall ? setPhase("recall") : onReady())}
+        />
+      </div>
+    );
   }
 
   if (phase === "recall") {
