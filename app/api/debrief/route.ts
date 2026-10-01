@@ -6,12 +6,19 @@ import {
   sanitizeScenario,
   sanitizeHoles,
 } from "@/lib/ai/sanitize";
+import { guardRequest } from "@/lib/ai/guard";
 
 // End-of-session coach endpoint (Claude, always — regardless of channel).
 // Called once, when the learner taps "End practice". `holes` is the
 // client's own silent per-turn mistake log, so the model isn't asked to
 // remember what the UI already counted.
 export async function POST(req: NextRequest) {
+  // Auth + rate limit before anything else, including before the body is
+  // read: an unauthenticated caller should never get us to parse their
+  // payload. Pass-through when LANG_APP_SECRET is unset — see lib/ai/guard.ts.
+  const blocked = guardRequest(req);
+  if (blocked) return blocked;
+
   try {
     const body = await req.json();
     const messages = sanitizeMessages(body?.messages);

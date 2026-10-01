@@ -7,7 +7,7 @@ import { speak, speechSupported, listenOnce } from "@/lib/speech";
 import { recordUntilSilence } from "@/lib/audio";
 import { useGameStore } from "@/lib/store/gameStore";
 import SpeakInput from "@/components/SpeakInput";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, apiErrorMessage, apiHeaders, jsonApiHeaders } from "@/lib/apiBase";
 import type { TutorDebrief, TutorHole, TutorTurn } from "@/lib/ai/schema";
 import DebriefCard from "@/components/tutor/DebriefCard";
 
@@ -19,6 +19,19 @@ interface VoiceLine {
 }
 
 type Phase = "idle" | "listening" | "thinking" | "speaking";
+
+// Why cloudTranscribe returns a tagged outcome rather than `string | null`:
+// it used to answer null for "no speech-to-text key" and "" for everything
+// else, which collapsed three completely different situations into two
+// indistinguishable values. A 429 from the rate limiter parsed as JSON,
+// produced no `transcript` field, and came back as "" — so the hands-free
+// loop announced "Didn't catch that" and carried on looping, speaking
+// nothing, while the actual cause was that the server had cut us off. Each
+// case now names itself.
+type TranscribeOutcome =
+  | { kind: "text"; text: string }
+  | { kind: "stubbed" }
+  | { kind: "error"; message: string };
 
 export default function VoiceChat({
   starter,
@@ -41,6 +54,10 @@ export default function VoiceChat({
   const [debriefing, setDebriefing] = useState(false);
   const [debrief, setDebrief] = useState<TutorDebrief | null>(null);
 
+  // Message from the most recent failed /api/voice call, so the hands-free
+  // loop can stop with the REAL reason ("Too many requests — wait 10 minutes")
+  // instead of blaming the connection for a deliberate 429.
+  const lastSendErrorRef = useRef<string | null>(null);
   const handsFreeRef = useRef(false);
   const emptyTriesRef = useRef(0);
   const runTurnRef = useRef<() => void>(() => {});
@@ -64,7 +81,7 @@ export default function VoiceChat({
     try {
       const res = await fetch(`${API_BASE}/api/voice`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: jsonApiHeaders(),
         // history gives the tutor memory of the exchange; completedLessons
         // lets the server constrain it to taught vocabulary.
         body: JSON.stringify({
@@ -74,6 +91,15 @@ export default function VoiceChat({
           scenario: scenarioId,
         }),
       });
+      // Status first: an error body is still valid JSON, so parsing it as a
+      // turn used to render a bare "…" line with nothing explaining it.
+      const problem = apiErrorMessage(res);
+      if (problem) {
+        lastSendErrorRef.current = problem;
+        setLines((l) => [...l, { role: "assistant", text: `(${problem})` }]);
+        return null;
+      }
+      lastSendErrorRef.current = null;
       const data: TutorTurn & { stubbed?: boolean } = await res.json();
       setDemo(Boolean(data.stubbed));
       if (data.issue && data.issue !== "ok") {
@@ -99,6 +125,7 @@ export default function VoiceChat({
       ]);
       return data;
     } catch {
+      lastSendErrorRef.current = null;
       setLines((l) => [
         ...l,
         { role: "assistant", text: "(Connection error — please try again.)" },
@@ -121,14 +148,23 @@ export default function VoiceChat({
     if (data) speak(spokenLine(data));
   }
 
-  async function cloudTranscribe(blob: Blob): Promise<string | null> {
+  async function cloudTranscribe(blob: Blob): Promise<TranscribeOutcome> {
     const form = new FormData();
     form.append("audio", blob, "audio");
     form.append("language", "ja");
-    const res = await fetch(`${API_BASE}/api/transcribe`, { method: "POST", body: form });
+    const res = await fetch(`${API_BASE}/api/transcribe`, {
+      method: "POST",
+      // apiHeaders() with no argument on purpose: this is multipart
+      // FormData, so the browser must set Content-Type itself to include
+      // the boundary. Naming it here at all breaks the upload.
+      headers: apiHeaders(),
+      body: form,
+    });
+    const problem = apiErrorMessage(res);
+    if (problem) return { kind: "error", message: problem };
     const data = await res.json();
-    if (data?.stubbed) return null; // no STT key — can't run hands-free
-    return typeof data?.transcript === "string" ? data.transcript : "";
+    if (data?.stubbed) return { kind: "stubbed" }; // no STT key — can't run hands-free
+    return { kind: "text", text: typeof data?.transcript === "string" ? data.transcript : "" };
   }
 
   function stopHandsFree(msg?: string) {
@@ -151,12 +187,18 @@ export default function VoiceChat({
         transcript = await listenOnce("ja-JP").promise;
       } else {
         const blob = await recordUntilSilence();
-        const t = await cloudTranscribe(blob);
-        if (t === null) {
+        const outcome = await cloudTranscribe(blob);
+        if (outcome.kind === "stubbed") {
           stopHandsFree("Hands-free needs a speech-to-text key configured.");
           return;
         }
-        transcript = t;
+        if (outcome.kind === "error") {
+          // Rate-limited or unauthorised: stop the loop and say so, rather
+          // than looping on an empty transcript as this used to.
+          stopHandsFree(outcome.message);
+          return;
+        }
+        transcript = outcome.text;
       }
     } catch {
       stopHandsFree("Microphone unavailable — allow access and try again.");
@@ -180,7 +222,7 @@ export default function VoiceChat({
     const data = await sendForReply(transcript);
     if (!handsFreeRef.current) return;
     if (!data) {
-      stopHandsFree("Connection error — tap Start to resume.");
+      stopHandsFree(lastSendErrorRef.current ?? "Connection error — tap Start to resume.");
       return;
     }
 
@@ -209,7 +251,7 @@ export default function VoiceChat({
     try {
       const res = await fetch(`${API_BASE}/api/debrief`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: jsonApiHeaders(),
         body: JSON.stringify({
           channel: "voice",
           messages: lines.map((l) => ({ role: l.role, content: l.text })),
@@ -218,6 +260,13 @@ export default function VoiceChat({
           holes,
         }),
       });
+      const problem = apiErrorMessage(res);
+      if (problem) {
+        // Same reason as ChatPanel's debrief: the card is the only surface,
+        // so an unexplained empty coach card is the failure to avoid.
+        setDebrief({ went_well: problem, notes: [], redo: [], coverage: [], alts: [] });
+        return;
+      }
       const data = await res.json();
       setDemo(Boolean(data.stubbed));
       setDebrief(data);

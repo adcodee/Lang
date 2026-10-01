@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runTutorTurn } from "@/lib/ai/tutor";
 import { sanitizeMessages, sanitizeCompletedLessons, sanitizeScenario } from "@/lib/ai/sanitize";
+import { guardRequest } from "@/lib/ai/guard";
 
 // Text tutor turn endpoint (Grok, per Patch 1.4's locked routing). Accepts
 // the conversation so far plus the learner's completed lessons (from which
 // the allowed vocabulary is derived server-side) and returns a TutorTurn.
 export async function POST(req: NextRequest) {
+  // Auth + rate limit before anything else, including before the body is
+  // read: an unauthenticated caller should never get us to parse their
+  // payload. Pass-through when LANG_APP_SECRET is unset — see lib/ai/guard.ts.
+  const blocked = guardRequest(req);
+  if (blocked) return blocked;
+
   try {
     const body = await req.json();
     const messages = sanitizeMessages(body?.messages);

@@ -5,7 +5,7 @@ import { Send, Sparkles, Flag } from "lucide-react";
 import { useGameStore } from "@/lib/store/gameStore";
 import type { ChatMessage } from "@/lib/types";
 import type { TutorDebrief, TutorHole } from "@/lib/ai/schema";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, apiErrorMessage, jsonApiHeaders } from "@/lib/apiBase";
 import DebriefCard from "@/components/tutor/DebriefCard";
 
 // A line as rendered in the panel. Distinct from ChatMessage (the
@@ -55,7 +55,7 @@ export default function ChatPanel({
     try {
       const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: jsonApiHeaders(),
         // completedLessons lets the server derive the allowed vocabulary —
         // the tutor stays inside what's actually been taught.
         body: JSON.stringify({
@@ -64,6 +64,15 @@ export default function ChatPanel({
           scenario: scenarioId,
         }),
       });
+      // Status before body. A 429 from the rate limiter (or a 401 once the
+      // server has a shared secret the APK doesn't) is valid JSON, so
+      // res.json() happily parses it and the old code rendered the result as
+      // a tutor turn: one "…" line and no idea why.
+      const problem = apiErrorMessage(res);
+      if (problem) {
+        setLines((l) => [...l, { role: "assistant", content: `(${problem})` }]);
+        return;
+      }
       const data = await res.json();
       setDemo(Boolean(data.stubbed));
       if (data.issue && data.issue !== "ok") {
@@ -107,7 +116,7 @@ export default function ChatPanel({
     try {
       const res = await fetch(`${API_BASE}/api/debrief`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: jsonApiHeaders(),
         body: JSON.stringify({
           channel: "text",
           messages: lines.map((l) => ({ role: l.role, content: l.content })),
@@ -116,6 +125,13 @@ export default function ChatPanel({
           holes,
         }),
       });
+      const problem = apiErrorMessage(res);
+      if (problem) {
+        // The debrief card is the only surface here, so the message has to go
+        // in it — silently showing an empty coach card was the old behaviour.
+        setDebrief({ went_well: problem, notes: [], redo: [], coverage: [], alts: [] });
+        return;
+      }
       const data = await res.json();
       setDemo(Boolean(data.stubbed));
       setDebrief(data);

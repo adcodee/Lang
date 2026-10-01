@@ -20,7 +20,7 @@ import {
   startRecording,
   type Recorder,
 } from "@/lib/audio";
-import { API_BASE } from "@/lib/apiBase";
+import { API_BASE, apiErrorMessage, apiHeaders } from "@/lib/apiBase";
 
 type Tier = "native" | "web-speech" | "cloud" | "typed";
 type Status = "idle" | "listening" | "recording" | "uploading" | "error";
@@ -179,7 +179,23 @@ export default function SpeakInput({
       form.append("audio", blob, "audio");
       form.append("language", "ja");
       if (hint) form.append("prompt", hint);
-      const res = await fetch(`${API_BASE}/api/transcribe`, { method: "POST", body: form });
+      const res = await fetch(`${API_BASE}/api/transcribe`, {
+        method: "POST",
+        // No Content-Type: this is multipart FormData and only the
+        // browser can write the boundary parameter correctly.
+        headers: apiHeaders(),
+        body: form,
+      });
+      // Status before body. A 429 or 401 is valid JSON with no `transcript`
+      // in it, so it used to land in the "nothing heard" branch below: the
+      // typed-romaji box appeared with no explanation and the owner had no
+      // way to tell "I mumbled" from "the server cut me off".
+      const problem = apiErrorMessage(res);
+      if (problem) {
+        setNote(problem);
+        setShowTyped(true);
+        return;
+      }
       const data = await res.json();
       if (data?.stubbed || !data?.transcript) {
         // No cloud key (or nothing heard) — fall back to typed-romaji practice.
