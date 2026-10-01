@@ -52,13 +52,42 @@ export PATH="$JAVA_HOME/bin:$PATH"
 # The :- default matters: `set -u` is on, so an unguarded reference to an
 # unset variable would abort the whole build.
 APP_SECRET="${NEXT_PUBLIC_LANG_APP_SECRET:-}"
+
+# Fall back to .env.local (gitignored), which is the PREFERRED place to keep
+# this value. Putting it there instead of on the command line means it never
+# lands in shell history — or, in this project's case, in an AI session
+# transcript — and every future run of this script picks it up with nothing to
+# remember. Add one line to .env.local:
+#
+#   NEXT_PUBLIC_LANG_APP_SECRET=<the same value set as LANG_APP_SECRET in Vercel>
+#
+# This fallback is not merely a convenience: Next loads .env.local itself, but
+# the explicit assignment on the npm run build line below would OVERRIDE it
+# with an empty string (an explicitly-set env var beats a .env file), so
+# without reading it here, a secret sitting in .env.local would be silently
+# ignored and the APK built without one.
+if [ -z "$APP_SECRET" ] && [ -f .env.local ]; then
+  # sed rather than grep|cut: one process, and it cannot be confused by a value
+  # containing '=' (a base64 or hex secret may well end in padding).
+  APP_SECRET="$(
+    sed -n 's/^[[:space:]]*NEXT_PUBLIC_LANG_APP_SECRET=//p' .env.local 2>/dev/null |
+      head -1 |
+      sed -e 's/[[:space:]]*$//' -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/" |
+      tr -d '\r'
+  )"
+  if [ -n "$APP_SECRET" ]; then
+    echo "==> Read NEXT_PUBLIC_LANG_APP_SECRET from .env.local"
+  fi
+fi
+
 if [ -z "$APP_SECRET" ]; then
   echo "==> WARNING: NEXT_PUBLIC_LANG_APP_SECRET is not set."
   echo "    The APK will be built WITHOUT the shared secret. It works fine"
   echo "    against a server that has no LANG_APP_SECRET configured, but the"
   echo "    moment that variable is set in Vercel this APK's AI calls will all"
   echo "    be rejected with 401 and the tutor will stop answering on the phone."
-  echo "    Re-run with NEXT_PUBLIC_LANG_APP_SECRET set to the same value."
+  echo "    Fix: add NEXT_PUBLIC_LANG_APP_SECRET=<value> to .env.local (gitignored),"
+  echo "    or re-run with it exported. Use the same value as Vercel's LANG_APP_SECRET."
 else
   echo "==> Shared secret present; APK will send the x-lang-app-secret header"
 fi
